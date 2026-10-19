@@ -162,6 +162,8 @@ erDiagram
         bigint repair_job_id FK
         bigint customer_id FK
         bigint created_by_user_id FK
+        bigint updated_by_user_id FK
+        string preparation_status
     }
     quotation_items {
         bigint id PK
@@ -172,6 +174,13 @@ erDiagram
         bigint id PK
         bigint quotation_id FK
         bigint recorded_by_user_id FK
+    }
+    quotation_history {
+        bigint id PK
+        bigint quotation_id FK
+        bigint actor_user_id FK
+        string event_type
+        datetime event_at
     }
     purchases {
         bigint id PK
@@ -446,6 +455,8 @@ erDiagram
     spare_parts o|--o{ quotation_items : "spare_part_id"
     quotations ||--o{ quotation_approvals : "quotation_id"
     users ||--o{ quotation_approvals : "recorded_by_user_id"
+    quotations ||--o{ quotation_history : "quotation_id"
+    users ||--o{ quotation_history : "actor_user_id"
     suppliers ||--o{ purchases : "supplier_id"
     users ||--o{ purchases : "created_by_user_id"
     purchases ||--o{ purchase_items : "purchase_id"

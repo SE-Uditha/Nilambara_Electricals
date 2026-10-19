@@ -4,6 +4,7 @@ namespace App\Modules\Quotations\Models;
 
 use App\Enums\ApprovalStatus;
 use App\Enums\DocumentStatus;
+use App\Enums\QuotationPreparationStatus;
 use App\Models\BusinessModel;
 use App\Models\User;
 use App\Modules\Customers\Models\Customer;
@@ -30,11 +31,15 @@ class Quotation extends BusinessModel
         'subtotal',
         'discount_amount',
         'total',
+        'parts_total',
         'valid_until',
         'terms_and_conditions',
         'approval_status',
         'status',
+        'preparation_status',
+        'issued_at',
         'created_by_user_id',
+        'updated_by_user_id',
     ];
 
     protected array $immutableFields = ['id', 'quotation_number', 'repair_job_id', 'customer_id', 'revises_quotation_id'];
@@ -51,9 +56,12 @@ class Quotation extends BusinessModel
             'subtotal' => 'decimal:2',
             'discount_amount' => 'decimal:2',
             'total' => 'decimal:2',
+            'parts_total' => 'decimal:2',
             'valid_until' => 'date',
             'approval_status' => ApprovalStatus::class,
             'status' => DocumentStatus::class,
+            'preparation_status' => QuotationPreparationStatus::class,
+            'issued_at' => 'datetime',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
@@ -84,6 +92,11 @@ class Quotation extends BusinessModel
         return $this->belongsTo(User::class, 'created_by_user_id');
     }
 
+    public function updatedByUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by_user_id');
+    }
+
     public function quotationItems(): HasMany
     {
         return $this->hasMany(QuotationItem::class, 'quotation_id');
@@ -112,5 +125,10 @@ class Quotation extends BusinessModel
     public function revisions(): HasMany
     {
         return $this->hasMany(Quotation::class, 'revises_quotation_id');
+    }
+
+    public function history(): HasMany
+    {
+        return $this->hasMany(QuotationHistory::class, 'quotation_id')->orderBy('event_at')->orderBy('id');
     }
 }

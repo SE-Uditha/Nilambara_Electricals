@@ -18,7 +18,11 @@
                     <h2 class="mb-2 px-3 text-[9px] font-semibold tracking-[0.15em] text-slate-500 uppercase">{{ __('ui.'.$group['label']) }}</h2>
                     <div class="space-y-0.5">
                         @foreach ($group['items'] as $item)
-                            <x-nav-item :item="$item" />
+                            @if ((! isset($item['roles']) || auth()->user()->hasAnyRole($item['roles']))
+                                && (! isset($item['except_roles']) || ! auth()->user()->hasAnyRole($item['except_roles']))
+                                && (! isset($item['permission']) || auth()->user()->can($item['permission'])))
+                                <x-nav-item :item="$item" />
+                            @endif
                         @endforeach
                     </div>
                 </div>

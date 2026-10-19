@@ -3,7 +3,7 @@
 return [
     'guard' => 'web',
     'passwords' => 'users',
-    'username' => 'email',
+    'username' => 'username',
     'email' => 'email',
     'lowercase_usernames' => true,
     'home' => '/dashboard',

@@ -15,6 +15,7 @@ use App\Modules\PrintTemplates\Models\DocumentPrintHistory;
 use App\Modules\Quotations\Models\Quotation;
 use App\Modules\RepairJobs\Models\RepairJob;
 use App\Modules\RepairReceipts\Models\RepairReceipt;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Customer extends BusinessModel
@@ -51,6 +52,13 @@ class Customer extends BusinessModel
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
+    }
+
+    protected function displayName(): Attribute
+    {
+        return Attribute::get(fn (): string => $this->customer_type === CustomerType::Company
+            ? (string) $this->company_name
+            : (string) $this->customer_name);
     }
 
     public function repairJobs(): HasMany

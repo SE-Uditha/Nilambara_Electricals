@@ -8,6 +8,6 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // No demo accounts or business records. Use php artisan app:create-user.
+        // No demo accounts or business records. Seed roles separately, then bootstrap an administrator privately.
     }
 }

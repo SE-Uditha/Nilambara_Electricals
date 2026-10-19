@@ -2,7 +2,7 @@
 
 ## Scope and authority
 
-These rules explain the Step 2 data foundation and the contracts future operations must follow. They do not implement CRUD, document generation, stock deduction, payment processing, reporting, audit listeners, permission evaluation, or backup/restore execution. The [BRD](../../../Repair%20Shop%20Management%20Final.pdf) references below use physical PDF page numbers. Exact column definitions and constraint names are maintained with the schema/data dictionary; unresolved policies are recorded in [open-decisions.md](open-decisions.md).
+These rules explain the Step 2 data foundation and the contracts future operations must follow. Steps 3 and 4 implement employee/authentication/RBAC and customer management, including opening-balance ledger initialization and customer audit events; they do not implement document generation, stock deduction, payment processing, business reporting, or backup/restore execution. The [BRD](../../../Repair%20Shop%20Management%20Final.pdf) references below use physical PDF page numbers. Exact column definitions and constraint names are maintained with the schema/data dictionary; unresolved policies are recorded in [open-decisions.md](open-decisions.md).
 
 Distinguish three layers:
 
@@ -36,7 +36,7 @@ There are no triggers or implicit model observers that secretly perform financia
 | POS sale to sale items | A sale has many lines using the same `spare_parts` records as repair parts. A customer link may be absent for a genuine walk-in sale; do not fabricate a customer to satisfy reporting. |
 | Returns to original sources | `stock_returns` selects exactly one original job, POS sale or purchase according to its return type; `stock_return_items` identifies part/location/quantity/condition. `stock_movements.reverses_movement_id` can preserve original movement lineage. Original source-line/returned-quantity coherence and ceilings still need future validation. |
 | Employee to Laravel user | An employee may link to one existing login account; preserve one unambiguous employee link per user. Employment and login identity are distinct. No employee password column duplicates Laravel credentials. |
-| Users to roles/permissions | One custom RBAC model supports role membership, role permissions and per-user customization. Membership storage is not permission enforcement; Step 3 defines evaluation and precedence. |
+| Users to roles/permissions | Spatie Laravel Permission uses the existing role/user, permission/role, and permission/user pivots. Membership storage is paired with Gate, route, view, and policy checks; explicit per-user deny overrides take precedence over role grants. |
 | Templates and document history | Template settings/revisions and snapshots retain historical printable facts. A job card derives core facts from its job, inspections and parts instead of maintaining another job master. |
 
 Where a transaction repeats an owner ID for referential checks, the redundant ID is an integrity key, not an independent source of ownership. Where a document snapshots a name/address/description, the copy preserves historical output rather than serving as a second editable customer or stock master.

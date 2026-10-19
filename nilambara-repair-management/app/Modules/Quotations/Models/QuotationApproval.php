@@ -16,6 +16,7 @@ class QuotationApproval extends BusinessModel
         'decision',
         'decided_at',
         'customer_contact_name',
+        'approval_method',
         'recorded_by_user_id',
         'notes',
     ];

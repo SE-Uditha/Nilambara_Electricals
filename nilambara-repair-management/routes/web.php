@@ -13,9 +13,9 @@ Route::middleware('guest:web')->group(function () {
         ->name('login.store');
 });
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'active.account'])->group(function () {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
-    Route::get('/dashboard', DashboardController::class)->name('dashboard');
+    Route::get('/dashboard', DashboardController::class)->middleware('can:dashboard.view')->name('dashboard');
 
     // Future module routes inherit web middleware, CSRF protection, and auth.
     foreach (glob(__DIR__.'/modules/*.php') ?: [] as $routeFile) {

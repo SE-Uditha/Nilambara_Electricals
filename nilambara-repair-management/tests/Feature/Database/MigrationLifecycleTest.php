@@ -60,6 +60,7 @@ class MigrationLifecycleTest extends TestCase
             'quotations',
             'quotation_items',
             'quotation_approvals',
+            'quotation_history',
             'purchases',
             'purchase_items',
             'goods_received_notes',
@@ -105,6 +106,10 @@ class MigrationLifecycleTest extends TestCase
             foreach ($expectedTables as $table) {
                 $this->assertTrue($schema->hasTable($table), "Missing table: {$table}");
             }
+            $this->assertTrue($schema->hasColumn('quotations', 'preparation_status'));
+            $this->assertTrue($schema->hasColumn('quotations', 'issued_at'));
+            $this->assertTrue($schema->hasColumn('quotation_items', 'display_order'));
+            $this->assertTrue($schema->hasColumn('quotation_approvals', 'approval_method'));
 
             $this->assertSame(0, Artisan::call('migrate:rollback', [
                 '--database' => $connection,

@@ -18,6 +18,8 @@ class JobInspection extends BusinessModel
         'inspection_result',
         'technical_information',
         'work_performed',
+        'parts_used',
+        'parts_quantity',
         'repaired_by_employee_id',
         'repair_completed_at',
         'testing_details',
@@ -33,6 +35,7 @@ class JobInspection extends BusinessModel
         return [
             'inspected_at' => 'datetime',
             'repair_completed_at' => 'datetime',
+            'parts_quantity' => 'decimal:3',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

@@ -44,6 +44,7 @@ Money totals are DECIMAL(19,2); unit costs/prices are DECIMAL(19,4); source quan
 | `quotations` | Quotations | [Quotation](../../app/Modules/Quotations/Models/Quotation.php) |
 | `quotation_items` | Quotations | [QuotationItem](../../app/Modules/Quotations/Models/QuotationItem.php) |
 | `quotation_approvals` | Quotations | [QuotationApproval](../../app/Modules/Quotations/Models/QuotationApproval.php) |
+| `quotation_history` | Quotations | [QuotationHistory](../../app/Modules/Quotations/Models/QuotationHistory.php) |
 | `purchases` | Purchases | [Purchase](../../app/Modules/Purchases/Models/Purchase.php) |
 | `purchase_items` | Purchases | [PurchaseItem](../../app/Modules/Purchases/Models/PurchaseItem.php) |
 | `goods_received_notes` | Purchases | [GoodsReceivedNote](../../app/Modules/Purchases/Models/GoodsReceivedNote.php) |
@@ -76,6 +77,8 @@ Money totals are DECIMAL(19,2); unit costs/prices are DECIMAL(19,4); source quan
 | `document_print_histories` | PrintTemplates | [DocumentPrintHistory](../../app/Modules/PrintTemplates/Models/DocumentPrintHistory.php) |
 
 ## Integrity and lifecycle
+
+Step 6 adds the append-only quotation history table and additive workflow/snapshot fields to the existing quotation tables. See the Step 6 migration and [quotation guide](../modules/quotation-management.md) for the implemented behavior.
 
 - Required starred BRD inputs use NOT NULL/conditional/nonblank CHECKs. Individual/company names remain distinct; receiving requires an item name, brand or model, and a registered receiving employee.
 - Job identifiers, document numbers, SKU/barcode, source idempotency keys, and relevant composite pairs are unique. Ordinary business cancellation retains the original rows and their identifiers.

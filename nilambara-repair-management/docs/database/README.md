@@ -1,6 +1,6 @@
 # Step 2 database foundation
 
-The existing Laravel application defines the BRD database foundation: 58 new entity tables, 58 module models, 16 additive migrations, enums, constraints, relationships, and database tests. Authentication and the Step 1 frontend remain in place. No business CRUD, payment processing, stock deduction, POS checkout, report, or Step 3 access-control workflow is implemented.
+This guide describes the Step 2 database foundation: 58 new entity tables, 58 module models, 16 additive migrations, enums, constraints, relationships, and database tests. Steps 3 and 4 add employee/account/RBAC and customer-management workflows using the existing tables. Payment processing, stock deduction, POS checkout, reports, and backup/restore execution remain deferred.
 
 Read the [schema overview](schema.md), [complete ERD](erd.md), [data dictionary](data-dictionary.md), [relationship rules](relationship-rules.md), [requirements traceability](requirements-traceability.md), [open decisions](open-decisions.md), [verification results](verification.md), and [file summary](change-summary.md).
 
@@ -8,7 +8,7 @@ Read the [schema overview](schema.md), [complete ERD](erd.md), [data dictionary]
 
 Laravel uses the `mysql` connection. The database is **nilambara_repair_management**. phpMyAdmin is the administration interface for this same server; it is not another database engine and needs no Laravel package. The current XAMPP server reports MariaDB 10.4.32 and phpMyAdmin 5.2.1. Native MySQL deployment requires MySQL 8.0.16 or newer for enforced CHECK constraints; a separate MySQL 8 instance has not been tested here.
 
-Start MySQL and Apache in the XAMPP Control Panel. Open **http://localhost/phpmyadmin/** and select **nilambara_repair_management** from the database tree. Refresh the tree after running migrations. The Structure tab lists the 67 tables, including retained Laravel infrastructure and the migration repository. Table Structure pages show primary keys, unique indexes, foreign keys, and InnoDB/utf8mb4 metadata. Browse displays stored rows; initially only the six reference role names and migration records are populated.
+Start MySQL and Apache in the XAMPP Control Panel. Open **http://localhost/phpmyadmin/** and select **nilambara_repair_management** from the database tree. Refresh the tree after running migrations. The Structure tab lists the existing 67 tables, including retained Laravel infrastructure and the migration repository; Step 3 adds columns and indexes but no duplicate role/permission tables. Table Structure pages show primary keys, unique indexes, foreign keys, and InnoDB/utf8mb4 metadata.
 
 All application tables are created by Laravel migrations. Do not recreate them in phpMyAdmin, import a conflicting SQL dump, or alter business/financial rows manually as a substitute for future validated workflows. phpMyAdmin may be used for schema inspection, queries, exports, and administration. The Mermaid ERD remains the complete diagram even if phpMyAdmin Designer configuration storage is not enabled.
 
@@ -41,9 +41,9 @@ php artisan migrate
 php artisan db:seed --class=RoleSeeder
 ```
 
-The seeder inserts only six reference role names if absent. It does not create accounts, assign permissions, or grant access. It is safe to repeat without replacing customized role metadata. Never regenerate an existing application key.
+The seeder idempotently creates six roles, the permission catalog, and their baseline grants. It does not create accounts. It keeps the Administrator role fully granted and only initializes the other role grants when they have no existing assignments. Never regenerate an existing application key.
 
-Inspect an existing table and its migration state before changing its design. An existing conflicting table is an error to investigate; these migrations do not silently drop or replace it. Existing authentication tables are not recreated or modified by the business migrations. Normal migrations add tables/indexes only. Rollback is supported for disposable/test databases and removes the schema it rolls back; do not run it on a populated application database.
+Inspect an existing table and its migration state before changing its design. An existing conflicting table is an error to investigate; migrations do not silently drop or replace it. Step 3's migration is additive to the existing schema: it keeps the role/permission pivots and old codes, preserves prior labels, backfills usernames, and maps those pivots to Spatie. Review `migrate --pretend` output and take a verified backup before applying it to an existing populated database. Do not run rollback on the application database.
 
 ## Verification commands
 
@@ -68,4 +68,4 @@ Current stock is the signed movement sum. Customer and supplier balances are the
 
 Composite FKs enforce ownership/source consistency, but SQL row CHECKs cannot enforce aggregate allocation ceilings, prevent overselling across concurrent transactions, reconcile document headers to all source lines, or authorize refunds. Future operations must use transactions, stable idempotency keys, row locks, and the relationship rules. Cost valuation, fractional units, adjustment/refund policy, and other unresolved BRD choices remain explicit proposals in the decision register.
 
-Step 2 stops at this database foundation. The next stage is Employee Management, Authentication, and Role-Based Access Control; it is not started automatically.
+Step 2 schema evidence is historical; current Step 3 behavior is described in the [employee guide](../modules/employee-management.md), [authentication guide](../modules/authentication.md), and [RBAC guide](../modules/role-permissions.md). Step 4 customer behavior is documented in the [customer management guide](../modules/customer-management.md). The next planned phase is Step 5 repair receipt and job registration.

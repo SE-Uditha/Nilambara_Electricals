@@ -109,3 +109,7 @@ Step 2 adds schema/model/relationship/reference-data/test/documentation files. T
 - `tests/Unit/AuditSafetyTest.php`.
 
 AuditLog and SystemSetting receive credential-safety mutators after initial model generation. Local tooling scripts/catalogs, environment credentials, metadata snapshots, and test logs remain ignored and are not runtime dependencies. Only six role names are seeded; no permission matrix, user role assignments, employees, customers, sales, or stock records are fabricated.
+
+## Step 6 additive quotation extension
+
+Migration `2026_10_19_100019_upgrade_quotation_workflow.php` extends the existing quotation, line-item, and approval tables with preparation state, issue/snapshot support, draft-line retention/display order, and decision method. It adds `quotation_history`; it does not replace or duplicate the existing quotation tables. Migration `2026_10_19_100020_backfill_quotation_preparation_status.php` maps legacy finalized/cancelled rows to the new preparation state. New PHP model: `app/Modules/Quotations/Models/QuotationHistory.php`. SQLite applies additive `ALTER TABLE` statements to avoid rebuilding the original composite-key quotation table; MySQL/MariaDB use the Laravel schema builder. See the [quotation data dictionary](data-dictionary.md#quotations) and [Step 6 summary](../development/step-6-summary.md).

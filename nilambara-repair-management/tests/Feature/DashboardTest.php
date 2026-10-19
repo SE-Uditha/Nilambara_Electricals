@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -22,7 +23,9 @@ class DashboardTest extends TestCase
 
     public function test_authenticated_users_can_view_the_dashboard_without_email_verification(): void
     {
+        $this->seed(RoleSeeder::class);
         $user = User::factory()->create(['email_verified_at' => null]);
+        $user->assignRole('administrator');
 
         $this->actingAs($user)->get(route('dashboard'))
             ->assertOk()
@@ -36,15 +39,14 @@ class DashboardTest extends TestCase
             ->assertSee($user->name);
     }
 
-    public function test_business_modules_do_not_have_working_crud_endpoints(): void
+    public function test_future_business_modules_do_not_have_working_crud_endpoints(): void
     {
         $this->actingAs(User::factory()->create());
 
         foreach ([
-            'customers', 'repair-receipts', 'repair-jobs', 'job-cards',
-            'quotations', 'job-status', 'invoices', 'payments',
+            'invoices', 'payments',
             'credit-management', 'inventory', 'suppliers', 'purchases',
-            'pos', 'employees', 'roles-permissions', 'reports',
+            'pos', 'roles-permissions', 'reports',
             'backup-restore', 'settings', 'audit-logs', 'print-templates',
         ] as $module) {
             $this->get('/'.$module)->assertNotFound();

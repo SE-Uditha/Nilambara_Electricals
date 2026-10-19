@@ -1,18 +1,18 @@
 # BRD module coverage
 
-Source: [Repair Shop Management Final.pdf](../../../Repair%20Shop%20Management%20Final.pdf). Page references below use the physical PDF page number, starting with its cover as page 1. The PDF has 20 pages and is titled a project proposal internally. This map captures architecture ownership; it does not claim the business functionality is implemented in Step 1.
+Source: [Repair Shop Management Final.pdf](../../../Repair%20Shop%20Management%20Final.pdf). Page references below use the physical PDF page number, starting with its cover as page 1. The PDF has 20 pages and is titled a project proposal internally. This map captures architecture ownership and current delivery boundaries. Steps 3-6 implement employee/authentication/RBAC, customer registration/management, repair intake/job workflow, and quotation approval; other capabilities remain planned unless explicitly delivered in a later phase.
 
 ## Required module map
 
 | Module directory | BRD source | Future responsibility |
 | --- | --- | --- |
 | `Dashboard` | Section 15, pp. 14-15; overview/objectives, p. 3 | Repair, sales, credit, and stock overview from real business data. Step 1 displays clearly marked empty statistics. |
-| `Customers` | Section 4, p. 4 | Individual and company registration, required contact information, account history, balances, and customer statements. |
-| `RepairReceipts` | Section 5, pp. 5-6 | Receiving details, automatic identifier and unique manual job number, internal priority, received-by user, advances, duplicate receipts, and atomic creation of the associated repair job. |
-| `RepairJobs` | Section 6.1, p. 6; workflow, pp. 17-18 | Inspection, approval, technical details, assigned repairer, parts/work/labour, testing, completion, delivery, warranty-related extensions, and authoritative job lifecycle. |
-| `JobCards` | Section 6.3, p. 7 | A6 job cards with essential job data and sufficient handwriting space; optional two-sided or two-page layout. |
-| `Quotations` | Section 7, pp. 7-8 | Linked estimates, validity, terms, approval/rejection history, print/PDF, and reuse of approved details in jobs/invoices. |
-| `JobTracking` | Section 6.2, pp. 6-7; section 8, p. 8 | Search by job/customer/mobile/item, status filters and current balances; display status history, with authorized changes delegated to the job lifecycle. |
+| `Customers` | Section 4, p. 4 | Step 4 delivers individual and company registration, required contact information, customer list/search/details/edit/deactivation, linked existing-record counts, and permission-protected ledger statements. Repair, invoice, and payment creation workflows remain deferred. |
+| `RepairReceipts` | Section 5, pp. 5-6 | **Step 5:** receiving details, automatic `JOB-` reference and unique manual job number, internal priority, received-by employee, optional advances, immutable receipt snapshot, atomic linked job creation, A5 browser print and duplicate print history. |
+| `RepairJobs` | Section 6.1, p. 6; workflow, pp. 17-18 | **Step 5:** technician assignment, inspection and repair notes, status changes/history, job search and filters. Quotation approval, stock deduction, final totals, testing, delivery, and warranty-related extensions remain planned. |
+| `JobCards` | Section 6.3, p. 7 | **Step 5:** two-page A6 browser print view with essential job facts, inspection/repair details, and handwriting space; print history and duplicate label. |
+| `Quotations` | Section 7, pp. 7-8 | **Step 6:** job/customer linked drafts, unique database-generated numbers, exact totals, validity and terms, immutable issued snapshots, revisions/supersession, customer decision and audit history, approval-gated repair start, cashier visibility, A4/A5 browser/PDF output. Inventory, invoice, payment, and approved-data reuse workflows remain deferred. |
+| `JobTracking` | Section 6.2, pp. 6-7; section 8, p. 8 | **Step 5:** search and pagination by job/customer/mobile/item with status filters and status history; authorized changes are recorded on the job lifecycle. Final totals and outstanding balances await billing. |
 | `Invoices` | Section 9, pp. 8-10 | Automatic invoice numbering, several jobs for the same customer, job-wise totals, cash/credit terms, delivery details, A5 preview/print, and duplicate labels. |
 | `Payments` | Section 10, p. 10; invoice details, p. 9 | Advance, current, partial, and subsequent payments; cash/bank transfer/cheque methods, balances, payment receipts, controlled refunds/reversals, and account statements. |
 | `CreditManagement` | Section 11, p. 10 | Credit invoices, payment history, remaining credit, collections by date, and customer credit monitoring using authoritative payment allocations. |
@@ -20,10 +20,10 @@ Source: [Repair Shop Management Final.pdf](../../../Repair%20Shop%20Management%2
 | `Suppliers` | Section 13, p. 12 | Supplier identity, contacts, opening balance, terms, account history, and outstanding balances. |
 | `Purchases` | Section 13, p. 12 | GRNs, supplier invoices, purchase costs/discounts, supplier payments/credit, and stock increases on receipt. |
 | `POS` | Objectives, p. 3; sections 12, 14-16 and 19, pp. 10-11, 13-15, 17; acceptance, p. 19 | Spare-parts sales against the shared stock ledger, linked payment and return flows, cashier access, and configurable receipt output. The BRD does not supply a separate detailed POS field list. |
-| `Employees` | Section 14, pp. 12-13 | Staff registration, employment/contact information, active state, account linkage, and administrator-controlled account creation. |
-| `RolesPermissions` | Section 14, p. 13; security, p. 16 | Administrator, receptionist, technician/repairer, cashier, storekeeper, and manager roles; per-user permissions and policy enforcement. Step 1 provides authentication only. |
+| `Employees` | Section 14, pp. 12-13 | Step 3 delivers staff registration, employment/contact information, active state, account linkage, and administrator-controlled account creation. |
+| `RolesPermissions` | Section 14, p. 13; security, p. 16 | Step 3 delivers Administrator, Receptionist, Technician, Cashier, Storekeeper, and Manager roles, granular permissions, per-user overrides, and backend authorization. |
 | `Reports` | Section 15, pp. 14-15 | Repair, sales, income, financial, and stock reports; filters, print/PDF, selected Excel exports, and accurate cost-based profit estimates. |
-| `AuditLogs` | Status history, p. 7; refunds, p. 10; database/security, pp. 15-16; recommendations, p. 18 | Actor/time history for significant changes, login/logout, financial reversals, stock actions, and sensitive operational actions. |
+| `AuditLogs` | Status history, p. 7; refunds, p. 10; database/security, pp. 15-16; recommendations, p. 18 | Step 3 records employee/account/role/permission administration and login/logout events. Job, financial, stock, and restore events await those modules. |
 | `BackupRestore` | Section 17, p. 16 | Manual/scheduled backups, destination/history, file verification, confirmed restore, failure warnings, external copies, and restore testing. |
 | `PrintTemplates` | Receipt/job/invoice details, pp. 6-10; section 19, p. 17 | Separate receipt, A6 card, quotation, A5 invoice, POS receipt, statement, payment receipt, and optional supplier templates; preview/PDF/reprint and layout settings. |
 | `Settings` | System modules, p. 4; sections 18-19, pp. 16-17 | Business identity/logo, language, currency, timezone, document settings, display defaults, and future authorized editing. Step 1 supplies configuration files only. |
@@ -43,11 +43,13 @@ The BRD combines some capabilities into 14 named sections on page 4. The 21-modu
 | English/Sinhala, barcode scanner, A4/A5/A6, PDF/Excel | `Settings`, `Inventory`/`POS`, `PrintTemplates`, `Reports`; pp. 15-17. |
 | Workflow and business acceptance | All modules; workflow pp. 17-18 and acceptance p. 19. These are future end-to-end acceptance criteria. |
 
-## Job status vocabulary to preserve for Step 2
+Step 6 records customer decisions communicated by authorized staff; it does not capture or verify an electronic signature. Issuing a quote sets `Waiting for Customer Approval`; approval sets `Under Repair`; rejection sets `Customer Contact Failed`. The approval path records quotation and job approval histories atomically and uses the existing job-status history service.
+
+## Job status vocabulary and Step 5 boundary
 
 Section 6.2 on pages 6-7 lists: Received; Pending Inspection; Under Inspection; Quotation Pending; Waiting for Customer Approval; Customer Contact Failed; Advance Payment Pending; Waiting for Spare Parts; Under Repair; Price Modification; Re-Assembling; Repair Completed; Ready for Collection; Customer Contact Failed After Ready; Delivered; Cancelled; Unable to Repair.
 
-Each change must retain its actor and date/time. The transition rules and stable stored values will be designed before creating enums or tables. A label in the BRD does not establish which roles may perform each transition.
+All 17 statuses are represented by the existing enum; every change appends the prior/new value, actor, timestamp, and optional note. Status authorization is permission-checked, but no general transition graph is enforced. Step 6 specifically blocks `Under Repair` when an issued quotation lacks approval. Receipt and A6 output remain HTML print views; quotation output supports HTML and PDF. Physical print acceptance and final layout approval remain later work.
 
 ## Decisions and conditional requirements
 

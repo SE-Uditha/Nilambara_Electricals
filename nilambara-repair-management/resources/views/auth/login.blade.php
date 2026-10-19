@@ -17,9 +17,9 @@
     <form method="POST" action="{{ route('login.store') }}" class="space-y-5">
         @csrf
         <div>
-            <label for="email" class="mb-2 block text-xs font-semibold text-slate-700">{{ __('ui.email_address') }}</label>
-            <input id="email" name="email" type="email" value="{{ old('email') }}" required autofocus autocomplete="username" placeholder="{{ __('ui.email_placeholder') }}" @class(['form-input', 'has-error' => $errors->has('email')]) @if($errors->has('email')) aria-invalid="true" aria-describedby="email-error" @endif>
-            @error('email')<p id="email-error" role="alert" class="mt-2 text-xs leading-5 text-red-600">{{ $message }}</p>@enderror
+            <label for="username" class="mb-2 block text-xs font-semibold text-slate-700">{{ __('ui.username') }}</label>
+            <input id="username" name="username" type="text" value="{{ old('username') }}" required autofocus autocomplete="username" placeholder="{{ __('ui.username_placeholder') }}" @class(['form-input', 'has-error' => $errors->has('username')]) @if($errors->has('username')) aria-invalid="true" aria-describedby="username-error" @endif>
+            @error('username')<p id="username-error" role="alert" class="mt-2 text-xs leading-5 text-red-600">{{ $message }}</p>@enderror
         </div>
         <div x-data="{ showPassword: false }">
             <label for="password" class="mb-2 block text-xs font-semibold text-slate-700">{{ __('ui.password') }}</label>

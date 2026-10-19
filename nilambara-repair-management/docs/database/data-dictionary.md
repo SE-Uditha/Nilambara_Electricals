@@ -1,6 +1,6 @@
 # Data dictionary
 
-The 58 new entity tables below are defined by the Step 2 migrations. Existing Laravel infrastructure follows in a separate section. Names, defaults, nullability, keys, and CHECKs are explicit. Monetary values use LKR; no foreign-exchange policy is implied.
+The 58 new entity tables below are defined by the Step 2 migrations. Existing Laravel infrastructure follows in a separate section. Step 3 adds account and Spatie-compatible columns to existing users and access-control tables; these amendments are listed in their respective entries. Names, defaults, nullability, keys, and CHECKs are explicit. Monetary values use LKR; no foreign-exchange policy is implied.
 
 MySQL/MariaDB use unsigned BIGINT auto-increment primary keys. Disposable SQLite verification substitutes INTEGER PRIMARY KEY AUTOINCREMENT; its numeric affinity does not certify native DECIMAL precision. All entity tables have Laravel timestamps.
 
@@ -8,15 +8,17 @@ MySQL/MariaDB use unsigned BIGINT auto-increment primary keys. Disposable SQLite
 
 Module: `RolesPermissions`. Model: [Role](../../app/Modules/RolesPermissions/Models/Role.php).
 
-Source / meaning: BRD pp12-13; Step2 sec15.
+Source / meaning: BRD pp12-13; Step2 sec15; Step3 Spatie-compatible role catalog.
 
 | Field | SQL type | Nullable | Default | Key / reference | Meaning and validation |
 | --- | --- | --- | --- | --- | --- |
 | id | BIGINT UNSIGNED | No | No default | PK, auto increment | Database-generated internal identifier; primary key Immutable through Eloquent after creation. |
 | code | VARCHAR(64) | No | No default | UNIQUE(code) | Code. Immutable through Eloquent after creation. |
-| name | VARCHAR(100) | No | No default | — | Name. |
+| name | VARCHAR(100) | No | No default | UNIQUE(name, guard_name) | Stable role slug used by authorization; Step 3 backfills it from the prior `code`. |
 | description | TEXT | Yes | NULL | — | Description. |
 | is_active | BOOLEAN | No | 1 | — | Is active. |
+| guard_name | VARCHAR(25) | No | web | — | Laravel authorization guard. |
+| label | VARCHAR(100) | Yes | NULL | — | Human-readable role label; Step 3 preserves the prior `name` value here. |
 | created_at | DATETIME | Yes | NULL | — | ORM record creation timestamp; no business event is implied. |
 | updated_at | DATETIME | Yes | NULL | — | ORM last modification timestamp; append-only records retain their original row. |
 
@@ -24,6 +26,7 @@ Indexes (including unique candidate keys):
 
 - `PRIMARY`: (id).
 - `uq_roles_e6fb0621`: (code).
+- `uq_roles_name_guard`: (name, guard_name).
 
 Composite foreign keys:
 
@@ -40,15 +43,17 @@ Record policy: reference/configuration data; incoming foreign keys restrict dele
 
 Module: `RolesPermissions`. Model: [Permission](../../app/Modules/RolesPermissions/Models/Permission.php).
 
-Source / meaning: BRD p13; proposed custom RBAC vocabulary.
+Source / meaning: BRD p13; Step3 Spatie-compatible permission catalog.
 
 | Field | SQL type | Nullable | Default | Key / reference | Meaning and validation |
 | --- | --- | --- | --- | --- | --- |
 | id | BIGINT UNSIGNED | No | No default | PK, auto increment | Database-generated internal identifier; primary key Immutable through Eloquent after creation. |
 | code | VARCHAR(120) | No | No default | UNIQUE(code) | Code. |
-| name | VARCHAR(150) | No | No default | — | Name. |
+| name | VARCHAR(150) | No | No default | UNIQUE(name, guard_name) | Stable dotted permission identifier used by authorization; Step 3 backfills it from the prior `code`. |
 | module | VARCHAR(64) | No | No default | — | Module. |
 | description | TEXT | Yes | NULL | — | Description. |
+| guard_name | VARCHAR(25) | No | web | — | Laravel authorization guard. |
+| label | VARCHAR(150) | Yes | NULL | — | Human-readable permission label; Step 3 preserves the prior `name` value here. |
 | created_at | DATETIME | Yes | NULL | — | ORM record creation timestamp; no business event is implied. |
 | updated_at | DATETIME | Yes | NULL | — | ORM last modification timestamp; append-only records retain their original row. |
 
@@ -56,6 +61,7 @@ Indexes (including unique candidate keys):
 
 - `PRIMARY`: (id).
 - `uq_permissions_e6fb0621`: (code).
+- `uq_permissions_name_guard`: (name, guard_name).
 
 Composite foreign keys:
 
@@ -71,15 +77,16 @@ Record policy: reference/configuration data; incoming foreign keys restrict dele
 
 ## role_user
 
-Module: `RolesPermissions`. Model: [UserRole](../../app/Modules/RolesPermissions/Models/UserRole.php).
+Module: `RolesPermissions`. Spatie `HasRoles` relation on [User](../../app/Models/User.php).
 
-Source / meaning: BRD p13; proposed multiple-role pivot.
+Source / meaning: BRD p13; existing role membership pivot adapted for Spatie.
 
 | Field | SQL type | Nullable | Default | Key / reference | Meaning and validation |
 | --- | --- | --- | --- | --- | --- |
 | id | BIGINT UNSIGNED | No | No default | PK, auto increment | Database-generated internal identifier; primary key Immutable through Eloquent after creation. |
 | user_id | BIGINT UNSIGNED | No | No default | FK → users.id; RESTRICT; UNIQUE(user_id,role_id) | User id. |
 | role_id | BIGINT UNSIGNED | No | No default | FK → roles.id; RESTRICT; UNIQUE(user_id,role_id) | Role id. |
+| model_type | VARCHAR(255) | No | App\Models\User | — | Polymorphic model class for Spatie; this existing application assigns roles to users. |
 | created_at | DATETIME | Yes | NULL | — | ORM record creation timestamp; no business event is implied. |
 | updated_at | DATETIME | Yes | NULL | — | ORM last modification timestamp; append-only records retain their original row. |
 
@@ -101,9 +108,9 @@ Record policy: reference/configuration data; incoming foreign keys restrict dele
 
 ## permission_role
 
-Module: `RolesPermissions`. Model: [RolePermission](../../app/Modules/RolesPermissions/Models/RolePermission.php).
+Module: `RolesPermissions`. Spatie `permissions` relation on [Role](../../app/Modules/RolesPermissions/Models/Role.php).
 
-Source / meaning: BRD p13; proposed role defaults.
+Source / meaning: BRD p13; role-to-permission grants.
 
 | Field | SQL type | Nullable | Default | Key / reference | Meaning and validation |
 | --- | --- | --- | --- | --- | --- |
@@ -131,15 +138,16 @@ Record policy: reference/configuration data; incoming foreign keys restrict dele
 
 ## permission_user
 
-Module: `RolesPermissions`. Model: [UserPermission](../../app/Modules/RolesPermissions/Models/UserPermission.php).
+Module: `RolesPermissions`. Spatie `HasPermissions` relation on [User](../../app/Models/User.php), with the existing explicit effect field.
 
-Source / meaning: BRD p13; proposed per-user overrides; evaluation deferred.
+Source / meaning: BRD p13; per-user permission overrides; explicit deny takes precedence over role grants.
 
 | Field | SQL type | Nullable | Default | Key / reference | Meaning and validation |
 | --- | --- | --- | --- | --- | --- |
 | id | BIGINT UNSIGNED | No | No default | PK, auto increment | Database-generated internal identifier; primary key Immutable through Eloquent after creation. |
 | user_id | BIGINT UNSIGNED | No | No default | FK → users.id; RESTRICT; UNIQUE(user_id,permission_id) | User id. |
 | permission_id | BIGINT UNSIGNED | No | No default | FK → permissions.id; RESTRICT; UNIQUE(user_id,permission_id) | Permission id. |
+| model_type | VARCHAR(255) | No | App\Models\User | — | Polymorphic model class for Spatie; this existing application assigns direct permissions to users. |
 | effect | VARCHAR(64) | No | allow | — | Effect. Allowed: allow, deny. |
 | created_at | DATETIME | Yes | NULL | — | ORM record creation timestamp; no business event is implied. |
 | updated_at | DATETIME | Yes | NULL | — | ORM last modification timestamp; append-only records retain their original row. |
@@ -159,7 +167,7 @@ Table CHECK rules:
 
 - ``effect` IN ('allow', 'deny')`.
 
-Record policy: reference/configuration data; incoming foreign keys restrict deletion. Raw SQL and eventless operations bypass model event guards.
+Record policy: reference/configuration data; incoming foreign keys restrict deletion. `effect=allow` grants an individual permission; `effect=deny` explicitly denies it before role grants are evaluated.
 
 ## employees
 
@@ -208,7 +216,7 @@ Source / meaning: BRD p4; starred type/name-or-company/address/mobile.
 | Field | SQL type | Nullable | Default | Key / reference | Meaning and validation |
 | --- | --- | --- | --- | --- | --- |
 | id | BIGINT UNSIGNED | No | No default | PK, auto increment | Database-generated internal identifier; primary key Immutable through Eloquent after creation. |
-| customer_code | VARCHAR(40) | No | No default | UNIQUE(customer_code) | Customer code. Immutable through Eloquent after creation. |
+| customer_code | VARCHAR(40) | No | No default | UNIQUE(customer_code) | Step 4 generates configurable `CUS-` prefix plus uppercase ULID; database unique key prevents duplicate identifiers. Immutable through Eloquent after creation. |
 | customer_type | VARCHAR(64) | No | No default | — | Customer type. Allowed: individual, company. |
 | customer_name | VARCHAR(255) | Yes | NULL | — | Customer name. |
 | company_name | VARCHAR(255) | Yes | NULL | — | Company name. |
@@ -997,14 +1005,18 @@ Source / meaning: BRD pp7-8; revisions have unique document numbers and approval
 | proposed_repair_description | TEXT | No | No default | — | Proposed repair description. |
 | document_snapshot | JSON | Yes | NULL | — | Issued document data/layout snapshot for historically accurate reprints; exclude credentials and unnecessary personal data. |
 | labour_charge | DECIMAL(19,2) | No | 0 | — | Labour amount charged to the customer; this is a selling charge, not an internal labour cost. CHECK `labour_charge` >= 0. |
+| parts_total | DECIMAL(19,2) | No | 0 | — | Sum of rounded part-line estimates. |
 | subtotal | DECIMAL(19,2) | No | 0 | — | Historical document subtotal in LKR before document discount; reconcile to its source lines at finalization. CHECK `subtotal` >= 0. |
 | discount_amount | DECIMAL(19,2) | No | 0 | — | Nonnegative discount amount in LKR. Line or document checks prevent a discount larger than its gross value. CHECK `discount_amount` >= 0. |
 | total | DECIMAL(19,2) | No | 0 | — | Historical document total in LKR; header CHECK enforces subtotal less discount plus explicit other costs where present. CHECK `total` >= 0. |
 | valid_until | DATE | Yes | NULL | — | Valid until. |
 | terms_and_conditions | TEXT | Yes | NULL | — | Terms and conditions. |
 | approval_status | VARCHAR(64) | No | pending | — | Approval status. Allowed: pending, approved, rejected. |
-| status | VARCHAR(64) | No | draft | — | Document or job lifecycle status; distinct from derived invoice payment status. Allowed: draft, finalized, cancelled. |
+| status | VARCHAR(64) | No | draft | — | Legacy document status, retained for schema compatibility: draft, finalized, cancelled. Workflow preparation status is stored separately. |
+| preparation_status | VARCHAR(32) | No | draft | — | Quotation preparation state: draft, issued, superseded, cancelled. |
+| issued_at | DATETIME | Yes | NULL | — | Time the customer-facing quotation was issued and its snapshot frozen. |
 | created_by_user_id | BIGINT UNSIGNED | No | No default | FK → users.id; RESTRICT | Created by user id. |
+| updated_by_user_id | BIGINT UNSIGNED | Yes | NULL | FK → users.id; RESTRICT | User responsible for the latest mutable draft update or issue. |
 | created_at | DATETIME | Yes | NULL | — | ORM record creation timestamp; no business event is implied. |
 | updated_at | DATETIME | Yes | NULL | — | ORM last modification timestamp; append-only records retain their original row. |
 
@@ -1020,11 +1032,14 @@ Indexes (including unique candidate keys):
 - `ix_quotations_d2dc6852`: (repair_job_id).
 - `ix_quotations_a7a13f4c`: (customer_id).
 - `ix_quotations_ae7720e8`: (created_by_user_id).
+- `ix_quotations_prep_approval`: (preparation_status, approval_status).
+- `quotations_updated_by_user_id_foreign`: (updated_by_user_id), supporting the foreign key.
 
 Composite foreign keys:
 
 - (repair_job_id, customer_id) → `repair_jobs` (id, customer_id); RESTRICT delete/update.
 - (revises_quotation_id, repair_job_id, customer_id) → `quotations` (id, repair_job_id, customer_id); RESTRICT delete/update.
+- `updated_by_user_id` → `users.id`; RESTRICT delete/update.
 
 Table CHECK rules:
 
@@ -1055,6 +1070,7 @@ Source / meaning: BRD p7 proposed repair/parts/labour lines.
 | id | BIGINT UNSIGNED | No | No default | PK, auto increment | Database-generated internal identifier; primary key Immutable through Eloquent after creation. |
 | quotation_id | BIGINT UNSIGNED | No | No default | FK → quotations.id; RESTRICT; UNIQUE(quotation_id,line_number) | Quotation id. |
 | line_number | INTEGER UNSIGNED | No | No default | UNIQUE(quotation_id,line_number) | Line number. |
+| display_order | INTEGER UNSIGNED | No | 0 | — | Current display order of active quotation lines. |
 | item_type | VARCHAR(64) | No | part | — | Item type. Allowed: part, labour, service. |
 | spare_part_id | BIGINT UNSIGNED | Yes | NULL | FK → spare_parts.id; RESTRICT | Spare part id. |
 | description | TEXT | No | No default | — | Description. |
@@ -1062,6 +1078,7 @@ Source / meaning: BRD p7 proposed repair/parts/labour lines.
 | unit_price | DECIMAL(19,4) | No | 0 | — | Historical unit selling price, four decimals; preserve for later reprints and reconciliation. CHECK `unit_price` >= 0. |
 | discount_amount | DECIMAL(19,2) | No | 0 | — | Nonnegative discount amount in LKR. Line or document checks prevent a discount larger than its gross value. CHECK `discount_amount` >= 0. |
 | line_total | DECIMAL(19,2) | No | 0 | — | Net line amount: proposed ROUND(quantity * rate - line discount, 2); rounding policy requires business confirmation CHECK `line_total` >= 0. |
+| removed_at | DATETIME | Yes | NULL | — | Removed draft line timestamp; retained instead of deleting the line. |
 | created_at | DATETIME | Yes | NULL | — | ORM record creation timestamp; no business event is implied. |
 | updated_at | DATETIME | Yes | NULL | — | ORM last modification timestamp; append-only records retain their original row. |
 
@@ -1103,6 +1120,7 @@ Source / meaning: BRD p8 approval/rejection and revision-specific history.
 | decision | VARCHAR(64) | No | No default | — | Decision. Allowed: pending, approved, rejected. |
 | decided_at | DATETIME | No | No default | — | Decided at. |
 | customer_contact_name | VARCHAR(255) | Yes | NULL | — | Customer contact name. |
+| approval_method | VARCHAR(32) | Yes | NULL | — | Customer communication method: in_person, telephone, email, or other. |
 | recorded_by_user_id | BIGINT UNSIGNED | No | No default | FK → users.id; RESTRICT | Recorded by user id. |
 | notes | TEXT | Yes | NULL | — | Notes. |
 | created_at | DATETIME | Yes | NULL | — | ORM record creation timestamp; no business event is implied. |
@@ -1123,6 +1141,34 @@ Table CHECK rules:
 - ``decision` IN ('pending', 'approved', 'rejected')`.
 
 Record policy: append-only via Eloquent; corrections create linked evidence. Raw SQL and eventless operations bypass model event guards.
+
+## quotation_history
+
+Module: `Quotations`. Model: [QuotationHistory](../../app/Modules/Quotations/Models/QuotationHistory.php).
+
+Source / meaning: Step 6 append-only workflow event and before/after summaries.
+
+| Field | SQL type | Nullable | Default | Key / reference | Meaning and validation |
+| --- | --- | --- | --- | --- | --- |
+| id | BIGINT UNSIGNED | No | No default | PK, auto increment | Database-generated history identifier. |
+| quotation_id | BIGINT UNSIGNED | No | No default | FK → quotations.id; RESTRICT | Quotation whose event is recorded. |
+| actor_user_id | BIGINT UNSIGNED | No | No default | FK → users.id; RESTRICT | User performing the event. |
+| event_type | VARCHAR(50) | No | No default | — | Event name, including creation, edits, issue, supersession, cancellation, revision, and customer decision. |
+| old_values | JSON | Yes | NULL | — | Redacted business-state summary before the event. |
+| new_values | JSON | Yes | NULL | — | Redacted business-state summary after the event. |
+| event_at | DATETIME | No | No default | — | Business event timestamp. |
+| created_at | DATETIME | Yes | NULL | — | ORM row creation timestamp. |
+| updated_at | DATETIME | Yes | NULL | — | ORM row update timestamp; Eloquent model is append-only. |
+
+Indexes:
+
+- `PRIMARY`: (id).
+- `quotation_history_quotation_id_foreign`: (quotation_id), supporting the foreign key.
+- `quotation_history_actor_user_id_foreign`: (actor_user_id), supporting the foreign key.
+- `ix_quotation_history_event`: (quotation_id, event_at).
+- `ix_quotation_history_actor`: (actor_user_id).
+
+Record policy: append-only via Eloquent; corrections create new evidence. Raw SQL and eventless operations bypass model event guards.
 
 ## purchases
 
@@ -2659,9 +2705,12 @@ These existing tables are preserved. `jobs` is Laravel's queue, not repair_jobs.
 | --- | --- | --- | --- | --- | --- |
 | id | bigint(20) unsigned | NO | No explicit default | PRI | Existing login identity primary key. |
 | name | varchar(255) | NO | No explicit default | — | Account display name. |
-| email | varchar(255) | NO | No explicit default | UNI | Existing unique login identifier; preserved authentication uses email. |
+| email | varchar(255) | YES | NULL | UNI | Optional contact address; no longer the login identifier. Existing addresses remain intact. |
+| username | varchar(64) | YES during migration; populated for existing rows | No explicit default | UNI (`uq_users_username`) | Normalized username login identifier. New accounts require one; migration derives existing usernames from unique email local parts. |
 | email_verified_at | timestamp | YES | NULL | — | Optional verification timestamp; no verification workflow is introduced. |
-| password | varchar(255) | NO | No explicit default | — | Hash only; existing hashed cast is preserved. |
+| password | varchar(255) | NO | No explicit default | — | Hash only; Laravel's hashed cast is preserved. |
+| is_active | boolean | NO | 1 | — | Disabled accounts cannot authenticate and are rejected on authenticated web requests. |
+| last_login_at | datetime | YES | NULL | — | Timestamp of the latest successful login. |
 | remember_token | varchar(100) | YES | NULL | — | Sensitive persistent-login token; hidden and excluded/redacted from audit snapshots. |
 | created_at | timestamp | YES | NULL | — | Existing Laravel account timestamp. |
 | updated_at | timestamp | YES | NULL | — | Existing Laravel account timestamp. |

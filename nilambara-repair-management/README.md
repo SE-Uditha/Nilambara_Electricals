@@ -2,9 +2,9 @@
 
 Laravel foundation for Nilambara Electricals' repair shop management system. The eventual application covers electrical-appliance and motor repair, customer/company records, quotations, billing, credit, spare parts, purchasing, POS, staff, reports, and operational controls.
 
-**Current delivery: Step 2 database foundation.** The existing login/logout and dashboard are preserved. The project now includes 58 business/support tables and module models, 16 additive migrations, a complete ERD, an all-field dictionary, relationships, integrity constraints, and database tests. Business CRUD, inventory/payment processing, POS checkout, reports, and the full employee permissions matrix remain deferred.
+**Current delivery: Step 6 quotations and repair approval.** Steps 3-4 provide employee management, username authentication, six roles, granular permissions, audit events, and customer/company registration. Step 5 adds transactional repair intake, advances, technician assignment, inspection and repair notes, status history/search, A5 receipt printing, and A6 job cards. Step 6 adds transactional quotation drafts, immutable issued snapshots, revisions, customer-decision history, approval-gated repair status, and A4/A5 print/PDF. See the [Step 6 summary](docs/development/step-6-summary.md) and [quotation guides](docs/modules/quotation-management.md). Inventory deduction, final billing, POS, reporting, and backup/restore remain deferred.
 
-The supplied [Business Requirements Document](../Repair%20Shop%20Management%20Final.pdf) is the source of truth. See the [BRD coverage map](docs/modules/brd-coverage.md), [architecture overview](docs/architecture/overview.md), [Step 2 database checklist](docs/database/README.md), and [development roadmap](docs/development/roadmap.md).
+The supplied [Business Requirements Document](../Repair%20Shop%20Management%20Final.pdf) is the source of truth. See the [BRD coverage map](docs/modules/brd-coverage.md), [architecture overview](docs/architecture/overview.md), [database guide](docs/database/README.md), and [development roadmap](docs/development/roadmap.md).
 
 Executed database checks are recorded in the [Step 2 verification results](docs/database/verification.md). The [Step 1 verification results](docs/development/verification.md) remain as historical foundation evidence.
 
@@ -12,21 +12,22 @@ Executed database checks are recorded in the [Step 2 verification results](docs/
 
 | Component | Foundation |
 | --- | --- |
-| Backend | Laravel 13, PHP, Eloquent, Laravel Fortify |
+| Backend | Laravel 13, PHP, Eloquent, Laravel Fortify, Spatie Laravel Permission 8 |
 | Frontend | Blade, Livewire 4, Tailwind CSS 4, Alpine.js through Livewire, Vite 8 |
 | Runtime database | MySQL connection, InnoDB / `utf8mb4`, phpMyAdmin administration; local XAMPP server is MariaDB 10.4.32 |
 | Testing | PHPUnit 12, isolated SQLite plus disposable MySQL-compatible database verification |
 | Dependency tools | Composer 2, npm; exact dependency versions are recorded in lockfiles |
 
-Use PHP **8.5** as the recommended and tested target. The resolved dependencies require PHP **8.4 or newer**. Enable the extensions required by Composer, including `mbstring`, `openssl`, `fileinfo`, `curl`, `pdo_mysql`, `dom`, and `xml`; enable `pdo_sqlite`/`sqlite3` for tests and `zip` for convenient Composer downloads. Use Node.js 22.12 or a compatible newer release, npm, a running MySQL server, and a browser. The PHP process needs write access to `storage/` and `bootstrap/cache/`.
+Use PHP **8.5** as the recommended and tested target. The resolved dependencies require PHP **8.4 or newer**. Enable the extensions required by Composer, including `mbstring`, `openssl`, `fileinfo`, `curl`, `pdo_mysql`, `dom`, `xml`, and `gd` (required for DomPDF output with the business logo); enable `pdo_sqlite`/`sqlite3` for tests and `zip` for convenient Composer downloads. Use Node.js 22.12 or a compatible newer release, npm, a running MySQL server, and a browser. The PHP process needs write access to `storage/` and `bootstrap/cache/`.
 
 ## First installation
 
-The following commands use PowerShell from the directory containing this application. With a normal PHP and Composer installation, both `php` and `composer` should be on `PATH`.
+The following commands use PowerShell from the directory containing this application. Use PHP 8.5 and load the repository's PHP configuration so Composer, Artisan, and child PHP processes all have the required extensions.
 
 ```powershell
 cd nilambara-repair-management
-composer install
+$env:PHPRC = (Resolve-Path ..\.tools\php.ini).Path
+php ..\.tools\composer.phar install
 npm ci
 ```
 
@@ -60,35 +61,46 @@ CREATE DATABASE IF NOT EXISTS nilambara_repair_management
     CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-If the example root account is denied access, put working local credentials in `.env` before continuing. Then run:
+If the example root account is denied access, put working local credentials in `.env` before continuing. For a brand-new local installation only, generate the application key if `.env` does not already contain one. Never rotate an existing key as part of an upgrade:
 
 ```powershell
 php artisan key:generate
-php artisan config:clear
-php artisan migrate
-php artisan db:seed --class=RoleSeeder
-php artisan app:create-user
-npm run build
-php artisan serve
 ```
 
-Open `http://localhost:8000/login` and sign in using the account created by the interactive command. It prompts for name, email, a hidden password of at least 12 characters, and password confirmation. No demo employee accounts or business records are seeded. The account command creates a login account; future administrator roles and account-management screens belong to the permissions phase.
+Then run:
 
-`php artisan migrate` creates the retained Laravel infrastructure and the Step 2 business/support schema. The role seeder adds only six reference names; it does not assign roles or implement authorization. Preserve an existing `APP_KEY`; generate it only for a new installation. See the [database guide](docs/database/README.md) for exact XAMPP commands, phpMyAdmin inspection, engine requirements, and safe verification.
+```powershell
+php artisan config:clear
+php artisan migrate:status
+php artisan migrate --pretend
+php artisan migrate
+php artisan db:seed --class=RoleSeeder
+npm run build
+```
+
+Inspect the pending migration output before applying it to an existing database. Do not run `migrate:fresh`, rollback, or manually recreate tables. `RoleSeeder` idempotently adds the six BRD roles and permission catalog; it creates no demo accounts. If no active administrator exists, create the initial linked Administrator account:
+
+```powershell
+php artisan app:create-user
+```
+
+If an account already exists but has no Administrator role, use `php artisan app:assign-initial-admin <username>` and confirm the grant. The private commands refuse when an active administrator already exists. Sign in at `http://127.0.0.1:8000/login` with the username (not email) and password.
+
+Preserve an existing `APP_KEY`; generate it only for a new installation. See the [database guide](docs/database/README.md), [Step 3 summary](docs/development/step-3-summary.md), and [role-permission guide](docs/modules/role-permissions.md) for safe migration, account, and access details.
 
 ## Daily development
 
 Run the PHP server in one terminal and Vite in another:
 
 ```powershell
-php artisan serve
+php artisan serve --host=127.0.0.1 --port=8000 --no-reload
 ```
 
 ```powershell
 npm run dev
 ```
 
-Alternatively, `composer run dev` starts both processes. A built asset bundle from `npm run build` is sufficient when running only `php artisan serve`. Stop the development processes with `Ctrl+C`.
+Alternatively, after setting `PHPRC`, `composer run dev` starts both processes. `--no-reload` is required on this PHP setup so Laravel's child web-server process inherits the extension configuration; restart the server after editing `.env`. A built asset bundle from `npm run build` is sufficient when running only `php artisan serve`. Stop the development processes with `Ctrl+C`.
 
 ## Environment and business configuration
 
@@ -96,7 +108,9 @@ Alternatively, `composer run dev` starts both processes. A built asset bundle fr
 
 | Variables | Purpose |
 | --- | --- |
-| `BUSINESS_NAME`, `BUSINESS_ADDRESS`, `BUSINESS_CONTACT_NUMBER`, `BUSINESS_LOGO` | Business identity and future document branding. |
+| `BUSINESS_NAME`, `BUSINESS_ADDRESS`, `BUSINESS_CONTACT_NUMBER`, `BUSINESS_LOGO` | Business identity and document branding. The logo path must point to a PNG/JPEG file under `public/`. |
+| `BUSINESS_CUSTOMER_CODE_PREFIX` | Customer identifier prefix; defaults to `CUS-` and is followed by a unique ULID. |
+| `BUSINESS_QUOTATION_NUMBER_PREFIX` | Quotation number prefix; defaults to `QUO-` and is followed by a database-generated id. |
 | `BUSINESS_CURRENCY` | Defaults to `LKR`. |
 | `APP_TIMEZONE`, `APP_LOCALE`, `APP_FALLBACK_LOCALE` | Defaults to `Asia/Colombo`, `en`, and `en`. |
 | `BUSINESS_PAGINATION` | Default page size, initially 25. |
@@ -117,12 +131,14 @@ Sessions use Laravel's database session driver, encrypted session payloads, HTTP
 | `composer dump-autoload` | Refresh autoloading after namespace changes. |
 | `php artisan migrate` | Run pending infrastructure and business migrations against the configured database. |
 | `php artisan migrate:status` | Check migration state on that database. |
-| `php artisan app:create-user` | Provision a private login account interactively. |
+| `php artisan app:create-user` | Privately bootstrap the first linked Administrator account. |
+| `php artisan app:assign-initial-admin <username>` | Promote an existing account during initial setup if no active Administrator exists. |
 | `npm ci` | Install the exact npm lockfile. |
 | `npm run dev` | Start Vite's development server. |
 | `npm run build` | Build production frontend assets. |
 | `composer test` | Clear cached configuration and run the automated tests. |
 | `php artisan test` | Run PHPUnit through Artisan directly. |
+| `php -d extension=gd vendor\bin\phpunit` | Run PHPUnit with GD enabled for PDF tests when GD is available but absent from the active PHP INI. |
 | `php scripts/verify-mysql.php` | Run the suite and rollback/remigration in a newly created disposable MySQL-compatible database. |
 | `composer lint:check` | Check PHP formatting with Laravel Pint. |
 | `composer lint` | Apply PHP formatting. |
@@ -165,12 +181,12 @@ tests/Feature/             Authentication and foundation behavior tests
 tests/Unit/                Isolated foundation tests
 ```
 
-Each module reserves `Controllers/`, `Models/`, `Services/`, `Repositories/`, `Requests/`, `Policies/`, `Enums/`, and `Actions/`. Step 2 populates the required entity models and relationships. Other empty layers retain `.gitkeep` files. Classes use the existing `App\Modules\...` PSR-4 namespace; no business controllers or transaction services are generated merely to populate a directory.
+Each module reserves `Controllers/`, `Models/`, `Services/`, `Repositories/`, `Requests/`, `Policies/`, `Enums/`, and `Actions/`. Step 2 populates entity models and relationships; Step 3 implements the employee/account and role-permission layers. Other empty layers retain `.gitkeep` files. Classes use the existing `App\Modules\...` PSR-4 namespace.
 
 | Module | Intended responsibility |
 | --- | --- |
 | Dashboard | Business overview and future statistics. |
-| Customers | Individual/company registration, history, and statements. |
+| Customers | Step 4 delivers individual/company registration, search, history, and protected ledger statements. |
 | RepairReceipts | Item receiving, job identity, advances, and receiving output. |
 | RepairJobs | Inspection, repair details, assignment, completion, and delivery. |
 | JobCards | A6 technician job-card output. |
@@ -195,9 +211,9 @@ Controllers stay small; use Form Requests, Policies, Eloquent relationships, and
 
 ## Planned next phases
 
-The next step is **Employee Management, Authentication, and Role-Based Access Control**. Step 2 stops after the database foundation. Later phases cover customer operations, receiving/repairs, quotations, stock/purchasing, invoicing/payments/credit, POS, reports, backup/audit/settings, printing, and business acceptance. See the [roadmap](docs/development/roadmap.md) and [open database decisions](docs/database/open-decisions.md).
+The next step is **Step 7 — Inventory and Purchasing**. Step 5's receipt/job features and Step 6's quotation/approval behavior are documented in the [module guides](docs/modules/repair-receipts.md), [quotation guides](docs/modules/quotation-management.md), [roadmap](docs/development/roadmap.md), and [open database decisions](docs/database/open-decisions.md). Later phases cover stock/purchasing, invoicing/payments/credit, POS, reports, backup/restore/settings, and end-to-end business acceptance.
 
-Dashboard statistics and business navigation are labelled as planned or unavailable. They do not present fabricated sales, credit, stock, or job data.
+Dashboard business metrics remain empty until their authorized reporting queries are delivered. Step 5 repair navigation is active; future module links remain labelled as unavailable and no fabricated sales, credit, or stock data is shown.
 
 ## This workspace's optional PHP/Composer helper
 
