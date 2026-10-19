@@ -6,10 +6,14 @@ use App\Models\User;
 use App\Modules\AuditLogs\Models\AuditLog;
 use App\Modules\Customers\Models\Customer;
 use App\Modules\Customers\Policies\CustomerPolicy;
-use App\Modules\RepairJobs\Models\RepairJob;
-use App\Modules\RepairJobs\Policies\RepairJobPolicy;
+use App\Modules\Invoices\Models\Invoice;
+use App\Modules\Invoices\Policies\InvoicePolicy;
+use App\Modules\Payments\Models\Payment;
+use App\Modules\Payments\Policies\PaymentPolicy;
 use App\Modules\Quotations\Models\Quotation;
 use App\Modules\Quotations\Policies\QuotationPolicy;
+use App\Modules\RepairJobs\Models\RepairJob;
+use App\Modules\RepairJobs\Policies\RepairJobPolicy;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Login;
@@ -78,6 +82,8 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(RepairJob::class, RepairJobPolicy::class);
         Gate::policy(Customer::class, CustomerPolicy::class);
         Gate::policy(Quotation::class, QuotationPolicy::class);
+        Gate::policy(Invoice::class, InvoicePolicy::class);
+        Gate::policy(Payment::class, PaymentPolicy::class);
 
         Event::listen(Login::class, function (Login $event): void {
             if (! $event->user instanceof User) {

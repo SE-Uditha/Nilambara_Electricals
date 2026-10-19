@@ -182,8 +182,24 @@
                     <div><dt class="form-label">{{ __('ui.advance_paid') }}</dt><dd class="font-semibold text-slate-800">{{ config('business.currency') }} {{ number_format((float) $advancePaid, 2) }}</dd></div>
                     <div><dt class="form-label">{{ __('ui.total_amount') }}</dt><dd class="text-slate-700">{{ (float) $job->total_job_amount > 0 ? config('business.currency').' '.$job->total_job_amount : __('ui.amount_unavailable') }}</dd></div>
                     <div><dt class="form-label">{{ __('ui.outstanding_balance') }}</dt><dd class="text-slate-700">{{ __('ui.amount_unavailable') }}</dd></div>
-                    <div class="border-t border-slate-100 pt-3 text-[11px] text-slate-500">{{ __('ui.financial_totals_not_integrated') }}</div>
                 </dl>
+                @can('payments.view')
+                    <div class="mt-5 border-t border-slate-100 pt-4">
+                        <h3 class="mb-3 text-xs font-bold text-slate-800">{{ __('payments.advance_history') }}</h3>
+                        <div class="space-y-3">
+                            @forelse ($advancePayments as $allocation)
+                                @php($releasedAdvance = $allocation->releases->reduce(fn ($sum, $release) => $sum->plus((string) $release->amount), \Brick\Math\BigDecimal::zero()->toScale(2)))
+                                @php($netAdvance = \Brick\Math\BigDecimal::of((string) $allocation->amount)->minus($releasedAdvance)->toScale(2))
+                                <a href="{{ route('payments.show', $allocation->payment) }}" class="flex items-center justify-between gap-3 text-xs hover:text-teal-800">
+                                    <span><span class="block font-semibold">{{ $allocation->payment->payment_number }}</span><span class="mt-1 block text-[10px] text-slate-500">{{ $allocation->payment->paid_at->format(config('business.date_format')) }} · {{ __('payments.method_'.$allocation->payment->method->value) }}</span></span>
+                                    <span class="font-semibold">{{ config('business.currency') }} {{ $netAdvance }}</span>
+                                </a>
+                            @empty
+                                <p class="text-xs text-slate-500">{{ __('payments.no_job_advances') }}</p>
+                            @endforelse
+                        </div>
+                    </div>
+                @endcan
             </section>
             @can('updateStatus', $job)
                 <section class="rounded-2xl border border-slate-200 bg-white p-5">

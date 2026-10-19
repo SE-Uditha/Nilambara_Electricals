@@ -39,19 +39,20 @@ class RoleSeeder extends Seeder
             'jobs' => ['view', 'create', 'update', 'assign', 'inspect', 'repair', 'update-status', 'complete', 'cancel'],
             'job-cards' => ['view', 'print'],
             'quotations' => ['view', 'create', 'update', 'issue', 'approve', 'revise', 'cancel', 'print'],
-            'invoices' => ['view', 'create', 'print', 'cancel'],
-            'payments' => ['view', 'create', 'receive', 'reverse'],
+            'invoices' => ['view', 'create', 'update-draft', 'issue', 'print', 'cancel', 'export'],
+            'payments' => ['view', 'create', 'receive', 'receive-for-others', 'reverse', 'print', 'export'],
             'credit' => ['view', 'collect', 'reports'],
             'inventory' => ['view', 'create', 'update', 'issue', 'adjust', 'stock-count'],
             'suppliers' => ['view', 'create', 'update'],
             'purchases' => ['view', 'create', 'receive', 'approve'],
-            'pos' => ['view', 'sale', 'refund'],
+            'pos' => ['view', 'sale', 'refund', 'sales.view', 'receipt.print', 'discount', 'sale.cancel', 'return', 'payment.verify', 'reports.view'],
             'employees' => ['view', 'create', 'update', 'deactivate'],
             'users' => ['view', 'create', 'update', 'disable'],
             'roles' => ['view', 'manage'],
             'permissions' => ['manage'],
             'reports' => ['view', 'export', 'financial'],
             'settings' => ['view', 'update'],
+            'print-templates' => ['view', 'update', 'reset'],
             'backups' => ['view', 'create', 'restore'],
             'audit' => ['view'],
         ];
@@ -77,7 +78,7 @@ class RoleSeeder extends Seeder
             'receptionist' => [
                 'dashboard.view', 'customers.view', 'customers.create', 'customers.update',
                 'receipts.view', 'receipts.create', 'receipts.print', 'jobs.view', 'jobs.create',
-                'job-cards.view', 'job-cards.print',
+                'job-cards.view', 'job-cards.print', 'invoices.view',
             ],
             'technician' => [
                 'dashboard.view', 'jobs.view', 'jobs.inspect', 'jobs.repair', 'jobs.update-status',
@@ -85,7 +86,8 @@ class RoleSeeder extends Seeder
             ],
             'cashier' => [
                 'dashboard.view', 'invoices.view', 'invoices.create', 'invoices.print',
-                'payments.view', 'payments.create', 'payments.receive', 'pos.view', 'pos.sale',
+                'payments.view', 'payments.create', 'payments.receive', 'payments.print', 'payments.export',
+                'credit.view', 'credit.collect', 'pos.view', 'pos.sale', 'pos.sales.view', 'pos.receipt.print',
                 'reports.view',
             ],
             'storekeeper' => [
@@ -95,7 +97,10 @@ class RoleSeeder extends Seeder
             ],
             'manager' => [
                 'dashboard.view', 'jobs.view', 'jobs.assign', 'quotations.view', 'quotations.approve',
-                'invoices.view', 'payments.view', 'credit.view', 'credit.collect', 'credit.reports',
+                'invoices.view', 'invoices.create', 'invoices.update-draft', 'invoices.issue',
+                'invoices.print', 'invoices.cancel', 'invoices.export',
+                'payments.view', 'payments.create', 'payments.receive', 'payments.reverse',
+                'payments.print', 'payments.export', 'credit.view', 'credit.collect', 'credit.reports',
                 'suppliers.view', 'suppliers.create', 'suppliers.update', 'purchases.view',
                 'purchases.create', 'purchases.receive', 'purchases.approve', 'reports.view',
                 'reports.export', 'reports.financial',
@@ -124,6 +129,43 @@ class RoleSeeder extends Seeder
         foreach ($quotationGrants as $roleName => $permissionNames) {
             Role::query()->where('name', $roleName)->firstOrFail()->givePermissionTo($permissionNames);
         }
+
+        $invoiceGrants = [
+            'receptionist' => ['invoices.view'],
+            'cashier' => ['invoices.view', 'invoices.create', 'invoices.update-draft', 'invoices.issue', 'invoices.print', 'invoices.export'],
+            'manager' => ['invoices.view', 'invoices.create', 'invoices.update-draft', 'invoices.issue', 'invoices.print', 'invoices.cancel', 'invoices.export'],
+        ];
+        foreach ($invoiceGrants as $roleName => $permissionNames) {
+            Role::query()->where('name', $roleName)->firstOrFail()->givePermissionTo($permissionNames);
+        }
+
+        $paymentGrants = [
+            'cashier' => [
+                'payments.view', 'payments.create', 'payments.receive', 'payments.print', 'payments.export',
+                'credit.view', 'credit.collect',
+            ],
+            'manager' => [
+                'payments.view', 'payments.create', 'payments.receive', 'payments.reverse',
+                'payments.print', 'payments.export', 'credit.view', 'credit.collect', 'credit.reports',
+            ],
+        ];
+        foreach ($paymentGrants as $roleName => $permissionNames) {
+            Role::query()->where('name', $roleName)->firstOrFail()->givePermissionTo($permissionNames);
+        }
+
+        $posGrants = [
+            'cashier' => ['pos.view', 'pos.sale', 'pos.sales.view', 'pos.receipt.print'],
+            'manager' => [
+                'pos.view', 'pos.sales.view', 'pos.receipt.print', 'pos.discount',
+                'pos.sale.cancel', 'pos.return', 'pos.refund', 'pos.payment.verify', 'pos.reports.view',
+            ],
+            'storekeeper' => ['pos.view'],
+        ];
+        foreach ($posGrants as $roleName => $permissionNames) {
+            Role::query()->where('name', $roleName)->firstOrFail()->givePermissionTo($permissionNames);
+        }
+
+        Role::query()->where('name', 'storekeeper')->firstOrFail()->givePermissionTo(['reports.view']);
 
         Role::query()->whereIn('name', ['manager', 'cashier'])
             ->each(function (Role $role): void {

@@ -44,27 +44,35 @@ Implemented: transactionally created drafts with database-generated `QUO-` numbe
 
 No invoice, payment, stock movement, or parts issue is created by quotation approval. Reuse of an approved quotation in later billing remains a subsequent workflow. See the [Step 6 summary](step-6-summary.md) and [quotation guides](../modules/quotation-management.md), [approval guide](../modules/quotation-approval.md), and [printing guide](../modules/quotation-printing.md).
 
-## Step 7: inventory and purchasing
+## Step 7: invoices
 
-Implement shared spare-part records and movement ledger, suppliers, GRNs/purchases, supplier credit/payments, issue-once repair parts, returns, damage/adjustments, counts, reorder alerts, and the agreed valuation rules. Verify atomicity and concurrent stock usage.
+Implemented: same-customer multi-job drafts and invoices, unique database-generated numbering, job-wise totals, approved-quotation price integration, issued job-part usage itemization where it reconciles to the job amount, draft updates, issue/cancellation lifecycle, audit/history, derived allocation-based payment balances, and A5 print/PDF with duplicate history. Invoice records may display prior advances and payments but do not accept or record tender. Full payment processing and credit collection are Step 8. See the [Step 7 summary](step-7-summary.md) and [invoice guides](../modules/invoice-management.md).
 
-## Step 8: billing, payments, and credit
+## Step 8: payments and credit
 
-Implement multi-job invoices for one customer, payment/advance allocation, partial collections, outstanding balances, credit monitoring, controlled refund/reversal, delivery details, statements, and A5 invoice/payment output. Reconcile every total against payment and job records.
+Implemented: transaction-safe cash/bank/cheque payment receipt; active employee receiver and acting-user audit; job/customer advances integrated with Step 5; advance application on invoice issue; multiple partial and credit collections; derived payment/invoice balances; credit invoice search/history; ledger statements with date filters/print/PDF; authorized partial refunds and full accounting reversal; allocation releases; A5 payment receipts/PDF/duplicate history; localized UI, role permissions, audit events, tests, and guides. Existing payment and ledger schema is reused without a new Step 8 migration or historical backfill. See the [Step 8 summary](step-8-summary.md) and [payment guides](../modules/payment-management.md), [advance guide](../modules/advance-payments.md), [credit guide](../modules/credit-invoice-management.md), [reversal guide](../modules/payment-reversals.md), and [statement guide](../modules/customer-account-statements.md).
 
-## Step 9: POS
+MySQL deployment contention still needs dedicated verification; the feature suite runs against isolated SQLite and does not certify row-lock behavior under concurrent MySQL cashiers.
 
-Implement spare-part sales using the same inventory and payment operations, barcode workflow where required, returns, cashier authorization, and the agreed POS receipt sizes. Confirm that repair issues and POS sales cannot deduct the same stock twice.
+## Step 9: inventory and purchasing
 
-## Step 10: reporting and dashboard
+Implement shared spare-part records and movement ledger, suppliers, GRNs/purchases, supplier credit/payments, issue-once repair parts, returns, damage/adjustments, counts, reorder alerts, and agreed valuation rules. Verify atomicity and concurrent stock usage. Invoice line snapshots do not post stock movements.
+
+## Step 10: POS
+
+Implemented: searchable/barcode-assisted spare-part checkout, cashier/manager permissions, exact decimal totals, cash tender/change, pending bank-transfer and cheque verification, idempotent checkout, POS sale/payment records, returns with resalable/damaged disposition, authorized refunds, sale history, duplicate-aware receipts/PDF, and operating summaries. POS uses the existing `stock_movements`, `payments`, `payment_allocations`, `stock_returns`, and `document_sequences` ledgers; it does not create parallel stock or payment balances. Pending bank/cheque transactions do not post a payment or stock movement until an authorized manager confirms receipt; cheque acceptance is not cheque clearing. See the [Step 10 summary](step-10-summary.md) and [POS guides](../modules/pos-management.md).
+
+Step 9's broader purchasing, receiving, stock counts, adjustments, supplier returns, and valuation workflows remain planned. POS uses the existing shared movement ledger and does not claim those workflows are complete.
+
+## Step 11: reporting and dashboard
 
 Replace dashboard empty states with authorized queries. Implement the BRD repair, sales, financial, and stock reports; filters, print/PDF, and the selected Excel exports. Use actual costs for profit estimates, and add an expenses capability only if separately agreed.
 
-## Step 11: operational controls and document customization
+## Step 12: operational controls and document customization
 
 Implement audit history, scheduled/manual backup, backup verification, restore with confirmation, restore testing, external backup destinations, failure warnings, and authorized system/print settings. Validate Sinhala/English document fonts and A4/A5/A6 or thermal layouts using real print output.
 
-## Step 12: acceptance and deployment
+## Step 13: acceptance and deployment
 
 Execute the BRD's physical page 19 acceptance scenarios, including persistent history, concurrent users, numbering, multi-job billing, partial payments, credit, repair/POS stock deductions, returns, reports, backup restoration, and permissions. Prepare the agreed deployment package, installation/admin/user guides, training, ownership/handover documentation, and maintenance terms described on pages 18-20.
 

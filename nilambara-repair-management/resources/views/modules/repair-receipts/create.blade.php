@@ -118,21 +118,26 @@
             <section class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">
                 <h2 class="mb-5 text-sm font-bold text-slate-900">{{ __('ui.payment_information') }}</h2>
                 <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                    <div>
-                        <label class="form-label" for="advance_payment">{{ __('ui.advance_payment') }}</label>
-                        <input id="advance_payment" name="advance_payment" type="number" min="0" step="0.01" value="{{ old('advance_payment', '0.00') }}" x-model="advancePayment" class="form-input">
-                        @error('advance_payment')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
-                    </div>
-                    <div x-show="Number(advancePayment || 0) > 0">
-                        <label class="form-label" for="payment_method">{{ __('ui.payment_method') }} <span class="text-red-600">*</span></label>
-                        <select id="payment_method" name="payment_method" x-bind:required="Number(advancePayment || 0) > 0" class="form-input">
-                            <option value="">{{ __('ui.select_payment_method') }}</option>
-                            @foreach (['cash', 'bank_transfer', 'cheque'] as $method)
-                                <option value="{{ $method }}" @selected(old('payment_method') === $method)>{{ __('ui.payment_method_'.$method) }}</option>
-                            @endforeach
-                        </select>
-                        @error('payment_method')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
-                    </div>
+                    @if (auth()->user()->can('payments.create') && auth()->user()->can('payments.receive'))
+                        <div>
+                            <label class="form-label" for="advance_payment">{{ __('ui.advance_payment') }}</label>
+                            <input id="advance_payment" name="advance_payment" type="number" min="0" step="0.01" value="{{ old('advance_payment', '0.00') }}" x-model="advancePayment" class="form-input">
+                            @error('advance_payment')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+                        </div>
+                        <div x-show="Number(advancePayment || 0) > 0">
+                            <label class="form-label" for="payment_method">{{ __('ui.payment_method') }} <span class="text-red-600">*</span></label>
+                            <select id="payment_method" name="payment_method" x-bind:required="Number(advancePayment || 0) > 0" class="form-input">
+                                <option value="">{{ __('ui.select_payment_method') }}</option>
+                                @foreach (['cash', 'bank_transfer', 'cheque'] as $method)
+                                    <option value="{{ $method }}" @selected(old('payment_method') === $method)>{{ __('ui.payment_method_'.$method) }}</option>
+                                @endforeach
+                            </select>
+                            @error('payment_method')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+                        </div>
+                    @else
+                        <input type="hidden" name="advance_payment" value="0.00">
+                        <p class="text-xs text-slate-500">{{ __('payments.advance_entry_restricted') }}</p>
+                    @endif
                     <div>
                         <label class="form-label" for="labor_cost">{{ __('ui.labor_cost') }} <span class="text-red-600">*</span></label>
                         <input id="labor_cost" name="labor_cost" type="number" min="0" step="0.01" value="{{ old('labor_cost', '0.00') }}" class="form-input" required>

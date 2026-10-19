@@ -7,6 +7,8 @@ return [
     'logo' => env('BUSINESS_LOGO') ?: 'images/nilambara-electrical-logo.png',
     'customer_code_prefix' => env('BUSINESS_CUSTOMER_CODE_PREFIX', 'CUS-'),
     'quotation_number_prefix' => env('BUSINESS_QUOTATION_NUMBER_PREFIX', 'QUO-'),
+    'invoice_number_prefix' => env('BUSINESS_INVOICE_NUMBER_PREFIX', 'INV-'),
+    'payment_number_prefix' => env('BUSINESS_PAYMENT_NUMBER_PREFIX', 'PAY-'),
     'currency' => env('BUSINESS_CURRENCY', 'LKR'),
     'timezone' => env('APP_TIMEZONE', 'Asia/Colombo'),
     'locales' => ['en' => 'English', 'si' => 'සිංහල'],

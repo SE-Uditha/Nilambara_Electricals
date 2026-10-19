@@ -228,12 +228,23 @@ erDiagram
         bigint quotation_item_id FK
         bigint spare_part_id FK
     }
+    invoice_history {
+        bigint id PK
+        bigint invoice_id FK
+        bigint actor_user_id FK
+        string event_type
+        datetime event_at
+    }
     pos_sales {
         bigint id PK
         string sale_number UK
         bigint customer_id FK
         bigint cashier_employee_id FK
         bigint customer_scope_id
+        string payment_method
+        string payment_status
+        string idempotency_key UK
+        bigint payment_verified_by_user_id FK
     }
     pos_sale_items {
         bigint id PK
@@ -367,6 +378,8 @@ erDiagram
         bigint repair_job_id FK
         bigint pos_sale_id FK
         bigint purchase_id FK
+        string idempotency_key UK
+        bigint refund_payment_reversal_id FK
         bigint recorded_by_user_id FK
     }
     stock_return_items {
@@ -374,6 +387,7 @@ erDiagram
         bigint stock_return_id FK
         bigint spare_part_id FK
         bigint location_id FK
+        bigint pos_sale_item_id FK
     }
     stock_movements {
         bigint id PK
@@ -486,6 +500,8 @@ erDiagram
     invoice_jobs ||--o{ invoice_items : "invoice_job_id"
     quotation_items o|--o{ invoice_items : "quotation_item_id"
     spare_parts o|--o{ invoice_items : "spare_part_id"
+    invoices ||--o{ invoice_history : "invoice_id"
+    users ||--o{ invoice_history : "actor_user_id"
     customers o|--o{ pos_sales : "customer_id"
     employees ||--o{ pos_sales : "cashier_employee_id"
     pos_sales ||--o{ pos_sale_items : "pos_sale_id"
@@ -607,4 +623,4 @@ erDiagram
     users ||--o{ document_print_histories : "printed_by_user_id"
 ```
 
-No cascade deletion is used on the new foreign keys. Dashed or inferred reporting balances are not additional tables. Multi-row invariants and deferred policies are described in [relationship rules](relationship-rules.md).
+No cascade deletion is used on the new foreign keys. Step 8 posts through the existing payment, allocation, release, reversal, customer-ledger, and print-history relationships; it adds no duplicate ledger or payment table. Dashed or inferred reporting balances are not additional tables. Multi-row invariants and deferred policies are described in [relationship rules](relationship-rules.md).

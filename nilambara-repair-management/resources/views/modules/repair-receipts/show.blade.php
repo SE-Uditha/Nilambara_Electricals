@@ -76,8 +76,22 @@
                 <h2 class="mb-4 text-sm font-bold text-slate-900">{{ __('ui.payment_information') }}</h2>
                 <dl class="space-y-3 text-sm">
                     <div><dt class="form-label">{{ __('ui.advance_payment') }}</dt><dd class="font-semibold text-slate-800">{{ config('business.currency') }} {{ data_get($snapshot, 'advance_payment', '0.00') }}</dd></div>
+                    @if (data_get($snapshot, 'advance_payment_number'))<div><dt class="form-label">{{ __('payments.number') }}</dt><dd class="font-mono text-teal-800">{{ data_get($snapshot, 'advance_payment_number') }}</dd></div>@endif
                     <div><dt class="form-label">{{ __('ui.labor_cost') }}</dt><dd class="text-slate-700">{{ config('business.currency') }} {{ data_get($snapshot, 'labor_cost', '0.00') }}</dd></div>
                 </dl>
+                @can('payments.view')
+                    @if ($advancePayments->isNotEmpty())
+                        <div class="mt-4 border-t border-slate-100 pt-3">
+                            <h3 class="mb-2 text-xs font-semibold text-slate-800">{{ __('payments.advance_history') }}</h3>
+                            @foreach ($advancePayments as $allocation)
+                                <a href="{{ route('payments.show', $allocation->payment) }}" class="flex justify-between gap-3 py-1.5 text-xs text-teal-800 hover:underline">
+                                    <span>{{ $allocation->payment->payment_number }} · {{ $allocation->payment->paid_at->format(config('business.date_format')) }}</span>
+                                    <span>{{ config('business.currency') }} {{ $allocation->amount }}</span>
+                                </a>
+                            @endforeach
+                        </div>
+                    @endif
+                @endcan
             </section>
         </aside>
     </div>

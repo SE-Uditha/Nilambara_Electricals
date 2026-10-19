@@ -80,6 +80,7 @@
             <h3>{{ __('ui.payment_information') }}</h3>
             <div class="grid">
                 <div class="field"><strong>{{ __('ui.advance_payment') }}:</strong> {{ config('business.currency') }} {{ data_get($snapshot, 'advance_payment', '0.00') }}</div>
+                @if (data_get($snapshot, 'advance_payment_number'))<div class="field"><strong>{{ __('payments.number') }}:</strong> {{ data_get($snapshot, 'advance_payment_number') }}</div>@endif
                 <div class="field"><strong>{{ __('ui.labor_cost') }}:</strong> {{ config('business.currency') }} {{ data_get($snapshot, 'labor_cost', '0.00') }}</div>
             </div>
         </section>
@@ -93,7 +94,7 @@
             <div>{{ __('ui.customer_signature') }}</div>
             <div>{{ __('ui.received_by') }}</div>
         </div>
-        <footer class="print-date">{{ __('ui.print_date') }}: {{ $printTime->format(config('business.date_format').' '.config('business.time_format')) }} · {{ config('business.timezone') }}</footer>
+        <footer class="print-date">{{ $footerText ?: __('ui.print_date') }}: {{ $printTime->format(config('business.date_format').' '.config('business.time_format')) }} · {{ config('business.timezone') }}</footer>
     </main>
 </body>
 </html>

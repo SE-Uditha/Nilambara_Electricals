@@ -10,8 +10,8 @@
         body { margin: 0; color: #17252d; font-family: Arial, sans-serif; font-size: {{ $fontSize }}pt; line-height: 1.25; }
         .screen-actions { display: flex; gap: 8px; justify-content: flex-end; margin: 0 auto 14px; max-width: 600px; }
         .screen-actions a, .screen-actions button { padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 7px; background: #fff; color: #17252d; font-size: 11px; text-decoration: none; cursor: pointer; }
-        .preview { width: 105mm; margin: auto; }
-        .page { position: relative; width: 105mm; min-height: 148mm; padding: 4mm; border: 1px solid #d9e0e5; page-break-after: always; }
+        .preview { width: {{ $pageWidth }}; margin: auto; }
+        .page { position: relative; width: {{ $pageWidth }}; min-height: {{ $pageHeight }}; padding: 4mm; border: 1px solid #d9e0e5; page-break-after: always; }
         .page:last-child { page-break-after: auto; }
         .business { display: flex; align-items: center; gap: 6px; border-bottom: 1.5px solid #0f766e; padding-bottom: 4px; }
         .business img { max-width: 22mm; max-height: 15mm; object-fit: contain; }
@@ -40,7 +40,7 @@
     <nav class="screen-actions" aria-label="{{ __('ui.print_actions') }}">
         <a href="{{ route('repair-jobs.show', $job) }}">{{ __('ui.back') }}</a>
         @can('job-cards.print')<a href="{{ route('job-cards.duplicate', $job) }}">{{ __('ui.reprint_job_card') }}</a>@endcan
-        <button type="button" onclick="window.print()">{{ __('ui.print_a6') }}</button>
+        <button type="button" onclick="window.print()">{{ __('ui.print') }}</button>
     </nav>
     <main class="preview">
         <article class="page">
@@ -73,7 +73,7 @@
                     <div class="line"><strong>{{ __('ui.inspection_date') }}</strong><span>{{ $inspection?->inspected_at?->timezone(config('business.timezone'))->format(config('business.date_format')) }}</span></div>
                 </div>
             </section>
-            <footer class="print-date">{{ __('ui.print_date') }}: {{ $printedAt->format(config('business.date_format').' '.config('business.time_format')) }}</footer>
+            <footer class="print-date">{{ $footerText ?: __('ui.print_date') }}: {{ $printedAt->format(config('business.date_format').' '.config('business.time_format')) }}</footer>
         </article>
         <article class="page">
             <header class="business">
@@ -105,7 +105,7 @@
                 <div class="writing"></div>
             </section>
             <section class="section"><h3>{{ __('ui.special_notes') }}</h3><div class="value">{{ $job->special_notes }}</div></section>
-            <footer class="print-date">{{ __('ui.print_date') }}: {{ $printedAt->format(config('business.date_format').' '.config('business.time_format')) }}</footer>
+            <footer class="print-date">{{ $footerText ?: __('ui.print_date') }}: {{ $printedAt->format(config('business.date_format').' '.config('business.time_format')) }}</footer>
         </article>
     </main>
 </body>

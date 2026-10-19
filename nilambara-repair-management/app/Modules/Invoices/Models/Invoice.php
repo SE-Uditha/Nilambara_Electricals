@@ -3,6 +3,7 @@
 namespace App\Modules\Invoices\Models;
 
 use App\Enums\DocumentStatus;
+use App\Enums\PaymentMethod;
 use App\Enums\PaymentTerms;
 use App\Models\BusinessModel;
 use App\Models\User;
@@ -16,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use LogicException;
 
 class Invoice extends BusinessModel
 {
@@ -29,6 +31,7 @@ class Invoice extends BusinessModel
         'discount_amount',
         'total',
         'payment_terms',
+        'payment_method',
         'due_date',
         'status',
         'cashier_employee_id',
@@ -48,6 +51,25 @@ class Invoice extends BusinessModel
 
     protected bool $preserveRecord = true;
 
+    protected static function booted(): void
+    {
+        static::updating(function (Invoice $invoice): void {
+            if ($invoice->getRawOriginal('status') !== DocumentStatus::Finalized->value) {
+                return;
+            }
+
+            $allowed = ['status', 'cancelled_at', 'cancelled_by_user_id', 'cancellation_reason', 'updated_at'];
+            foreach (array_keys($invoice->getDirty()) as $field) {
+                if (! in_array($field, $allowed, true)) {
+                    throw new LogicException('Issued invoice field ['.$field.'] is immutable.');
+                }
+            }
+            if ($invoice->isDirty('status') && $invoice->status !== DocumentStatus::Cancelled) {
+                throw new LogicException('Issued invoices can only transition to cancelled.');
+            }
+        });
+    }
+
     protected function casts(): array
     {
         return [
@@ -56,6 +78,7 @@ class Invoice extends BusinessModel
             'discount_amount' => 'decimal:2',
             'total' => 'decimal:2',
             'payment_terms' => PaymentTerms::class,
+            'payment_method' => PaymentMethod::class,
             'due_date' => 'date',
             'status' => DocumentStatus::class,
             'delivery_at' => 'datetime',
@@ -120,6 +143,11 @@ class Invoice extends BusinessModel
     public function allocations(): HasMany
     {
         return $this->hasMany(PaymentAllocation::class, 'invoice_id');
+    }
+
+    public function history(): HasMany
+    {
+        return $this->hasMany(InvoiceHistory::class, 'invoice_id')->orderBy('event_at')->orderBy('id');
     }
 
     public function repairJobs(): BelongsToMany

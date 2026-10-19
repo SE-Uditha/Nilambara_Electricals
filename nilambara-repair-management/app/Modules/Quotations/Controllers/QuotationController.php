@@ -236,7 +236,7 @@ class QuotationController extends Controller
         $viewData = $this->preparePrint($request, $quotation, false, true)->getData();
         $paper = $viewData['paperSize'];
         $response = Pdf::loadView('modules.quotations.print', $viewData)
-            ->setPaper($paper, 'portrait')
+            ->setPaper($paper, $viewData['orientation'])
             ->download($quotation->quotation_number.'.pdf');
         $this->recordPrint($quotation, $viewData, false, true, $request->user());
 
@@ -326,6 +326,7 @@ class QuotationController extends Controller
         if (! in_array($paper, ['A4', 'A5'], true)) {
             $paper = 'A4';
         }
+        $orientation = in_array($template?->orientation, ['portrait', 'landscape'], true) ? $template->orientation : 'portrait';
         $label = $template?->duplicate_copy_label ?: __('ui.duplicate_copy');
         $printedAt = now(config('business.timezone', 'Asia/Colombo'));
         $snapshot = $quotation->preparation_status === QuotationPreparationStatus::Draft
@@ -337,6 +338,8 @@ class QuotationController extends Controller
             'snapshot' => $snapshot,
             'template' => $template,
             'paperSize' => $paper,
+            'orientation' => $orientation,
+            'footerText' => $template?->footer,
             'duplicate' => $duplicate,
             'duplicateLabel' => $label,
             'printedAt' => $printedAt,
@@ -376,8 +379,9 @@ class QuotationController extends Controller
         $printedAt = $viewData['printedAt'];
         $label = $viewData['duplicateLabel'];
         $paper = $viewData['paperSize'];
+        $orientation = $viewData['orientation'];
 
-        DB::transaction(function () use ($quotation, $template, $duplicate, $label, $printedAt, $snapshot, $pdf, $paper, $user): void {
+        DB::transaction(function () use ($quotation, $template, $duplicate, $label, $printedAt, $snapshot, $pdf, $paper, $orientation, $user): void {
             DocumentPrintHistory::query()->create([
                 'print_template_id' => $template?->getKey(),
                 'quotation_id' => $quotation->getKey(),
@@ -392,6 +396,7 @@ class QuotationController extends Controller
                     'printed_at' => $printedAt->toIso8601String(),
                     'export_format' => $pdf ? 'pdf' : 'html',
                     'paper_size' => $paper,
+                    'orientation' => $orientation,
                 ],
                 'output_reference' => $pdf ? $quotation->quotation_number.'.pdf' : null,
             ]);
@@ -406,6 +411,7 @@ class QuotationController extends Controller
                     'duplicate' => $duplicate,
                     'preparation_status' => $quotation->preparation_status->value,
                     'paper_size' => $paper,
+                    'orientation' => $orientation,
                     'export_format' => $pdf ? 'pdf' : 'html',
                 ],
             );

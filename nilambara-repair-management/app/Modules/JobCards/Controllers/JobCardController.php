@@ -60,6 +60,16 @@ class JobCardController extends Controller
             ->first();
         $label = $template?->duplicate_copy_label ?: __('ui.duplicate_copy');
         $printedAt = now(config('business.timezone', 'Asia/Colombo'));
+        $paperSize = in_array($template?->paper_size, ['A4', 'A5', 'A6'], true) ? $template->paper_size : 'A6';
+        [$pageWidth, $pageHeight] = match ($paperSize) {
+            'A4' => [210, 297],
+            'A5' => [148, 210],
+            default => [105, 148],
+        };
+        $orientation = in_array($template?->orientation, ['portrait', 'landscape'], true) ? $template->orientation : 'portrait';
+        if ($orientation === 'landscape') {
+            [$pageWidth, $pageHeight] = [$pageHeight, $pageWidth];
+        }
         $snapshot = [
             'automatic_number' => $job->automatic_number,
             'job_number' => $job->job_number,
@@ -81,7 +91,7 @@ class JobCardController extends Controller
             'duplicate' => $duplicate,
         ];
 
-        DB::transaction(function () use ($jobCard, $job, $template, $duplicate, $label, $printedAt, $snapshot): void {
+        DB::transaction(function () use ($jobCard, $job, $template, $duplicate, $label, $printedAt, $snapshot, $paperSize): void {
             DocumentPrintHistory::query()->create([
                 'print_template_id' => $template?->getKey(),
                 'job_card_id' => $jobCard->getKey(),
@@ -93,6 +103,7 @@ class JobCardController extends Controller
                     ...$snapshot,
                     'duplicate_label' => $duplicate ? $label : null,
                     'printed_at' => $printedAt->toIso8601String(),
+                    'paper_size' => $paperSize,
                 ],
             ]);
 
@@ -105,6 +116,7 @@ class JobCardController extends Controller
                     'job_id' => $job->getKey(),
                     'automatic_number' => $job->automatic_number,
                     'duplicate' => $duplicate,
+                    'paper_size' => $paperSize,
                 ],
             );
         });
@@ -116,8 +128,10 @@ class JobCardController extends Controller
             'duplicate' => $duplicate,
             'duplicateLabel' => $label,
             'printedAt' => $printedAt,
-            'paperSize' => 'A6',
-            'orientation' => in_array($template?->orientation, ['portrait', 'landscape'], true) ? $template->orientation : 'portrait',
+            'paperSize' => $paperSize,
+            'orientation' => $orientation,
+            'pageWidth' => $pageWidth.'mm',
+            'pageHeight' => $pageHeight.'mm',
             'margins' => [
                 'top' => $this->safeMillimetres($template?->margin_top_mm, 5),
                 'right' => $this->safeMillimetres($template?->margin_right_mm, 5),
@@ -130,6 +144,7 @@ class JobCardController extends Controller
             'businessTelephone' => $template?->telephone_number ?: config('business.contact_number'),
             'logoUrl' => $template?->logo_path ? asset($template->logo_path) : asset(config('business.logo')),
             'documentTitle' => $template?->document_title ?: __('ui.repair_job_card'),
+            'footerText' => $template?->footer,
         ]);
     }
 

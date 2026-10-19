@@ -1,19 +1,20 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Middleware\ApplySystemSettings;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
 
 Route::redirect('/', '/dashboard')->name('home');
 
-Route::middleware('guest:web')->group(function () {
+Route::middleware(['guest:web', ApplySystemSettings::class])->group(function () {
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
     Route::post('/login', [AuthenticatedSessionController::class, 'store'])
         ->middleware('throttle:login')
         ->name('login.store');
 });
 
-Route::middleware(['auth', 'active.account'])->group(function () {
+Route::middleware(['auth', 'active.account', ApplySystemSettings::class])->group(function () {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
     Route::get('/dashboard', DashboardController::class)->middleware('can:dashboard.view')->name('dashboard');
 

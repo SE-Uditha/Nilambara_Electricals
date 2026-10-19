@@ -5,6 +5,7 @@ namespace App\Modules\Inventory\Models;
 use App\Enums\DocumentStatus;
 use App\Models\BusinessModel;
 use App\Models\User;
+use App\Modules\Payments\Models\PaymentReversal;
 use App\Modules\POS\Models\PosSale;
 use App\Modules\Purchases\Models\Purchase;
 use App\Modules\RepairJobs\Models\RepairJob;
@@ -25,6 +26,10 @@ class StockReturn extends BusinessModel
         'recorded_by_user_id',
         'status',
         'reason',
+        'idempotency_key',
+        'idempotency_hash',
+        'refund_amount',
+        'refund_payment_reversal_id',
     ];
 
     protected array $immutableFields = ['id', 'return_number'];
@@ -35,6 +40,7 @@ class StockReturn extends BusinessModel
     {
         return [
             'returned_at' => 'datetime',
+            'refund_amount' => 'decimal:2',
             'status' => DocumentStatus::class,
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
@@ -59,6 +65,11 @@ class StockReturn extends BusinessModel
     public function recordedByUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'recorded_by_user_id');
+    }
+
+    public function refundPaymentReversal(): BelongsTo
+    {
+        return $this->belongsTo(PaymentReversal::class, 'refund_payment_reversal_id');
     }
 
     public function stockReturnItems(): HasMany

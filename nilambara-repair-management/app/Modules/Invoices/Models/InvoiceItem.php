@@ -26,7 +26,21 @@ class InvoiceItem extends BusinessModel
         'line_total',
     ];
 
-    protected array $immutableFields = ['id'];
+    protected array $immutableFields = [
+        'id',
+        'invoice_id',
+        'invoice_job_id',
+        'line_number',
+        'quotation_item_id',
+        'item_type',
+        'spare_part_id',
+        'description',
+        'quantity',
+        'unit_price',
+        'unit_cost',
+        'discount_amount',
+        'line_total',
+    ];
 
     protected bool $preserveRecord = true;
 

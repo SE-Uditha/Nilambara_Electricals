@@ -1,7 +1,8 @@
 @props(['item'])
 
 @if (isset($item['route']))
-    <a href="{{ route($item['route']) }}" @class(['sidebar-link', 'is-active' => request()->routeIs($item['route'])]) @if(request()->routeIs($item['route'])) aria-current="page" @endif>
+    @php($isActive = request()->routeIs($item['route']) && collect($item['route_parameters'] ?? [])->every(fn ($value, $key) => request()->query($key) === (string) $value))
+    <a href="{{ route($item['route'], $item['route_parameters'] ?? []) }}" @class(['sidebar-link', 'is-active' => $isActive]) @if($isActive) aria-current="page" @endif>
         <x-icon :name="$item['icon']" :size="17" class="shrink-0" />
         <span class="flex-1">{{ __('ui.'.$item['label']) }}</span>
         <span class="size-1.5 rounded-full bg-teal-300" aria-hidden="true"></span>

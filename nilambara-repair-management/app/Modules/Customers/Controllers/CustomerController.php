@@ -3,11 +3,12 @@
 namespace App\Modules\Customers\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Modules\CreditManagement\Models\CustomerAccountEntry;
 use App\Modules\Customers\Models\Customer;
 use App\Modules\Customers\Requests\StoreCustomerRequest;
 use App\Modules\Customers\Requests\UpdateCustomerRequest;
 use App\Modules\Customers\Services\CustomerService;
+use App\Modules\Customers\Services\CustomerStatementService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -152,18 +153,53 @@ class CustomerController extends Controller
         return back()->with('status', __('ui.customer_deactivated'));
     }
 
-    public function statement(Customer $customer): View
+    public function statement(Request $request, Customer $customer, CustomerStatementService $statements): View
     {
         Gate::authorize('statement', $customer);
 
+        $filters = $this->statementFilters($request);
+
         return view('modules.customers.statement', [
             'customer' => $customer,
-            'entries' => CustomerAccountEntry::query()
-                ->where('customer_id', $customer->id)
-                ->orderByDesc('occurred_at')
-                ->orderByDesc('id')
-                ->paginate(30),
-            'accountBalance' => $customer->customerAccountEntries()->sum('amount'),
+            ...$statements->data($customer, $filters, true),
+            'filters' => $filters,
+        ]);
+    }
+
+    public function statementPrint(Request $request, Customer $customer, CustomerStatementService $statements): View
+    {
+        Gate::authorize('statement', $customer);
+        $filters = $this->statementFilters($request);
+
+        return view('modules.customers.statement-print', [
+            'customer' => $customer,
+            ...$statements->data($customer, $filters, false),
+            'filters' => $filters,
+            'printedAt' => now(config('business.timezone', 'Asia/Colombo')),
+        ]);
+    }
+
+    public function statementPdf(Request $request, Customer $customer, CustomerStatementService $statements)
+    {
+        Gate::authorize('statement', $customer);
+        $filters = $this->statementFilters($request);
+
+        return Pdf::loadView('modules.customers.statement-print', [
+            'customer' => $customer,
+            ...$statements->data($customer, $filters, false),
+            'filters' => $filters,
+            'printedAt' => now(config('business.timezone', 'Asia/Colombo')),
+        ])->setPaper('A4', 'landscape')->download($customer->customer_code.'-statement.pdf');
+    }
+
+    /**
+     * @return array{date_from: string|null, date_to: string|null}
+     */
+    private function statementFilters(Request $request): array
+    {
+        return $request->validate([
+            'date_from' => ['nullable', 'date'],
+            'date_to' => ['nullable', 'date', 'after_or_equal:date_from'],
         ]);
     }
 }

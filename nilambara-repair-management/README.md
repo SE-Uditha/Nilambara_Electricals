@@ -2,7 +2,7 @@
 
 Laravel foundation for Nilambara Electricals' repair shop management system. The eventual application covers electrical-appliance and motor repair, customer/company records, quotations, billing, credit, spare parts, purchasing, POS, staff, reports, and operational controls.
 
-**Current delivery: Step 6 quotations and repair approval.** Steps 3-4 provide employee management, username authentication, six roles, granular permissions, audit events, and customer/company registration. Step 5 adds transactional repair intake, advances, technician assignment, inspection and repair notes, status history/search, A5 receipt printing, and A6 job cards. Step 6 adds transactional quotation drafts, immutable issued snapshots, revisions, customer-decision history, approval-gated repair status, and A4/A5 print/PDF. See the [Step 6 summary](docs/development/step-6-summary.md) and [quotation guides](docs/modules/quotation-management.md). Inventory deduction, final billing, POS, reporting, and backup/restore remain deferred.
+**Current delivery: Step 7 invoice management.** Steps 3-4 provide employee management, username authentication, six roles, granular permissions, audit events, and customer/company registration. Step 5 adds transactional repair intake, advances, technician assignment, inspection and repair notes, status history/search, A5 receipt printing, and A6 job cards. Step 6 adds transactional quotation drafts, immutable issued snapshots, revisions, customer-decision history, approval-gated repair status, and A4/A5 print/PDF. Step 7 adds same-customer multi-job invoices, approved-quotation pricing, derived payment balances, invoice lifecycle/audit, and A5 print/PDF. Recording payments and full credit collection begin in Step 8; see the [invoice summary](docs/development/step-7-summary.md) and [invoice guides](docs/modules/invoice-management.md).
 
 The supplied [Business Requirements Document](../Repair%20Shop%20Management%20Final.pdf) is the source of truth. See the [BRD coverage map](docs/modules/brd-coverage.md), [architecture overview](docs/architecture/overview.md), [database guide](docs/database/README.md), and [development roadmap](docs/development/roadmap.md).
 
@@ -111,6 +111,7 @@ Alternatively, after setting `PHPRC`, `composer run dev` starts both processes. 
 | `BUSINESS_NAME`, `BUSINESS_ADDRESS`, `BUSINESS_CONTACT_NUMBER`, `BUSINESS_LOGO` | Business identity and document branding. The logo path must point to a PNG/JPEG file under `public/`. |
 | `BUSINESS_CUSTOMER_CODE_PREFIX` | Customer identifier prefix; defaults to `CUS-` and is followed by a unique ULID. |
 | `BUSINESS_QUOTATION_NUMBER_PREFIX` | Quotation number prefix; defaults to `QUO-` and is followed by a database-generated id. |
+| `BUSINESS_INVOICE_NUMBER_PREFIX` | Invoice number prefix; defaults to `INV-` and is followed by a database-generated id. |
 | `BUSINESS_CURRENCY` | Defaults to `LKR`. |
 | `APP_TIMEZONE`, `APP_LOCALE`, `APP_FALLBACK_LOCALE` | Defaults to `Asia/Colombo`, `en`, and `en`. |
 | `BUSINESS_PAGINATION` | Default page size, initially 25. |

@@ -1,6 +1,6 @@
 # Data dictionary
 
-The 58 new entity tables below are defined by the Step 2 migrations. Existing Laravel infrastructure follows in a separate section. Step 3 adds account and Spatie-compatible columns to existing users and access-control tables; these amendments are listed in their respective entries. Names, defaults, nullability, keys, and CHECKs are explicit. Monetary values use LKR; no foreign-exchange policy is implied.
+The original 58 entity tables below are defined by the Step 2 migrations. Later additive workflow migrations add `quotation_history` and `invoice_history` and extend existing tables; those additions are called out in their entries and the schema change summary. Step 8 uses the existing payment, allocation, release, reversal, account-ledger, and print-history schema without adding payment tables. Existing Laravel infrastructure follows in a separate section. Step 3 also adds account and Spatie-compatible columns to existing users and access-control tables. Names, defaults, nullability, keys, and CHECKs are explicit. Monetary values use LKR; no foreign-exchange policy is implied.
 
 MySQL/MariaDB use unsigned BIGINT auto-increment primary keys. Disposable SQLite verification substitutes INTEGER PRIMARY KEY AUTOINCREMENT; its numeric affinity does not certify native DECIMAL precision. All entity tables have Laravel timestamps.
 
@@ -1188,6 +1188,7 @@ Source / meaning: BRD p12; purchase drafts cause no stock movement.
 | other_costs | DECIMAL(19,2) | No | 0 | — | Other costs. CHECK `other_costs` >= 0. |
 | total | DECIMAL(19,2) | No | 0 | — | Historical document total in LKR; header CHECK enforces subtotal less discount plus explicit other costs where present. CHECK `total` >= 0. |
 | payment_terms | VARCHAR(64) | No | cash | — | Payment terms. Allowed: cash, credit. |
+| payment_method | VARCHAR(64) | Yes | NULL | — | Informational tender method selected for the invoice; Step 7 does not record a receipt or payment. |
 | due_date | DATE | Yes | NULL | — | Due date. |
 | status | VARCHAR(64) | No | draft | — | Document or job lifecycle status; distinct from derived invoice payment status. Allowed: draft, finalized, cancelled. |
 | created_by_user_id | BIGINT UNSIGNED | No | No default | FK → users.id; RESTRICT | Created by user id. |
@@ -1514,6 +1515,36 @@ Table CHECK rules:
 
 Record policy: retained through Eloquent; cancel/reverse instead of deleting. Raw SQL and eventless operations bypass model event guards.
 
+## invoice_history
+
+Module: `Invoices`. Model: [InvoiceHistory](../../app/Modules/Invoices/Models/InvoiceHistory.php).
+
+Source / meaning: BRD pp. 9,16; append-only invoice lifecycle, edit and job-link history.
+
+| Field | SQL type | Nullable | Default | Key / reference | Meaning and validation |
+| --- | --- | --- | --- | --- | --- |
+| id | BIGINT UNSIGNED | No | No default | PK, auto increment | Database-generated internal identifier. |
+| invoice_id | BIGINT UNSIGNED | No | No default | FK → invoices.id; RESTRICT | Invoice whose event is recorded. |
+| actor_user_id | BIGINT UNSIGNED | No | No default | FK → users.id; RESTRICT | Authenticated actor responsible for the event. |
+| event_type | VARCHAR(50) | No | No default | — | Event such as `draft_created`, `draft_updated`, `job_linked`, `issued`, or `cancelled`. |
+| old_values | JSON | Yes | NULL | — | Relevant before-values, when applicable. |
+| new_values | JSON | Yes | NULL | — | Relevant after-values, when applicable. |
+| event_at | DATETIME | No | No default | — | Business event time. |
+| created_at | DATETIME | Yes | NULL | — | ORM record creation timestamp. |
+| updated_at | DATETIME | Yes | NULL | — | ORM last modification timestamp. |
+
+Indexes:
+
+- `PRIMARY`: (id).
+- `ix_invoice_history_event`: (invoice_id, event_at).
+- `ix_invoice_history_actor`: (actor_user_id).
+
+Table CHECK rules:
+
+- No explicit CHECK constraints; MySQL/MariaDB JSON columns validate JSON values natively.
+
+Record policy: append-only through Eloquent; corrections create subsequent evidence. Raw SQL and eventless operations bypass model event guards.
+
 ## pos_sales
 
 Module: `POS`. Model: [PosSale](../../app/Modules/POS/Models/PosSale.php).
@@ -1531,6 +1562,17 @@ Source / meaning: BRD pp3,10-11,13-19; tender methods normalized through payment
 | discount_amount | DECIMAL(19,2) | No | 0 | — | Nonnegative discount amount in LKR. Line or document checks prevent a discount larger than its gross value. CHECK `discount_amount` >= 0. |
 | total | DECIMAL(19,2) | No | 0 | — | Historical document total in LKR; header CHECK enforces subtotal less discount plus explicit other costs where present. CHECK `total` >= 0. |
 | payment_terms | VARCHAR(64) | No | cash | — | Payment terms. Allowed: cash, credit. |
+| payment_method | VARCHAR(64) | Yes | NULL | UNIQUE(payment_method,payment_reference) | POS tender method: cash, bank_transfer, or cheque. |
+| payment_status | VARCHAR(64) | No | pending | — | POS-specific payment lifecycle: pending, settled, partially_refunded, refunded. |
+| payment_reference | VARCHAR(100) | Yes | NULL | UNIQUE(payment_method,payment_reference) | Bank/cheque reference; unique within payment method. |
+| cheque_date | DATE | Yes | NULL | — | Cheque date supplied at checkout; does not mean the cheque has cleared. |
+| bank_name | VARCHAR(150) | Yes | NULL | — | Bank name supplied for transfer/cheque records. |
+| amount_tendered | DECIMAL(19,2) | No | 0 | — | Cash tender received; payment ledger records sale total, not this tender amount. |
+| change_due | DECIMAL(19,2) | No | 0 | — | Change returned to customer, derived from tender less sale total. |
+| idempotency_key | VARCHAR(100) | Yes | NULL | UNIQUE(idempotency_key) | Stable checkout retry key. |
+| idempotency_hash | VARCHAR(64) | Yes | NULL | — | SHA-256 fingerprint of the normalized checkout request and cart; rejects reuse of a key with changed data. |
+| payment_verified_by_user_id | BIGINT UNSIGNED | Yes | NULL | FK → users.id; RESTRICT | Manager who confirmed receipt of a pending transfer/cheque. |
+| payment_verified_at | DATETIME | Yes | NULL | — | Time pending tender was confirmed and the sale was finalized. |
 | status | VARCHAR(64) | No | draft | — | Document or job lifecycle status; distinct from derived invoice payment status. Allowed: draft, finalized, cancelled. |
 | document_snapshot | JSON | Yes | NULL | — | Issued document data/layout snapshot for historically accurate reprints; exclude credentials and unnecessary personal data. |
 | finalized_at | DATETIME | Yes | NULL | — | Finalized at. |
@@ -1547,6 +1589,8 @@ Indexes (including unique candidate keys):
 - `uq_pos_sales_ad3551cc`: (id, customer_scope_id).
 - `uq_pos_sales_1407226b`: (sale_number).
 - `uq_pos_sales_a5d450da`: (id, customer_id).
+- `uq_step10_pos_payment_reference`: (payment_method, payment_reference).
+- `uq_step10_pos_sale_idempotency`: (idempotency_key).
 - `ix_pos_sales_a8fee2cf`: (sale_at).
 - `ix_pos_sales_a7a13f4c`: (customer_id).
 - `ix_pos_sales_782ecea6`: (cashier_employee_id).
@@ -2344,6 +2388,10 @@ Source / meaning: BRD pp11,15 returns retain source transaction.
 | recorded_by_user_id | BIGINT UNSIGNED | No | No default | FK → users.id; RESTRICT | Recorded by user id. |
 | status | VARCHAR(64) | No | draft | — | Document or job lifecycle status; distinct from derived invoice payment status. Allowed: draft, finalized, cancelled. |
 | reason | TEXT | No | No default | — | Reason. |
+| idempotency_key | VARCHAR(100) | Yes | NULL | UNIQUE(idempotency_key) | Stable POS return retry key. |
+| idempotency_hash | VARCHAR(64) | Yes | NULL | — | SHA-256 fingerprint of the normalized return request; rejects reuse of a key with changed data. |
+| refund_amount | DECIMAL(19,2) | No | 0 | — | Authorized refund total associated with this return, if any. |
+| refund_payment_reversal_id | BIGINT UNSIGNED | Yes | NULL | FK → payment_reversals.id; RESTRICT | Existing payment-ledger reversal created for an authorized POS refund. |
 | created_at | DATETIME | Yes | NULL | — | ORM record creation timestamp; no business event is implied. |
 | updated_at | DATETIME | Yes | NULL | — | ORM last modification timestamp; append-only records retain their original row. |
 
@@ -2351,6 +2399,7 @@ Indexes (including unique candidate keys):
 
 - `PRIMARY`: (id).
 - `uq_stock_returns_855a7dba`: (return_number).
+- `uq_step10_pos_return_idempotency`: (idempotency_key).
 - `ix_stock_returns_d2dc6852`: (repair_job_id).
 - `ix_stock_returns_bc1ec442`: (pos_sale_id).
 - `ix_stock_returns_86cc2ebe`: (purchase_id).
@@ -2384,6 +2433,8 @@ Source / meaning: BRD p11 returned stock detail; stock reversal links to origina
 | quantity | DECIMAL(18,3) | No | 0 | — | Positive source-line quantity in its spare part unit. DECIMAL capacity does not approve fractional units; validate against unit.quantity_scale later. CHECK `quantity` > 0. |
 | unit_cost | DECIMAL(19,4) | Yes | NULL | — | Historical known acquisition/consumption unit cost, four decimals. NULL, if allowed, means unknown; no FIFO/average valuation policy is selected. CHECK `unit_cost` >= 0. |
 | condition | VARCHAR(64) | No | resalable | — | Condition. Allowed: resalable, damaged. |
+| pos_sale_item_id | BIGINT UNSIGNED | Yes | NULL | FK → pos_sale_items.id; RESTRICT | Original POS sale line. Used to enforce cumulative return quantity limits. |
+| refund_amount | DECIMAL(19,2) | No | 0 | — | Refund amount attributed to this returned line. |
 | notes | TEXT | Yes | NULL | — | Notes. |
 | created_at | DATETIME | Yes | NULL | — | ORM record creation timestamp; no business event is implied. |
 | updated_at | DATETIME | Yes | NULL | — | ORM last modification timestamp; append-only records retain their original row. |
@@ -2724,9 +2775,9 @@ These existing tables are preserved. `jobs` is Laravel's queue, not repair_jobs.
 | Customer account balance | SUM(customer_account_entries.amount). Include one opening entry; never add customers.opening_balance again. |
 | Supplier account balance | SUM(supplier_account_entries.amount). Include one opening entry; never add suppliers.opening_balance again. |
 | Net applied payment | SUM(allocation.amount) minus SUM(its allocation releases.amount). Releases are not new payments. |
-| Invoice outstanding | Finalized invoice.total minus net invoice allocations. Allocations/reversals must be posted atomically by future services. |
-| Invoice payment status | Unpaid if net applied=0; Partially Paid if 0<net<total; Paid if net=total (zero-value invoice handling and overpayment policy require confirmation). Never set Paid manually. |
+| Invoice outstanding | Finalized invoice.total minus net direct invoice allocations and eligible job advances from linked repair jobs. Step 8 rejects overpayment and clamps display outstanding to zero; reversals/releases restore outstanding. |
+| Invoice payment status | Derived as Unpaid if net applied=0; Partially Paid if 0<net<total; Paid if net>=total for a finalized positive-total invoice. Canceled state remains separate. Never set Paid manually. |
 | Purchase settled amount | Net supplier allocations to that purchase. |
-| Job advances | Net payment allocations whose target is that job; release then reallocate to invoice within one future transaction. |
+| Job advances | Net payment allocations whose target is that job. The linked invoice balance includes eligible advances for jobs on the invoice; customer-level unapplied advances are allocated at issue without a second cash posting. |
 
-These formulas define architecture and future read queries. No payment processing, stock deduction, report, or concurrency-safe transaction service is implemented in Step 2.
+Step 8 implements payment posting, invoice collection locks, allocation/reversal releases, customer-ledger entries, and audit logging. SQLite feature tests exercise these services; deployment MySQL contention still needs a separate environment test. Stock deduction and full reporting remain later phases.

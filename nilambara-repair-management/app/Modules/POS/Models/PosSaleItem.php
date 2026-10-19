@@ -6,7 +6,9 @@ use App\Models\BusinessModel;
 use App\Modules\Inventory\Models\SparePart;
 use App\Modules\Inventory\Models\StockLocation;
 use App\Modules\Inventory\Models\StockMovement;
+use App\Modules\Inventory\Models\StockReturnItem;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class PosSaleItem extends BusinessModel
@@ -62,5 +64,10 @@ class PosSaleItem extends BusinessModel
     public function stockMovements(): HasOne
     {
         return $this->hasOne(StockMovement::class, 'pos_sale_item_id');
+    }
+
+    public function returnItems(): HasMany
+    {
+        return $this->hasMany(StockReturnItem::class, 'pos_sale_item_id');
     }
 }

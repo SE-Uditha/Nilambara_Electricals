@@ -4,13 +4,12 @@ namespace App\Modules\RepairReceipts\Services;
 
 use App\Enums\JobStatus;
 use App\Models\User;
-use App\Modules\CreditManagement\Models\CustomerAccountEntry;
 use App\Modules\Customers\Models\Customer;
 use App\Modules\Employees\Models\Employee;
 use App\Modules\JobCards\Models\JobCard;
 use App\Modules\JobTracking\Models\JobStatusHistory;
 use App\Modules\Payments\Models\Payment;
-use App\Modules\Payments\Models\PaymentAllocation;
+use App\Modules\Payments\Services\PaymentService;
 use App\Modules\RepairJobs\Models\RepairJob;
 use App\Modules\RepairReceipts\Models\RepairReceipt;
 use App\Support\BusinessAudit;
@@ -21,6 +20,8 @@ use Illuminate\Validation\ValidationException;
 
 class RepairReceiptService
 {
+    public function __construct(private readonly PaymentService $payments) {}
+
     /**
      * @param  array<string, mixed>  $data
      */
@@ -77,6 +78,18 @@ class RepairReceiptService
             ]);
             $job->refresh();
 
+            $advance = $this->currency($data['advance_payment'] ?? '0');
+            $advancePayment = $advance !== '0.00'
+                ? $this->recordAdvancePayment(
+                    $job,
+                    $user,
+                    $advance,
+                    $data['payment_method'],
+                    $receivedAt,
+                    (int) $employee->getKey(),
+                )
+                : null;
+
             $snapshot = [
                 'job_reference' => $jobReference,
                 'manual_job_number' => $job->job_number,
@@ -101,6 +114,7 @@ class RepairReceiptService
                     'visible_damage' => $job->visible_damage,
                 ],
                 'advance_payment' => $this->currency($data['advance_payment'] ?? '0'),
+                'advance_payment_number' => $advancePayment?->payment_number,
                 'labor_cost' => $this->currency($data['labor_cost']),
                 'received_by' => $employee->name,
                 'special_notes' => $job->special_notes,
@@ -128,19 +142,6 @@ class RepairReceiptService
                 'repair_job_id' => $job->getKey(),
                 'paper_size' => 'A6',
             ]);
-
-            $advance = $this->currency($data['advance_payment'] ?? '0');
-            if ($advance !== '0.00') {
-                $this->recordAdvancePayment(
-                    $job,
-                    $customer,
-                    $employee,
-                    $user,
-                    $advance,
-                    $data['payment_method'],
-                    $receivedAt,
-                );
-            }
 
             BusinessAudit::record(
                 $user,
@@ -174,52 +175,20 @@ class RepairReceiptService
 
     private function recordAdvancePayment(
         RepairJob $job,
-        Customer $customer,
-        Employee $employee,
         User $user,
         string $amount,
         string $method,
         Carbon|CarbonImmutable $receivedAt,
-    ): void {
-        $idempotencyKey = 'job-advance:'.$job->getKey();
-        $paymentNumber = $job->automatic_number.'-ADV';
-
-        $payment = Payment::query()->create([
-            'payment_number' => $paymentNumber,
-            'customer_id' => $customer->getKey(),
-            'payment_type' => 'advance',
+        int $receiverEmployeeId,
+    ): Payment {
+        return $this->payments->receiveAdvance([
+            'amount' => $amount,
+            'payment_date' => $receivedAt->toDateString(),
             'method' => $method,
-            'amount' => $amount,
-            'paid_at' => $receivedAt,
-            'received_by_employee_id' => $employee->getKey(),
             'notes' => __('ui.repair_job_advance_note', ['job' => $job->automatic_number]),
-            'idempotency_key' => $idempotencyKey,
-            'customer_scope_id' => $customer->getKey(),
-        ]);
-
-        PaymentAllocation::query()->create([
-            'payment_id' => $payment->getKey(),
-            'customer_id' => $customer->getKey(),
-            'target_type' => 'job_advance',
-            'repair_job_id' => $job->getKey(),
-            'amount' => $amount,
-            'allocated_at' => $receivedAt,
-            'allocated_by_user_id' => $user->getKey(),
-            'idempotency_key' => $idempotencyKey,
-            'customer_scope_id' => $customer->getKey(),
-        ]);
-
-        CustomerAccountEntry::query()->create([
-            'customer_id' => $customer->getKey(),
-            'entry_type' => 'payment',
-            'amount' => '-'.$amount,
-            'occurred_at' => $receivedAt,
-            'reference_number' => $paymentNumber,
-            'description' => __('ui.repair_job_advance_note', ['job' => $job->automatic_number]),
-            'recorded_by_user_id' => $user->getKey(),
-            'payment_id' => $payment->getKey(),
-            'idempotency_key' => $idempotencyKey,
-        ]);
+            'idempotency_key' => 'repair-receipt-advance:'.$job->getKey(),
+            'received_by_employee_id' => $receiverEmployeeId,
+        ], $user, $job);
     }
 
     private function currency(mixed $value): string

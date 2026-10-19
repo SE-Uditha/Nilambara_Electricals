@@ -1,0 +1,263 @@
+<?php
+
+namespace App\Modules\Invoices\Controllers;
+
+use App\Enums\DocumentStatus;
+use App\Enums\JobStatus;
+use App\Enums\PaymentTerms;
+use App\Http\Controllers\Controller;
+use App\Modules\Customers\Models\Customer;
+use App\Modules\Invoices\Models\Invoice;
+use App\Modules\Invoices\Models\InvoiceJob;
+use App\Modules\Invoices\Requests\CancelInvoiceRequest;
+use App\Modules\Invoices\Requests\StoreInvoiceRequest;
+use App\Modules\Invoices\Requests\UpdateInvoiceRequest;
+use App\Modules\Invoices\Services\InvoiceBalanceService;
+use App\Modules\Invoices\Services\InvoicePrintService;
+use App\Modules\Invoices\Services\InvoiceService;
+use App\Modules\RepairJobs\Models\RepairJob;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\Rule;
+use Illuminate\View\View;
+
+class InvoiceController extends Controller
+{
+    public function index(Request $request, InvoiceBalanceService $balances): View
+    {
+        Gate::authorize('viewAny', Invoice::class);
+        $filters = $request->validate([
+            'q' => ['nullable', 'string', 'max:120'],
+            'date_from' => ['nullable', 'date'],
+            'date_to' => ['nullable', 'date', 'after_or_equal:date_from'],
+            'status' => ['nullable', Rule::enum(DocumentStatus::class)],
+            'payment_status' => ['nullable', Rule::in(['unpaid', 'partially_paid', 'paid', 'outstanding'])],
+            'payment_terms' => ['nullable', Rule::enum(PaymentTerms::class)],
+        ]);
+        $query = Invoice::query()->with(['customer', 'cashierEmployee', 'invoiceJobs.repairJob'])
+            ->orderByDesc('invoice_date')->orderByDesc('id');
+
+        if (($term = trim((string) ($filters['q'] ?? ''))) !== '') {
+            $like = '%'.$term.'%';
+            $query->where(function ($builder) use ($like): void {
+                $builder->where('invoice_number', 'like', $like)
+                    ->orWhereHas('customer', function ($customer) use ($like): void {
+                        $customer->where('customer_name', 'like', $like)
+                            ->orWhere('company_name', 'like', $like)
+                            ->orWhere('mobile_number', 'like', $like);
+                    })
+                    ->orWhereHas('invoiceJobs.repairJob', function ($job) use ($like): void {
+                        $job->where('job_number', 'like', $like)
+                            ->orWhere('automatic_number', 'like', $like);
+                    });
+            });
+        }
+        if (! empty($filters['date_from'])) {
+            $query->whereDate('invoice_date', '>=', $filters['date_from']);
+        }
+        if (! empty($filters['date_to'])) {
+            $query->whereDate('invoice_date', '<=', $filters['date_to']);
+        }
+        if (! empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+        if (! empty($filters['payment_terms'])) {
+            $query->where('payment_terms', $filters['payment_terms']);
+        }
+        if (! empty($filters['payment_status'])) {
+            $balances->constrainPaymentStatus($query, $filters['payment_status']);
+        }
+
+        $invoices = $query->paginate(20)->withQueryString();
+        foreach ($invoices as $invoice) {
+            $invoice->setAttribute('payment_summary', $balances->summary($invoice));
+        }
+
+        return view('modules.invoices.index', ['invoices' => $invoices]);
+    }
+
+    public function create(Request $request): View
+    {
+        Gate::authorize('create', Invoice::class);
+        $selectedCustomer = $request->old('customer_id')
+            ? Customer::query()->whereKey($request->old('customer_id'))->where('is_active', true)->first()
+            : null;
+        $oldJobIds = array_values(array_unique(array_map('intval', (array) $request->old('repair_job_ids', []))));
+        $selectedJobs = $selectedCustomer === null || $oldJobIds === [] ? collect() : RepairJob::query()
+            ->where('customer_id', $selectedCustomer->getKey())
+            ->whereIn('id', $oldJobIds)
+            ->whereIn('status', [JobStatus::RepairCompleted->value, JobStatus::ReadyForCollection->value])
+            ->whereNull('cancelled_at')
+            ->whereDoesntHave('invoiceJobs')
+            ->get()
+            ->map(fn (RepairJob $job): array => [
+                'id' => $job->getKey(),
+                'job_number' => $job->automatic_number ?: $job->job_number,
+                'item_name' => $job->item_name,
+                'description' => $job->repair_description ?: $job->item_description ?: $job->reported_fault,
+                'status' => $job->status->value,
+                'total' => (string) $job->total_job_amount,
+            ])
+            ->all();
+
+        return view('modules.invoices.create', [
+            'invoice' => null,
+            'selectedCustomer' => $selectedCustomer,
+            'selectedJobs' => $selectedJobs,
+            'invoiceDate' => now(config('business.timezone', 'Asia/Colombo'))->toDateString(),
+        ]);
+    }
+
+    public function eligibleJobs(Customer $customer): JsonResponse
+    {
+        Gate::authorize('view', $customer);
+        $jobs = RepairJob::query()
+            ->where('customer_id', $customer->getKey())
+            ->whereIn('status', [JobStatus::RepairCompleted->value, JobStatus::ReadyForCollection->value])
+            ->whereNull('cancelled_at')
+            ->whereDoesntHave('invoiceJobs')
+            ->with(['quotations' => fn ($query) => $query
+                ->where('preparation_status', 'issued')
+                ->where('approval_status', 'approved')
+                ->orderByDesc('revision')])
+            ->orderBy('received_at')
+            ->get();
+
+        return response()->json(['data' => $jobs->map(fn (RepairJob $job): array => [
+            'id' => $job->getKey(),
+            'job_number' => $job->automatic_number ?: $job->job_number,
+            'item_name' => $job->item_name,
+            'description' => $job->repair_description ?: $job->item_description ?: $job->reported_fault,
+            'status' => $job->status->value,
+            'labour_charge' => (string) $job->labour_charge,
+            'parts_charge' => (string) $job->parts_charge,
+            'total' => (string) $job->total_job_amount,
+            'approved_quotation' => $job->quotations->first()?->quotation_number,
+        ])->all()]);
+    }
+
+    public function store(StoreInvoiceRequest $request, InvoiceService $service): RedirectResponse
+    {
+        $data = $request->validated();
+        $intent = $data['intent'];
+        if ($intent === 'issue' && ! $request->user()->can('invoices.issue')) {
+            abort(403);
+        }
+        if ($intent === 'preview' && ! $request->user()->can('invoices.print')) {
+            abort(403);
+        }
+        $data['intent'] = $intent === 'issue' ? 'issue' : 'draft';
+        $invoice = $service->create($data, $request->user());
+
+        if ($intent === 'preview') {
+            return redirect()->route('invoices.print', $invoice);
+        }
+
+        return redirect()->route('invoices.show', $invoice)->with('status', __('invoices.saved'));
+    }
+
+    public function show(Invoice $invoice, InvoiceBalanceService $balances): View
+    {
+        Gate::authorize('view', $invoice);
+        $invoice->load([
+            'customer',
+            'cashierEmployee',
+            'invoiceJobs.repairJob',
+            'invoiceJobs.invoiceItems',
+            'history.actor',
+            'documentPrintHistories.printedByUser',
+        ]);
+
+        return view('modules.invoices.show', [
+            'invoice' => $invoice,
+            'balance' => $balances->summary($invoice),
+            'document' => $invoice->document_snapshot ?: [],
+        ]);
+    }
+
+    public function edit(Invoice $invoice): View
+    {
+        Gate::authorize('updateDraft', $invoice);
+        $invoice->load(['customer', 'invoiceJobs.repairJob']);
+        $selectedJobs = $invoice->invoiceJobs->map(fn (InvoiceJob $link): array => [
+            'id' => $link->repair_job_id,
+            'job_number' => data_get($link->job_snapshot, 'job_number'),
+            'item_name' => data_get($link->job_snapshot, 'item_name'),
+            'description' => data_get($link->job_snapshot, 'repair_description'),
+            'status' => data_get($link->job_snapshot, 'status'),
+            'total' => (string) $link->job_amount,
+        ])->all();
+
+        return view('modules.invoices.create', [
+            'invoice' => $invoice,
+            'selectedCustomer' => $invoice->customer,
+            'selectedJobs' => $selectedJobs,
+            'invoiceDate' => $invoice->invoice_date->toDateString(),
+        ]);
+    }
+
+    public function update(UpdateInvoiceRequest $request, Invoice $invoice, InvoiceService $service): RedirectResponse
+    {
+        $data = $request->validated();
+        $intent = $data['intent'];
+        if ($intent === 'issue' && ! $request->user()->can('invoices.issue')) {
+            abort(403);
+        }
+        if ($intent === 'preview' && ! $request->user()->can('invoices.print')) {
+            abort(403);
+        }
+        $data['intent'] = $intent === 'issue' ? 'issue' : 'draft';
+        $updated = $service->updateDraft($invoice, $data, $request->user());
+
+        if ($intent === 'preview') {
+            return redirect()->route('invoices.print', $updated);
+        }
+
+        return redirect()->route('invoices.show', $updated)->with('status', __('invoices.saved'));
+    }
+
+    public function issue(Request $request, Invoice $invoice, InvoiceService $service): RedirectResponse
+    {
+        Gate::authorize('issue', $invoice);
+        $issued = $service->issue($invoice, $request->user());
+
+        return redirect()->route('invoices.show', $issued)->with('status', __('invoices.issued'));
+    }
+
+    public function cancel(CancelInvoiceRequest $request, Invoice $invoice, InvoiceService $service): RedirectResponse
+    {
+        Gate::authorize('cancel', $invoice);
+        $cancelled = $service->cancel($invoice, $request->validated('reason'), $request->user());
+
+        return redirect()->route('invoices.show', $cancelled)->with('status', __('invoices.cancelled'));
+    }
+
+    public function print(Invoice $invoice, InvoicePrintService $printer): View
+    {
+        Gate::authorize('print', $invoice);
+        $data = $printer->prepare($invoice, false, false, request()->user());
+
+        return $printer->render($data);
+    }
+
+    public function duplicate(Invoice $invoice, InvoicePrintService $printer): View
+    {
+        Gate::authorize('print', $invoice);
+        $data = $printer->prepare($invoice, true, false, request()->user());
+
+        return $printer->render($data);
+    }
+
+    public function pdf(Invoice $invoice, InvoicePrintService $printer)
+    {
+        Gate::authorize('export', $invoice);
+        $data = $printer->prepare($invoice, false, true, request()->user());
+
+        return Pdf::loadView('modules.invoices.print', $data)
+            ->setPaper($data['paperSize'], $data['orientation'])
+            ->download($invoice->invoice_number.'.pdf');
+    }
+}

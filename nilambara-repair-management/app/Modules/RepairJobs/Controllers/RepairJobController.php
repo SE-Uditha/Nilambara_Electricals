@@ -82,10 +82,20 @@ class RepairJobController extends Controller
                 ->orderByDesc('id')]);
         }
         $advancePaid = $this->advancePaid($job);
+        $advancePayments = auth()->user()->can('payments.view')
+            ? PaymentAllocation::query()
+                ->with(['payment.receivedByEmployee', 'releases'])
+                ->where('repair_job_id', $job->getKey())
+                ->where('target_type', 'job_advance')
+                ->orderByDesc('allocated_at')
+                ->orderByDesc('id')
+                ->get()
+            : collect();
 
         return view('modules.repair-jobs.show', [
             'job' => $job,
             'advancePaid' => $advancePaid,
+            'advancePayments' => $advancePayments,
             'statuses' => JobStatus::cases(),
         ]);
     }

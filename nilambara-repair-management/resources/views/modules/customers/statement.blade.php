@@ -3,41 +3,30 @@
 @section('title', __('ui.customer_statement'))
 
 @section('content')
-    <div class="mb-7">
-        <a href="{{ route('customers.show', $customer) }}" class="text-xs font-semibold text-teal-700 hover:text-teal-900">← {{ $customer->customer_code }} · {{ $customer->display_name }}</a>
-        <h1 class="mt-3 text-2xl font-bold tracking-tight text-slate-900">{{ __('ui.customer_statement') }}</h1>
-        <p class="mt-1 text-sm text-slate-500">{{ __('ui.customer_statement_description') }}</p>
+    <div class="mb-7 flex flex-wrap items-end justify-between gap-4">
+        <div>
+            <a href="{{ route('customers.show', $customer) }}" class="text-xs font-semibold text-teal-700 hover:text-teal-900">← {{ $customer->customer_code }} · {{ $customer->display_name }}</a>
+            <h1 class="mt-3 text-2xl font-bold tracking-tight text-slate-900">{{ __('ui.customer_statement') }}</h1>
+            <p class="mt-1 text-sm text-slate-500">{{ __('ui.customer_statement_description') }}</p>
+        </div>
+        <div class="flex gap-2">
+            <a href="{{ route('customers.statement.print', ['customer' => $customer] + $filters) }}" target="_blank" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700">{{ __('payments.print_statement') }}</a>
+            <a href="{{ route('customers.statement.pdf', ['customer' => $customer] + $filters) }}" class="rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white">{{ __('payments.download_pdf') }}</a>
+        </div>
     </div>
 
-    <section class="mb-5 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-5">
-        <div>
-            <p class="text-[10px] font-semibold tracking-wide text-slate-400 uppercase">{{ __('ui.outstanding_credit_balance') }}</p>
-            <p class="mt-1 text-2xl font-bold text-slate-900">{{ config('business.currency') }} {{ number_format((float) $accountBalance, 2) }}</p>
-        </div>
-        <p class="max-w-xl text-xs text-slate-500">{{ __('ui.balance_ledger_source') }}</p>
+    <form method="GET" class="mb-5 flex flex-wrap items-end gap-3 rounded-2xl border border-slate-200 bg-white p-4">
+        <div><label for="date_from" class="form-label">{{ __('payments.date_from') }}</label><input id="date_from" name="date_from" type="date" value="{{ $filters['date_from'] ?? '' }}" class="form-input"></div>
+        <div><label for="date_to" class="form-label">{{ __('payments.date_to') }}</label><input id="date_to" name="date_to" type="date" value="{{ $filters['date_to'] ?? '' }}" class="form-input"></div>
+        <button class="rounded-xl border border-teal-700 px-4 py-2.5 text-xs font-semibold text-teal-800 hover:bg-teal-50">{{ __('ui.filter') }}</button>
+        <a href="{{ route('customers.statement', $customer) }}" class="px-3 py-2.5 text-xs font-semibold text-slate-500">{{ __('ui.clear') }}</a>
+    </form>
+
+    <section class="mb-5 rounded-2xl border border-slate-200 bg-white px-5 py-4 text-xs text-slate-600">
+        <p class="font-semibold text-slate-900">{{ $customer->display_name }} · {{ $customer->customer_code }}</p>
+        <p class="mt-1">{{ $customer->address }} · {{ $customer->mobile_number }}@if ($customer->email) · {{ $customer->email }}@endif</p>
     </section>
 
-    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white">
-        <div class="overflow-x-auto">
-            <table class="w-full min-w-[700px] text-left text-xs">
-                <thead class="bg-slate-50 text-[10px] font-semibold tracking-wide text-slate-500 uppercase">
-                    <tr><th class="px-5 py-3">{{ __('ui.date') }}</th><th class="px-5 py-3">{{ __('ui.type') }}</th><th class="px-5 py-3">{{ __('ui.reference') }}</th><th class="px-5 py-3">{{ __('ui.description') }}</th><th class="px-5 py-3 text-right">{{ __('ui.amount') }}</th></tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100">
-                    @forelse ($entries as $entry)
-                        <tr class="text-slate-700">
-                            <td class="px-5 py-4">{{ $entry->occurred_at->format(config('business.date_format', 'd M Y')) }}</td>
-                            <td class="px-5 py-4">{{ str($entry->entry_type)->replace('_', ' ')->headline() }}</td>
-                            <td class="px-5 py-4 font-mono">{{ $entry->reference_number }}</td>
-                            <td class="px-5 py-4">{{ $entry->description }}</td>
-                            <td class="px-5 py-4 text-right font-semibold">{{ config('business.currency') }} {{ number_format((float) $entry->amount, 2) }}</td>
-                        </tr>
-                    @empty
-                        <tr><td colspan="5" class="px-5 py-14 text-center text-sm text-slate-500">{{ __('ui.no_statement_entries') }}</td></tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-        @if ($entries->hasPages())<div class="border-t border-slate-100 px-5 py-4">{{ $entries->links() }}</div>@endif
-    </div>
+    @include('modules.customers.statement-summary')
+    @include('modules.customers.statement-table', ['entries' => $entries])
 @endsection

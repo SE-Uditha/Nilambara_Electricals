@@ -21,7 +21,7 @@
     <style>
         @font-face{font-family:NotoSinhala;src:url("{{ $fontRegularPath }}") format("truetype");font-style:normal;font-weight:400}
         @font-face{font-family:NotoSinhala;src:url("{{ $fontBoldPath }}") format("truetype");font-style:normal;font-weight:700}
-        @page{size:{{ $paperSize }} portrait;margin:{{ $margins['top'] }}mm {{ $margins['right'] }}mm {{ $margins['bottom'] }}mm {{ $margins['left'] }}mm}
+        @page{size:{{ $paperSize }} {{ $orientation }};margin:{{ $margins['top'] }}mm {{ $margins['right'] }}mm {{ $margins['bottom'] }}mm {{ $margins['left'] }}mm}
         *{box-sizing:border-box}
         body{font-family:NotoSinhala,"DejaVu Sans",sans-serif;font-size:{{ $fontSize }}pt;color:#1e293b;line-height:1.5;margin:0}
         .toolbar{display:flex;justify-content:center;gap:10px;margin:20px auto;max-width:210mm}
@@ -141,7 +141,7 @@
             <div class="sign-line">{{ __('ui.customer_contact_name') }} / {{ __('ui.customer_signature') }}</div>
             <div class="sign-line">{{ __('ui.prepared_by') }}: {{ $snapshot['prepared_by'] ?? $quotation->createdByUser?->name }}</div>
         </div>
-        <footer>{{ __('ui.quotation_print_footer') }} · {{ __('ui.print_date') }}: {{ $printedAt->format(config('business.date_format').' '.config('business.time_format')) }}</footer>
+        <footer>{{ $footerText ?: __('ui.quotation_print_footer') }} · {{ __('ui.print_date') }}: {{ $printedAt->format(config('business.date_format').' '.config('business.time_format')) }}</footer>
     </main>
 </body>
 </html>

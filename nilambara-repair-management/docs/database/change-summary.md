@@ -113,3 +113,7 @@ AuditLog and SystemSetting receive credential-safety mutators after initial mode
 ## Step 6 additive quotation extension
 
 Migration `2026_10_19_100019_upgrade_quotation_workflow.php` extends the existing quotation, line-item, and approval tables with preparation state, issue/snapshot support, draft-line retention/display order, and decision method. It adds `quotation_history`; it does not replace or duplicate the existing quotation tables. Migration `2026_10_19_100020_backfill_quotation_preparation_status.php` maps legacy finalized/cancelled rows to the new preparation state. New PHP model: `app/Modules/Quotations/Models/QuotationHistory.php`. SQLite applies additive `ALTER TABLE` statements to avoid rebuilding the original composite-key quotation table; MySQL/MariaDB use the Laravel schema builder. See the [quotation data dictionary](data-dictionary.md#quotations) and [Step 6 summary](../development/step-6-summary.md).
+
+## Step 7 additive invoice extension
+
+Migration `2026_10_19_170000_add_invoice_workflow_support.php` adds nullable informational `payment_method` to the existing `invoices` table and creates append-only `invoice_history`; it does not replace invoice/job/item/payment tables or add payment-entry behavior. `InvoiceHistory` stores lifecycle, draft edit, and job-link evidence. See the [invoice data dictionary](data-dictionary.md#invoices), [Step 7 summary](../development/step-7-summary.md), and [invoice workflow guide](../modules/invoice-management.md).

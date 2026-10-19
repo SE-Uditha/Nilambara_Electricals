@@ -1,6 +1,6 @@
 # Step 2 database foundation
 
-This guide describes the Step 2 database foundation: 58 new entity tables, 58 module models, 16 additive migrations, enums, constraints, relationships, and database tests. Steps 3 and 4 add employee/account/RBAC and customer-management workflows using the existing tables. Payment processing, stock deduction, POS checkout, reports, and backup/restore execution remain deferred.
+This guide describes the original Step 2 database foundation: 58 entity tables, 58 module models, 16 migrations, enums, constraints, relationships, and database tests. Steps 3-8 add employee/account/RBAC, customer, repair, quotation, invoice, and payment workflows to the existing schema. Step 7 adds `invoice_history` and an informational invoice `payment_method`; Step 8 reuses the existing payment, allocation, release, reversal, account-ledger, and print-history tables without adding another financial ledger. Stock deduction, POS checkout, reports, and backup/restore execution remain deferred.
 
 Read the [schema overview](schema.md), [complete ERD](erd.md), [data dictionary](data-dictionary.md), [relationship rules](relationship-rules.md), [requirements traceability](requirements-traceability.md), [open decisions](open-decisions.md), [verification results](verification.md), and [file summary](change-summary.md).
 
@@ -8,7 +8,7 @@ Read the [schema overview](schema.md), [complete ERD](erd.md), [data dictionary]
 
 Laravel uses the `mysql` connection. The database is **nilambara_repair_management**. phpMyAdmin is the administration interface for this same server; it is not another database engine and needs no Laravel package. The current XAMPP server reports MariaDB 10.4.32 and phpMyAdmin 5.2.1. Native MySQL deployment requires MySQL 8.0.16 or newer for enforced CHECK constraints; a separate MySQL 8 instance has not been tested here.
 
-Start MySQL and Apache in the XAMPP Control Panel. Open **http://localhost/phpmyadmin/** and select **nilambara_repair_management** from the database tree. Refresh the tree after running migrations. The Structure tab lists the existing 67 tables, including retained Laravel infrastructure and the migration repository; Step 3 adds columns and indexes but no duplicate role/permission tables. Table Structure pages show primary keys, unique indexes, foreign keys, and InnoDB/utf8mb4 metadata.
+Start MySQL and Apache in the XAMPP Control Panel. Open **http://localhost/phpmyadmin/** and select **nilambara_repair_management** from the database tree. Refresh the tree after running migrations. The Structure tab lists the application tables, including retained Laravel infrastructure and the migration repository; later workflow steps add only documented tables/columns and do not duplicate the Step 2 invoice or payment tables. Table Structure pages show primary keys, unique indexes, foreign keys, and InnoDB/utf8mb4 metadata.
 
 All application tables are created by Laravel migrations. Do not recreate them in phpMyAdmin, import a conflicting SQL dump, or alter business/financial rows manually as a substitute for future validated workflows. phpMyAdmin may be used for schema inspection, queries, exports, and administration. The Mermaid ERD remains the complete diagram even if phpMyAdmin Designer configuration storage is not enabled.
 

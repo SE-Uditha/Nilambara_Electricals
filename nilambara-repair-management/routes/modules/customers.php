@@ -23,6 +23,14 @@ Route::get('/customers/{customer}/statement', [CustomerController::class, 'state
     ->middleware('can:customers.statement')
     ->name('customers.statement');
 
+Route::get('/customers/{customer}/statement/print', [CustomerController::class, 'statementPrint'])
+    ->middleware('can:customers.statement')
+    ->name('customers.statement.print');
+
+Route::get('/customers/{customer}/statement/pdf', [CustomerController::class, 'statementPdf'])
+    ->middleware('can:customers.statement')
+    ->name('customers.statement.pdf');
+
 Route::get('/customers/{customer}/edit', [CustomerController::class, 'edit'])
     ->middleware('can:customers.update')
     ->name('customers.edit');

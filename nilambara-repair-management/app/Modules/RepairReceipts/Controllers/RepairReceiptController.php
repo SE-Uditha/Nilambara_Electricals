@@ -8,6 +8,7 @@ use App\Modules\Customers\Models\Customer;
 use App\Modules\Employees\Models\Employee;
 use App\Modules\PrintTemplates\Models\DocumentPrintHistory;
 use App\Modules\PrintTemplates\Models\PrintTemplate;
+use App\Modules\Payments\Models\PaymentAllocation;
 use App\Modules\RepairReceipts\Models\RepairReceipt;
 use App\Modules\RepairReceipts\Requests\StoreRepairReceiptRequest;
 use App\Modules\RepairReceipts\Services\RepairReceiptService;
@@ -133,7 +134,19 @@ class RepairReceiptController extends Controller
         ]);
         Gate::authorize('view', $receipt->repairJob);
 
-        return view('modules.repair-receipts.show', ['receipt' => $receipt]);
+        $advancePayments = auth()->user()->can('payments.view')
+            ? PaymentAllocation::query()
+                ->with(['payment.receivedByEmployee', 'releases'])
+                ->where('repair_job_id', $receipt->repair_job_id)
+                ->where('target_type', 'job_advance')
+                ->orderBy('allocated_at')
+                ->get()
+            : collect();
+
+        return view('modules.repair-receipts.show', [
+            'receipt' => $receipt,
+            'advancePayments' => $advancePayments,
+        ]);
     }
 
     public function print(RepairReceipt $receipt): View
@@ -161,7 +174,7 @@ class RepairReceiptController extends Controller
         $label = $template?->duplicate_copy_label ?: __('ui.duplicate_copy');
         $printTime = now(config('business.timezone', 'Asia/Colombo'));
 
-        DB::transaction(function () use ($receipt, $duplicate, $template, $snapshot, $label, $printTime): void {
+        DB::transaction(function () use ($receipt, $duplicate, $template, $snapshot, $label, $printTime, $settings): void {
             DocumentPrintHistory::query()->create([
                 'print_template_id' => $template?->getKey(),
                 'repair_receipt_id' => $receipt->getKey(),
@@ -174,6 +187,8 @@ class RepairReceiptController extends Controller
                     'duplicate' => $duplicate,
                     'duplicate_label' => $duplicate ? $label : null,
                     'printed_at' => $printTime->toIso8601String(),
+                    'paper_size' => $settings['paperSize'],
+                    'orientation' => $settings['orientation'],
                 ],
             ]);
             BusinessAudit::record(
@@ -185,6 +200,8 @@ class RepairReceiptController extends Controller
                     'receipt_number' => $receipt->receipt_number,
                     'repair_job_id' => $receipt->repair_job_id,
                     'duplicate' => $duplicate,
+                    'paper_size' => $settings['paperSize'],
+                    'orientation' => $settings['orientation'],
                 ],
             );
         });
@@ -207,7 +224,7 @@ class RepairReceiptController extends Controller
         $paper = $template?->paper_size ?? config('business.printing.paper', $defaultPaper);
 
         return [
-            'paperSize' => in_array($paper, ['A5', 'A4', 'A6', 'Letter'], true) ? $paper : $defaultPaper,
+            'paperSize' => in_array($paper, ['A5', 'A4', 'A6'], true) ? $paper : $defaultPaper,
             'orientation' => in_array($template?->orientation, ['portrait', 'landscape'], true)
                 ? $template->orientation
                 : 'portrait',
@@ -223,6 +240,7 @@ class RepairReceiptController extends Controller
             'businessTelephone' => $template?->telephone_number ?: config('business.contact_number'),
             'logoUrl' => $template?->logo_path ? asset($template->logo_path) : asset(config('business.logo')),
             'documentTitle' => $template?->document_title ?: __('ui.repair_receipt'),
+            'footerText' => $template?->footer,
         ];
     }
 

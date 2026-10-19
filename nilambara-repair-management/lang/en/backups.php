@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'title' => 'Database backups',
+    'description' => 'Private, verified database backup history. Restores are available only through a separately confirmed CLI maintenance workflow.',
+    'destination_ready' => 'Private backup destination is configured.',
+    'destination_unavailable' => 'Backups are disabled until a valid private BACKUP_ROOT outside the repository is configured and mysqldump is available.',
+    'policy' => 'Scheduled backups run daily at 2:00 AM Asia/Colombo. Retention is 30 days and at most 30 files; cleanup runs only after a recent checksum-verified backup.',
+    'create_now' => 'Create backup now',
+    'date' => 'Backup date',
+    'type' => 'Type',
+    'status' => 'Status',
+    'verified' => 'Verified at',
+    'checksum' => 'SHA-256',
+    'actions' => 'Actions',
+    'manual' => 'Manual',
+    'scheduled' => 'Scheduled',
+    'pending' => 'Pending',
+    'running' => 'Running',
+    'completed' => 'Completed',
+    'failed' => 'Failed',
+    'download' => 'Download verified backup',
+    'no_backups' => 'No backup history is available.',
+    'backup_created' => 'Backup :id completed and verified.',
+    'backup_failed' => 'The backup failed. Check the server logs and database dump tooling.',
+];

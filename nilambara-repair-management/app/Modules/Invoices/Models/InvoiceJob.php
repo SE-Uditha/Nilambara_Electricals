@@ -20,7 +20,7 @@ class InvoiceJob extends BusinessModel
         'job_snapshot',
     ];
 
-    protected array $immutableFields = ['id', 'invoice_id', 'repair_job_id', 'customer_id'];
+    protected array $immutableFields = ['id', 'invoice_id', 'repair_job_id', 'customer_id', 'job_amount', 'job_snapshot'];
 
     protected bool $preserveRecord = true;
 
