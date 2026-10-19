@@ -4,78 +4,171 @@ namespace Tests\Feature\Auth;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Laravel\Fortify\Features;
 use Tests\TestCase;
 
 class AuthenticationTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_login_screen_can_be_rendered(): void
+    public function test_login_screen_renders_a_csrf_protected_form(): void
     {
-        $response = $this->get(route('login'));
-
-        $response->assertOk();
+        $this->get(route('login'))
+            ->assertOk()
+            ->assertSee('name="_token"', false)
+            ->assertSee('name="email"', false)
+            ->assertSee('name="password"', false)
+            ->assertDontSee('href="/register"', false);
     }
 
-    public function test_users_can_authenticate_using_the_login_screen(): void
+    public function test_users_can_log_in_and_the_session_id_is_regenerated(): void
     {
         $user = User::factory()->create();
 
-        $response = $this->post(route('login.store'), [
-            'email' => $user->email,
-            'password' => 'password',
-        ]);
+        $this->get(route('login'));
+        $oldSessionId = session()->getId();
 
-        $response
+        $this->withSession(['preserved' => 'session value'])
+            ->post(route('login.store'), [
+                'email' => strtoupper($user->email),
+                'password' => 'test-password-123',
+            ])
             ->assertSessionHasNoErrors()
-            ->assertRedirect(route('dashboard', absolute: false));
+            ->assertSessionHas('preserved', 'session value')
+            ->assertRedirect('/dashboard');
 
-        $this->assertAuthenticated();
+        $this->assertAuthenticatedAs($user);
+        $this->assertNotSame($oldSessionId, session()->getId());
     }
 
-    public function test_users_can_not_authenticate_with_invalid_password(): void
+    public function test_users_cannot_log_in_with_an_invalid_password(): void
     {
         $user = User::factory()->create();
 
-        $response = $this->post(route('login.store'), [
+        $this->from(route('login'))->post(route('login.store'), [
             'email' => $user->email,
-            'password' => 'wrong-password',
-        ]);
-
-        $response->assertSessionHasErrorsIn('email');
+            'password' => 'incorrect-password',
+        ])->assertRedirect(route('login'))->assertSessionHasErrors(['email']);
 
         $this->assertGuest();
     }
 
-    public function test_users_with_two_factor_enabled_are_redirected_to_two_factor_challenge(): void
+    public function test_login_requires_an_email_and_password(): void
     {
-        $this->skipUnlessFortifyHas(Features::twoFactorAuthentication());
+        $this->post(route('login.store'), [])
+            ->assertSessionHasErrors(['email', 'password']);
 
-        Features::twoFactorAuthentication([
-            'confirm' => true,
-            'confirmPassword' => true,
-        ]);
-
-        $user = User::factory()->withTwoFactor()->create();
-
-        $response = $this->post(route('login.store'), [
-            'email' => $user->email,
-            'password' => 'password',
-        ]);
-
-        $response->assertRedirect(route('two-factor.login'));
         $this->assertGuest();
     }
 
-    public function test_users_can_logout(): void
+    public function test_login_rejects_non_string_credentials(): void
+    {
+        $this->post(route('login.store'), [
+            'email' => ['invalid'],
+            'password' => ['invalid'],
+        ])->assertSessionHasErrors(['email', 'password']);
+
+        $this->assertGuest();
+    }
+
+    public function test_login_is_throttled_after_five_attempts_per_email_and_ip(): void
     {
         $user = User::factory()->create();
 
-        $response = $this->actingAs($user)->post(route('logout'));
+        for ($attempt = 0; $attempt < 5; $attempt++) {
+            $this->post(route('login.store'), [
+                'email' => $user->email,
+                'password' => 'incorrect-password',
+            ])->assertSessionHasErrors(['email']);
+        }
 
-        $response->assertRedirect(route('home'));
+        $this->post(route('login.store'), [
+            'email' => strtoupper($user->email),
+            'password' => 'test-password-123',
+        ])->assertTooManyRequests();
 
         $this->assertGuest();
+
+        $this->travel(61)->seconds();
+
+        $this->post(route('login.store'), [
+            'email' => $user->email,
+            'password' => 'test-password-123',
+        ])->assertRedirect('/dashboard');
+
+        $this->assertAuthenticatedAs($user);
+    }
+
+    public function test_logout_invalidates_the_session_and_regenerates_the_csrf_token(): void
+    {
+        $user = User::factory()->create();
+
+        $this->get(route('login'));
+        $this->withSession(['private-data' => 'must be cleared'])
+            ->post(route('login.store'), [
+                'email' => $user->email,
+                'password' => 'test-password-123',
+            ]);
+
+        $oldSessionId = session()->getId();
+        $oldToken = session()->token();
+
+        $this->post(route('logout'))
+            ->assertRedirect('/')
+            ->assertSessionMissing('private-data');
+
+        $this->assertGuest();
+        $this->assertNotSame($oldSessionId, session()->getId());
+        $this->assertNotSame($oldToken, session()->token());
+    }
+
+    public function test_login_rejects_requests_without_a_csrf_token_when_verification_is_active(): void
+    {
+        $user = User::factory()->create();
+
+        // Laravel bypasses request forgery checks in its testing environment.
+        $this->app->instance('env', 'production');
+
+        $this->post(route('login.store'), [
+            'email' => $user->email,
+            'password' => 'test-password-123',
+        ])->assertStatus(419);
+
+        $this->assertGuest();
+
+        $this->withSession(['_token' => 'valid-test-csrf-token'])
+            ->post(route('login.store'), [
+                '_token' => 'valid-test-csrf-token',
+                'email' => $user->email,
+                'password' => 'test-password-123',
+            ])->assertRedirect('/dashboard');
+
+        $this->assertAuthenticatedAs($user);
+    }
+
+    public function test_unused_authentication_features_are_not_exposed(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        foreach ([
+            '/forgot-password', '/reset-password/token', '/email/verify',
+            '/two-factor-challenge', '/user/confirm-password',
+            '/user/confirmed-password-status', '/passkeys/login/options',
+        ] as $path) {
+            $this->get($path)->assertNotFound();
+        }
+    }
+
+    public function test_public_registration_is_not_available(): void
+    {
+        $this->get('/register')->assertNotFound();
+
+        $this->post('/register', [
+            'name' => 'Uninvited User',
+            'email' => 'uninvited@example.test',
+            'password' => 'test-password-123',
+            'password_confirmation' => 'test-password-123',
+        ])->assertNotFound();
+
+        $this->assertDatabaseCount('users', 0);
     }
 }

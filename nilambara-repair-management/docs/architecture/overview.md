@@ -32,7 +32,7 @@ The standard Laravel directories remain in place. `app/Http`, `app/Models`, and 
 | `Enums` | Stable domain values after their meaning is agreed. |
 | `Actions` | Focused application operations with one responsibility. |
 
-All 21 modules currently contain only `.gitkeep` placeholders. No interfaces, repositories, controllers, or models are generated merely to populate these directories. Laravel's existing `App\\` PSR-4 mapping resolves future classes such as `App\Modules\RepairJobs\Actions\CompleteRepair` without a new package or autoloader.
+All 21 modules currently contain only `.gitkeep` placeholders. No interfaces, repositories, controllers, or models are generated merely to populate these directories. Laravel's existing `App\` PSR-4 mapping resolves future classes such as `App\Modules\RepairJobs\Actions\CompleteRepair` without a new package or autoloader.
 
 Keep business rules in their owning module. A controller or Livewire component may delegate to an action or service; it must not duplicate stock, payment, numbering, or authorization rules. Add repositories only where they offer a concrete persistence boundary beyond Eloquent. Introduce providers, events, or contracts when a real integration needs them.
 

@@ -11,13 +11,20 @@ use Laravel\Fortify\Fortify;
 
 class FortifyServiceProvider extends ServiceProvider
 {
+    public function register(): void
+    {
+        // Register only the session routes required for the Step 1 foundation.
+        Fortify::ignoreRoutes();
+    }
+
     public function boot(): void
     {
         Fortify::loginView(fn () => view('auth.login'));
 
         RateLimiter::for('login', function (Request $request) {
+            $username = $request->input(Fortify::username());
             $key = Str::transliterate(
-                Str::lower((string) $request->input(Fortify::username())).'|'.$request->ip()
+                Str::lower(is_string($username) ? $username : '').'|'.$request->ip()
             );
 
             return Limit::perMinute(5)->by($key);

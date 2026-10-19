@@ -22,7 +22,8 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
         with:
-          php-version: '8.3'
+          php-version: '8.5'
+          extensions: mbstring, pdo_sqlite, intl, zip
           tools: composer:v2
           coverage: none
 
@@ -31,8 +32,20 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Setup Application
-        run: composer setup
+      - name: Install Dependencies
+        run: |
+          composer install --prefer-dist --no-interaction
+          npm ci
+
+      - name: Setup Test Environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Build Frontend Assets
+        run: npm run build
 
       - name: Run CI Checks
-        run: composer ci:check
+        run: |
+          composer lint:check
+          composer test

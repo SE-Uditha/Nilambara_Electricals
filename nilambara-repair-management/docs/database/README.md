@@ -1,14 +1,20 @@
-# Database planning: Step 2
+# Step 2 database foundation
 
-## Current boundary
+The existing Laravel application defines the BRD database foundation: 58 new entity tables, 58 module models, 16 additive migrations, enums, constraints, relationships, and database tests. Authentication and the Step 1 frontend remain in place. No business CRUD, payment processing, stock deduction, POS checkout, report, or Step 3 access-control workflow is implemented.
 
-Step 1 configures Laravel's MySQL connection through environment variables and retains the framework's default infrastructure migrations. It intentionally creates no customer, repair, invoice, payment, stock, supplier, role, or other business tables. The test environment uses isolated SQLite in memory; this is not the runtime database choice or a business schema design.
+Read the [schema overview](schema.md), [complete ERD](erd.md), [data dictionary](data-dictionary.md), [relationship rules](relationship-rules.md), [requirements traceability](requirements-traceability.md), [open decisions](open-decisions.md), [verification results](verification.md), and [file summary](change-summary.md).
 
-The full schema, ERD, relationships, keys, indexes, and migration plan are the next phase. Use the supplied [BRD](../../../Repair%20Shop%20Management%20Final.pdf), particularly sections 16-17 on physical pages 15-16, together with the [module coverage map](../modules/brd-coverage.md).
+## MySQL and phpMyAdmin
 
-## Local MySQL preparation
+Laravel uses the `mysql` connection. The database is **nilambara_repair_management**. phpMyAdmin is the administration interface for this same server; it is not another database engine and needs no Laravel package. The current XAMPP server reports MariaDB 10.4.32 and phpMyAdmin 5.2.1. Native MySQL deployment requires MySQL 8.0.16 or newer for enforced CHECK constraints; a separate MySQL 8 instance has not been tested here.
 
-The example configuration is local development configuration:
+Start MySQL and Apache in the XAMPP Control Panel. Open **http://localhost/phpmyadmin/** and select **nilambara_repair_management** from the database tree. Refresh the tree after running migrations. The Structure tab lists the 67 tables, including retained Laravel infrastructure and the migration repository. Table Structure pages show primary keys, unique indexes, foreign keys, and InnoDB/utf8mb4 metadata. Browse displays stored rows; initially only the six reference role names and migration records are populated.
+
+All application tables are created by Laravel migrations. Do not recreate them in phpMyAdmin, import a conflicting SQL dump, or alter business/financial rows manually as a substitute for future validated workflows. phpMyAdmin may be used for schema inspection, queries, exports, and administration. The Mermaid ERD remains the complete diagram even if phpMyAdmin Designer configuration storage is not enabled.
+
+## Local connection
+
+The ignored `.env` contains the operator's requested local account. These are local development examples:
 
 ```dotenv
 DB_CONNECTION=mysql
@@ -19,49 +25,47 @@ DB_USERNAME=root
 DB_PASSWORD=
 ```
 
-Create the database using an account that has local database-creation privileges:
+The database container itself may be created once in phpMyAdmin or through MySQL administration with utf8mb4 collation. Application tables must then come from migrations. Never commit `.env`, passwords, application keys, backup secrets, or production connection URLs.
 
-```sql
-CREATE DATABASE IF NOT EXISTS nilambara_repair_management
-    CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+## Exact commands in this workspace
+
+Use the installed PHP 8.5 CLI. XAMPP's bundled PHP 8.2 cannot run this Laravel 13 dependency set. The project-local PHP configuration enables the existing PHP 8.5 extensions; it does not change XAMPP or system configuration.
+
+```powershell
+cd "D:\xampp\htdocs\Nilambara_Electricals\nilambara-repair-management"
+$env:PHPRC = (Resolve-Path ..\.tools\php.ini).Path
+php artisan config:clear
+php artisan migrate:status
+php artisan migrate --pretend
+php artisan migrate
+php artisan db:seed --class=RoleSeeder
 ```
 
-Then run `php artisan migrate` from the application directory. Credentials belong in untracked `.env`; do not commit them. A MySQL access-denied result means the example account does not match the local server and must be replaced with working local credentials. Do not substitute SQLite and describe that as a successful MySQL migration.
+The seeder inserts only six reference role names if absent. It does not create accounts, assign permissions, or grant access. It is safe to repeat without replacing customized role metadata. Never regenerate an existing application key.
 
-## Step 2 deliverables
+Inspect an existing table and its migration state before changing its design. An existing conflicting table is an error to investigate; these migrations do not silently drop or replace it. Existing authentication tables are not recreated or modified by the business migrations. Normal migrations add tables/indexes only. Rollback is supported for disposable/test databases and removes the schema it rolls back; do not run it on a populated application database.
 
-1. A BRD-traceable entity and relationship catalogue with ownership by module.
-2. An ERD showing receipt/job/customer relationships, invoice/job links, invoice lines, payment allocations, stock movements, and supplier/purchase relationships.
-3. A data dictionary with required/optional fields, types, precision, defaults, lifecycle rules, and English/Sinhala text handling.
-4. Unique keys, foreign keys, indexes, deletion/reversal rules, and concurrency strategy.
-5. Explicit decisions for monetary amounts, balances, costing/valuation, document numbering, and permissions ambiguities.
-6. An implementation sequence for business migrations, factories, seeds, and transactional tests. Business migrations are not created as part of Step 1.
+## Verification commands
 
-## Required relationship and consistency topics
+The default test configuration uses SQLite in memory with FK enforcement. It does not target the local application database:
 
-| Area | BRD design constraint |
-| --- | --- |
-| Customer and job | A job belongs to a customer and its receiving receipt; customer history includes jobs, invoices, and payments. |
-| Receiving and numbering | System identifiers are generated automatically; manual job numbers are unique and immutable after creation. Concurrent receiving must not allocate duplicates. |
-| Job history | Record each status change with actor and timestamp. Keep inspection, repair, testing, approval, and delivery facts distinguishable. |
-| Quotation | Link to a job, preserve approvals/history, and reuse approved details without re-entry or loss of the original quotation. |
-| Invoice and job | An invoice can include several jobs for the same customer, with job-wise totals and correct relational links. Agree whether/how a job may be re-invoiced after cancellation. |
-| Payment | One invoice may receive several payments; advances may precede the invoice. Design allocations, rounding, refund/reversal links, and reconciliation before storing balances. |
-| Inventory | Repairs and POS share the same stock source. Record date, reference, quantity, actor, and reason for every movement. Prevent duplicate issue/deduction and define cancellation/return behavior. |
-| Purchase | Receiving goods increases stock. Supplier credit, payment history, purchase costs, discounts, and other costs remain traceable. |
-| Financial history | Preserve important transactions through cancellation/reversal; define which business facts and print snapshots must remain stable after later edits. |
-| Atomic operations | Related stock/payment changes must commit together or roll back together; agree transaction boundaries, locking, and retry behavior. |
-| Reporting | Reconcile sales, collections, advances, outstanding credit, purchases, stock, costs, and estimated profit to their authoritative records. |
-| Access and audit | Separate staff employment, login accounts, roles, permissions, and audit history without assuming that one login automatically has management privileges. |
+```powershell
+php artisan test
+php vendor\bin\pint --test
+```
 
-## Questions to resolve before migration design
+Three native storage checks require a MySQL-compatible server and are skipped on SQLite. To run the complete suite, rollback, and remigration against that server safely:
 
-- Clarify automatic Job ID versus automatic/manual Job Number wording and numbering/reset rules.
-- Confirm invoice finalization, cancellation, edits, reissue, duplicate printing, and allocation of earlier advances to multi-job invoices.
-- Agree money precision, allowed quantities/units, rounding, negative balances, overpayments, stock valuation method, and cost snapshots.
-- Define POS sale and return detail, supplier payments, damaged stock, physical counts, and whether stock transfers are required.
-- Resolve management-only supplier/purchase access (p. 12) against storekeeper purchase permissions (p. 13).
-- Define role-to-action and per-user permission precedence, job assignment, and approval authorities.
-- Confirm ownership, retention, archival, restore procedure, and scope of audit records.
+```powershell
+php scripts\verify-mysql.php
+```
 
-Record business decisions with the relevant BRD page before implementation. Do not silently convert unresolved wording into a database constraint.
+This script creates a randomized `nilambara_step2_test_...` database, refuses to reuse an existing one, passes its connection only to child verification processes, tests the schema, and drops only the disposable database it created. The configured local account needs database creation/deletion permission for this test helper. The application database and `.env` are never changed by the helper.
+
+## Reconciliation and decisions
+
+Current stock is the signed movement sum. Customer and supplier balances are their canonical signed ledger sums. Payment allocations describe application of an already-recorded receipt; releasing an advance allocation and reapplying it must not create another payment or account credit. Invoice payment status is derived from net allocations, not a separately editable paid flag.
+
+Composite FKs enforce ownership/source consistency, but SQL row CHECKs cannot enforce aggregate allocation ceilings, prevent overselling across concurrent transactions, reconcile document headers to all source lines, or authorize refunds. Future operations must use transactions, stable idempotency keys, row locks, and the relationship rules. Cost valuation, fractional units, adjustment/refund policy, and other unresolved BRD choices remain explicit proposals in the decision register.
+
+Step 2 stops at this database foundation. The next stage is Employee Management, Authentication, and Role-Based Access Control; it is not started automatically.

@@ -20,8 +20,8 @@ class CreateUserCommand extends Command
         $data = [
             'name' => trim((string) $this->ask('Name')),
             'email' => Str::lower(trim((string) $this->ask('Email'))),
-            'password' => $this->secret('Password (minimum 12 characters)'),
-            'password_confirmation' => $this->secret('Confirm password'),
+            'password' => $this->secret('Password (minimum 12 characters)', false),
+            'password_confirmation' => $this->secret('Confirm password', false),
         ];
 
         $validator = Validator::make($data, [

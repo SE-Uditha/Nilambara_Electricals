@@ -1,6 +1,6 @@
 # Development roadmap
 
-The supplied BRD defines the eventual system. This repository is currently Step 1 only. The phase ordering below is a plan; it does not imply that the later modules, schemas, reports, or operational capabilities are implemented.
+The supplied BRD defines the eventual system. Steps 1 and 2 establish the application and database foundations. Later phases remain a plan; database tables alone do not imply that business workflows, reports, or operational capabilities are implemented.
 
 ## Step 1: project foundation
 
@@ -14,13 +14,13 @@ The completion report records actual command results and any environmental limit
 
 ## Step 2: database architecture and ERD
 
-Read the [database planning checklist](../database/README.md) and the [BRD coverage map](../modules/brd-coverage.md). Define entities, relationships, field rules, numbering, monetary precision, transactional boundaries, indexes, audit/reversal rules, and schema implementation order. Resolve the automatic/manual job-number terminology and management/storekeeper permission ambiguity.
+Implemented: 58 new entity tables/models, 16 additive migrations, enum definitions, SQL constraints/indexes, Eloquent relationships, a complete ERD, all-field documentation, BRD traceability, and isolated database tests. Read the [database guide](../database/README.md), [verification results](../database/verification.md), and [open decisions](../database/open-decisions.md).
 
-Stop for review of the database architecture before implementing the business schema. Step 1 does not start this work by creating speculative tables.
+No CRUD, stock/payment processing, reports, or full permission enforcement is part of this step. Business policy choices remain explicit decisions; the implementation does not silently select an inventory valuation policy.
 
-## Step 3: staff access and customer records
+## Step 3: employee management, authentication, and role-based access control
 
-Implement administrator-controlled staff accounts, agreed roles/permissions and policies, customer/company registration, required field validation, search, and historical account links. Verify denied access as well as allowed actions.
+Implement administrator-controlled staff accounts, employee management, agreed role/permission evaluation, per-user overrides, and authorization policies. Verify denied access as well as allowed actions. Customer CRUD and later business workflows require their own authorized stage.
 
 ## Step 4: repair intake and job lifecycle
 
