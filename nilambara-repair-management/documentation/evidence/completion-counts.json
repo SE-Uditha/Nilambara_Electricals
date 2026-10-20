@@ -1,0 +1,38 @@
+{
+  "date": "2026-10-20",
+  "module_areas": 20,
+  "features": 103,
+  "verified_scenario_features": 102,
+  "features_not_verified": [
+    "F-037 Delivery information"
+  ],
+  "automated": {
+    "total": 218,
+    "passed": 218,
+    "failed": 0,
+    "blocked": 0,
+    "not_run": 0,
+    "assertions": 3566
+  },
+  "manual": {
+    "Not Run": 8,
+    "Blocked": 4
+  },
+  "screenshots": 45,
+  "screenshots_not_captured": [],
+  "brd_rows": 327,
+  "database": {
+    "tables": 69,
+    "foreign_key_constraints": 199,
+    "orphans": 0,
+    "all_innodb": true,
+    "all_utf8mb4": true,
+    "floating_columns": [],
+    "row_counts_unchanged": true
+  },
+  "open_defects": {
+    "High": 1,
+    "Medium": 2,
+    "Low": 2
+  }
+}

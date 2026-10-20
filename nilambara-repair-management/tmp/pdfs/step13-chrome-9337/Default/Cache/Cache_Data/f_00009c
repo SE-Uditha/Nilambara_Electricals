@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="csrf-token" content="77GUxEfYNjomrFTXuDve4JxkvzacWuRY3dTC5XZ9">
+<meta name="theme-color" content="#122b36">
+<title>Repair Receipts · Nilambara Repair Management</title>
+<link rel="icon" type="image/svg+xml" href="http://127.0.0.1:8087/favicon.svg">
+<link rel="preload" as="style" href="http://127.0.0.1:8087/build/assets/app-CDRURyWK.css" /><link rel="modulepreload" as="script" href="http://127.0.0.1:8087/build/assets/app-BvRk9kiK.js" /><link rel="stylesheet" href="http://127.0.0.1:8087/build/assets/app-CDRURyWK.css" data-navigate-track="reload" /><script type="module" src="http://127.0.0.1:8087/build/assets/app-BvRk9kiK.js" data-navigate-track="reload"></script><!-- Livewire Styles --><style >[wire\:loading][wire\:loading], [wire\:loading\.delay][wire\:loading\.delay], [wire\:loading\.list-item][wire\:loading\.list-item], [wire\:loading\.inline-block][wire\:loading\.inline-block], [wire\:loading\.inline][wire\:loading\.inline], [wire\:loading\.block][wire\:loading\.block], [wire\:loading\.flex][wire\:loading\.flex], [wire\:loading\.table][wire\:loading\.table], [wire\:loading\.grid][wire\:loading\.grid], [wire\:loading\.inline-flex][wire\:loading\.inline-flex] {display: none;}[wire\:loading\.delay\.none][wire\:loading\.delay\.none], [wire\:loading\.delay\.shortest][wire\:loading\.delay\.shortest], [wire\:loading\.delay\.shorter][wire\:loading\.delay\.shorter], [wire\:loading\.delay\.short][wire\:loading\.delay\.short], [wire\:loading\.delay\.default][wire\:loading\.delay\.default], [wire\:loading\.delay\.long][wire\:loading\.delay\.long], [wire\:loading\.delay\.longer][wire\:loading\.delay\.longer], [wire\:loading\.delay\.longest][wire\:loading\.delay\.longest] {display: none;}[wire\:offline][wire\:offline] {display: none;}[wire\:dirty]:not(textarea):not(input):not(select) {display: none;}:root {--livewire-progress-bar-color: #2299dd;}[x-cloak="x-cloak"],[x-cloak=""] {display: none !important;}[wire\:cloak="wire:cloak"],[wire\:cloak=""] {display: none !important;}dialog#livewire-error::backdrop {background-color: rgba(0, 0, 0, .6);}</style>
+</head>
+<body class="app-body" x-data="{ sidebarOpen: false, desktop: window.innerWidth >= 1024 }" x-on:resize.window="desktop = window.innerWidth >= 1024; if (desktop) sidebarOpen = false" x-on:keydown.escape.window="if (sidebarOpen) { sidebarOpen = false; $refs.menuButton.focus() }" :class="{ 'drawer-open': sidebarOpen }">
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <button x-cloak x-show="sidebarOpen" x-transition.opacity type="button" class="sidebar-backdrop lg:hidden" x-on:click="sidebarOpen = false; $refs.menuButton.focus()" aria-label="Close navigation"></button>
+
+    <aside id="main-sidebar" class="app-sidebar" :class="{ 'is-open': sidebarOpen }" :inert="!desktop && !sidebarOpen" aria-label="Main navigation">
+        <div class="flex h-[88px] shrink-0 items-center justify-between border-b border-white/8 px-5">
+            <a href="http://127.0.0.1:8087/dashboard" class="rounded-lg text-white" aria-label="Nilambara Repair Management — Dashboard"><div class="flex items-center gap-3">
+    <span class="brand-mark flex h-16 w-14 shrink-0 items-center justify-center rounded-xl p-1.5" aria-hidden="true">
+                    <img src="http://127.0.0.1:8087/images/nilambara-electrical-logo.png" alt="" width="48" height="56" class="h-full w-full rounded-md bg-white object-contain p-0.5">
+            </span>
+            <span class="min-w-0">
+            <span class="block text-sm font-bold tracking-wide">Nilambara Electricals</span>
+            <span class="mt-0.5 block text-[10px] font-medium tracking-[0.12em] opacity-55">REPAIR MANAGEMENT</span>
+        </span>
+    </div>
+</a>
+            <button type="button" x-ref="closeNavigation" class="rounded-lg p-2 text-slate-300 hover:bg-white/10 lg:hidden" x-on:click="sidebarOpen = false; $refs.menuButton.focus()" aria-label="Close navigation"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="m6 6 12 12M18 6 6 18" />
+            </svg>
+</button>
+        </div>
+        <nav class="sidebar-scroll min-h-0 flex-1 overflow-y-auto px-3 pt-5 pb-6">
+                            <div class="mb-5 last:mb-0">
+                    <h2 class="mb-2 px-3 text-[9px] font-semibold tracking-[0.15em] text-slate-500 uppercase">Workspace</h2>
+                    <div class="space-y-0.5">
+                                                                                    <a href="http://127.0.0.1:8087/dashboard" class="sidebar-link" >
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0">
+                <rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" /><rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" />
+            </svg>
+        <span class="flex-1">Dashboard</span>
+        <span class="size-1.5 rounded-full bg-teal-300" aria-hidden="true"></span>
+    </a>
+                                                                        </div>
+                </div>
+                            <div class="mb-5 last:mb-0">
+                    <h2 class="mb-2 px-3 text-[9px] font-semibold tracking-[0.15em] text-slate-500 uppercase">REPAIR MANAGEMENT</h2>
+                    <div class="space-y-0.5">
+                                                                                    <a href="http://127.0.0.1:8087/customers" class="sidebar-link" >
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0">
+                <circle cx="9" cy="8" r="3" /><path d="M3 21v-3a6 6 0 0 1 12 0v3M16 5a3 3 0 0 1 0 6M21 21v-3a6 6 0 0 0-4-5.65" />
+            </svg>
+        <span class="flex-1">Customers</span>
+        <span class="size-1.5 rounded-full bg-teal-300" aria-hidden="true"></span>
+    </a>
+                                                                                                                <a href="http://127.0.0.1:8087/repair-receipts" class="sidebar-link is-active"  aria-current="page" >
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0">
+                <path d="M5 3h14v18l-3-2-4 2-4-2-3 2V3ZM9 7h6M9 11h6M9 15h3" />
+            </svg>
+        <span class="flex-1">Repair Receipts</span>
+        <span class="size-1.5 rounded-full bg-teal-300" aria-hidden="true"></span>
+    </a>
+                                                                                                                <a href="http://127.0.0.1:8087/repair-receipts/create" class="sidebar-link" >
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0">
+                <path d="M5 3h14v18l-3-2-4 2-4-2-3 2V3ZM9 7h6M9 11h6M9 15h3" />
+            </svg>
+        <span class="flex-1">New repair receipt</span>
+        <span class="size-1.5 rounded-full bg-teal-300" aria-hidden="true"></span>
+    </a>
+                                                                                                                <a href="http://127.0.0.1:8087/repair-jobs" class="sidebar-link" >
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0">
+                <path d="m14.5 6.5 3 3 3.25-3.25a6 6 0 0 1-7.68 7.68L6.5 20.5a2.12 2.12 0 0 1-3-3l6.57-6.57A6 6 0 0 1 17.75 3.25L14.5 6.5Z" />
+            </svg>
+        <span class="flex-1">Repair Jobs</span>
+        <span class="size-1.5 rounded-full bg-teal-300" aria-hidden="true"></span>
+    </a>
+                                                                                                                                                                    <a href="http://127.0.0.1:8087/job-cards" class="sidebar-link" >
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0">
+                <rect x="5" y="4" width="14" height="17" rx="2" /><rect x="9" y="2" width="6" height="4" rx="1" /><path d="M9 11h6M9 15h6" />
+            </svg>
+        <span class="flex-1">Job Cards</span>
+        <span class="size-1.5 rounded-full bg-teal-300" aria-hidden="true"></span>
+    </a>
+                                                                                                                <a href="http://127.0.0.1:8087/quotations" class="sidebar-link" >
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6ZM14 2v6h6M8 13h8M8 17h5" />
+            </svg>
+        <span class="flex-1">Quotations</span>
+        <span class="size-1.5 rounded-full bg-teal-300" aria-hidden="true"></span>
+    </a>
+                                                                                                                <a href="http://127.0.0.1:8087/repair-jobs/status" class="sidebar-link" >
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0">
+                <path d="M3 12h4l3-8 4 16 3-8h4" />
+            </svg>
+        <span class="flex-1">Job Status</span>
+        <span class="size-1.5 rounded-full bg-teal-300" aria-hidden="true"></span>
+    </a>
+                                                                        </div>
+                </div>
+                            <div class="mb-5 last:mb-0">
+                    <h2 class="mb-2 px-3 text-[9px] font-semibold tracking-[0.15em] text-slate-500 uppercase">Sales &amp; finance</h2>
+                    <div class="space-y-0.5">
+                                                                                    <a href="http://127.0.0.1:8087/invoices" class="sidebar-link" >
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0">
+                <path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3ZM9 7h6M9 11h6M9 15h2" />
+            </svg>
+        <span class="flex-1">All Invoices</span>
+        <span class="size-1.5 rounded-full bg-teal-300" aria-hidden="true"></span>
+    </a>
+                                                                                                                <a href="http://127.0.0.1:8087/invoices?status=draft" class="sidebar-link" >
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6ZM14 2v6h6M8 13h8M8 17h5" />
+            </svg>
+        <span class="flex-1">Draft Invoices</span>
+        <span class="size-1.5 rounded-full bg-teal-300" aria-hidden="true"></span>
+    </a>
+                                                                                                                <a href="http://127.0.0.1:8087/invoices?status=finalized" class="sidebar-link" >
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6ZM14 2v6h6M8 13h8M8 17h5" />
+            </svg>
+        <span class="flex-1">Issued Invoices</span>
+        <span class="size-1.5 rounded-full bg-teal-300" aria-hidden="true"></span>
+    </a>
+                                                                                                                <a href="http://127.0.0.1:8087/invoices?payment_status=outstanding" class="sidebar-link" >
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0">
+                <path d="M20 8V6a2 2 0 0 0-2-2H5a3 3 0 0 0 0 6h15v10H5a3 3 0 0 1-3-3V7M20 12h-5v5h5" /><path d="M17 14.5h.01" />
+            </svg>
+        <span class="flex-1">Outstanding Invoices</span>
+        <span class="size-1.5 rounded-full bg-teal-300" aria-hidden="true"></span>
+    </a>
+                                                                                                                <a href="http://127.0.0.1:8087/invoices/create" class="sidebar-link" >
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0">
+                <path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3ZM9 7h6M9 11h6M9 15h2" />
+            </svg>
+        <span class="flex-1">Create Invoice</span>
+        <span class="size-1.5 rounded-full bg-teal-300" aria-hidden="true"></span>
+    </a>
+                                                                                                                <a href="http://127.0.0.1:8087/payments" class="sidebar-link" >
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0">
+                <path d="M20 8V6a2 2 0 0 0-2-2H5a3 3 0 0 0 0 6h15v10H5a3 3 0 0 1-3-3V7M20 12h-5v5h5" /><path d="M17 14.5h.01" />
+            </svg>
+        <span class="flex-1">Payments</span>
+        <span class="size-1.5 rounded-full bg-teal-300" aria-hidden="true"></span>
+    </a>
+                                                                                                                <a href="http://127.0.0.1:8087/payments/create" class="sidebar-link" >
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0">
+                <path d="M20 8V6a2 2 0 0 0-2-2H5a3 3 0 0 0 0 6h15v10H5a3 3 0 0 1-3-3V7M20 12h-5v5h5" /><path d="M17 14.5h.01" />
+            </svg>
+        <span class="flex-1">Record payment</span>
+        <span class="size-1.5 rounded-full bg-teal-300" aria-hidden="true"></span>
+    </a>
+                                                                                                                <a href="http://127.0.0.1:8087/credit-invoices" class="sidebar-link" >
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0">
+                <rect x="2" y="4" width="20" height="16" rx="3" /><path d="M2 9h20M6 15h4M15 15h3" />
+            </svg>
+        <span class="flex-1">Credit Management</span>
+        <span class="size-1.5 rounded-full bg-teal-300" aria-hidden="true"></span>
+    </a>
+                                                                                                                <a href="http://127.0.0.1:8087/pos" class="sidebar-link" >
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0">
+                <rect x="4" y="3" width="16" height="12" rx="2" /><path d="M9 15v5M15 15v5M6 21h12M8 7h8M8 11h4" />
+            </svg>
+        <span class="flex-1">POS</span>
+        <span class="size-1.5 rounded-full bg-teal-300" aria-hidden="true"></span>
+    </a>
+                                                                                                                <a href="http://127.0.0.1:8087/pos/sales" class="sidebar-link" >
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6ZM14 2v6h6M8 13h8M8 17h5" />
+            </svg>
+        <span class="flex-1">POS sales history</span>
+        <span class="size-1.5 rounded-full bg-teal-300" aria-hidden="true"></span>
+    </a>
+                                                                                                                <a href="http://127.0.0.1:8087/pos/returns" class="sidebar-link" >
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0">
+                <path d="M5 3h14v18l-3-2-4 2-4-2-3 2V3ZM9 7h6M9 11h6M9 15h3" />
+            </svg>
+        <span class="flex-1">POS returns</span>
+        <span class="size-1.5 rounded-full bg-teal-300" aria-hidden="true"></span>
+    </a>
+                                                                                                                <a href="http://127.0.0.1:8087/pos/reports" class="sidebar-link" >
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0">
+                <path d="M3 3v18h18M7 16v-4M12 16V7M17 16v-7" />
+            </svg>
+        <span class="flex-1">POS reports</span>
+        <span class="size-1.5 rounded-full bg-teal-300" aria-hidden="true"></span>
+    </a>
+                                                                                                                <a href="http://127.0.0.1:8087/reports/cash-summary" class="sidebar-link" >
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0">
+                <path d="M20 8V6a2 2 0 0 0-2-2H5a3 3 0 0 0 0 6h15v10H5a3 3 0 0 1-3-3V7M20 12h-5v5h5" /><path d="M17 14.5h.01" />
+            </svg>
+        <span class="flex-1">Cash Summary</span>
+        <span class="size-1.5 rounded-full bg-teal-300" aria-hidden="true"></span>
+    </a>
+                                                                        </div>
+                </div>
+                            <div class="mb-5 last:mb-0">
+                    <h2 class="mb-2 px-3 text-[9px] font-semibold tracking-[0.15em] text-slate-500 uppercase">Stock &amp; purchasing</h2>
+                    <div class="space-y-0.5">
+                                                                                    <a href="http://127.0.0.1:8087/inventory" class="sidebar-link" >
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0">
+                <path d="m12 3 9 5v9l-9 5-9-5V8l9-5ZM3 8l9 5 9-5M12 13v9M7.5 5.5l9 5" />
+            </svg>
+        <span class="flex-1">Inventory</span>
+        <span class="size-1.5 rounded-full bg-teal-300" aria-hidden="true"></span>
+    </a>
+                                                                                                                <a href="http://127.0.0.1:8087/suppliers" class="sidebar-link" >
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0">
+                <path d="M1 4h13v13H1V4ZM14 9h5l3 4v4h-8M3 17h1M9 17h8" /><circle cx="6.5" cy="18" r="2.5" /><circle cx="19.5" cy="18" r="2.5" />
+            </svg>
+        <span class="flex-1">Suppliers</span>
+        <span class="size-1.5 rounded-full bg-teal-300" aria-hidden="true"></span>
+    </a>
+                                                                                                                <a href="http://127.0.0.1:8087/purchases" class="sidebar-link" >
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0">
+                <path d="M5 7h14l2 14H3L5 7ZM8 8V6a4 4 0 0 1 8 0v2" />
+            </svg>
+        <span class="flex-1">Purchases</span>
+        <span class="size-1.5 rounded-full bg-teal-300" aria-hidden="true"></span>
+    </a>
+                                                                                                                <a href="http://127.0.0.1:8087/stock-issues" class="sidebar-link" >
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0">
+                <path d="m12 3 9 5v9l-9 5-9-5V8l9-5ZM3 8l9 5 9-5M12 13v9M7.5 5.5l9 5" />
+            </svg>
+        <span class="flex-1">Stock Issues</span>
+        <span class="size-1.5 rounded-full bg-teal-300" aria-hidden="true"></span>
+    </a>
+                                                                                                                            </div>
+                </div>
+                            <div class="mb-5 last:mb-0">
+                    <h2 class="mb-2 px-3 text-[9px] font-semibold tracking-[0.15em] text-slate-500 uppercase">Business reports</h2>
+                    <div class="space-y-0.5">
+                                                                                    <a href="http://127.0.0.1:8087/reports/repair" class="sidebar-link" >
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0">
+                <path d="M3 3v18h18M7 16v-4M12 16V7M17 16v-7" />
+            </svg>
+        <span class="flex-1">Repair reports</span>
+        <span class="size-1.5 rounded-full bg-teal-300" aria-hidden="true"></span>
+    </a>
+                                                                                                                <a href="http://127.0.0.1:8087/reports/sales" class="sidebar-link" >
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0">
+                <path d="M3 3v18h18M7 16v-4M12 16V7M17 16v-7" />
+            </svg>
+        <span class="flex-1">Sales reports</span>
+        <span class="size-1.5 rounded-full bg-teal-300" aria-hidden="true"></span>
+    </a>
+                                                                                                                <a href="http://127.0.0.1:8087/reports/collections" class="sidebar-link" >
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0">
+                <path d="M3 3v18h18M7 16v-4M12 16V7M17 16v-7" />
+            </svg>
+        <span class="flex-1">Financial reports</span>
+        <span class="size-1.5 rounded-full bg-teal-300" aria-hidden="true"></span>
+    </a>
+                                                                                                                <a href="http://127.0.0.1:8087/reports/customer-credit" class="sidebar-link" >
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0">
+                <rect x="2" y="4" width="20" height="16" rx="3" /><path d="M2 9h20M6 15h4M15 15h3" />
+            </svg>
+        <span class="flex-1">Credit reports</span>
+        <span class="size-1.5 rounded-full bg-teal-300" aria-hidden="true"></span>
+    </a>
+                                                                                                                <a href="http://127.0.0.1:8087/reports/stock" class="sidebar-link" >
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0">
+                <path d="m12 3 9 5v9l-9 5-9-5V8l9-5ZM3 8l9 5 9-5M12 13v9M7.5 5.5l9 5" />
+            </svg>
+        <span class="flex-1">Inventory reports</span>
+        <span class="size-1.5 rounded-full bg-teal-300" aria-hidden="true"></span>
+    </a>
+                                                                                                                <a href="http://127.0.0.1:8087/reports/supplier-outstanding" class="sidebar-link" >
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0">
+                <path d="M1 4h13v13H1V4ZM14 9h5l3 4v4h-8M3 17h1M9 17h8" /><circle cx="6.5" cy="18" r="2.5" /><circle cx="19.5" cy="18" r="2.5" />
+            </svg>
+        <span class="flex-1">Supplier reports</span>
+        <span class="size-1.5 rounded-full bg-teal-300" aria-hidden="true"></span>
+    </a>
+                                                                                                                <a href="http://127.0.0.1:8087/reports/profit-estimate" class="sidebar-link" >
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0">
+                <path d="M3 3v18h18M7 16v-4M12 16V7M17 16v-7" />
+            </svg>
+        <span class="flex-1">Profit estimate</span>
+        <span class="size-1.5 rounded-full bg-teal-300" aria-hidden="true"></span>
+    </a>
+                                                                        </div>
+                </div>
+                            <div class="mb-5 last:mb-0">
+                    <h2 class="mb-2 px-3 text-[9px] font-semibold tracking-[0.15em] text-slate-500 uppercase">Administration</h2>
+                    <div class="space-y-0.5">
+                                                                                    <a href="http://127.0.0.1:8087/employees" class="sidebar-link" >
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0">
+                <rect x="4" y="5" width="16" height="16" rx="2" /><path d="M9 3h6v4H9V3M8 17a4 4 0 0 1 8 0" /><circle cx="12" cy="12" r="2" />
+            </svg>
+        <span class="flex-1">Employees</span>
+        <span class="size-1.5 rounded-full bg-teal-300" aria-hidden="true"></span>
+    </a>
+                                                                                                                <a href="http://127.0.0.1:8087/admin/users" class="sidebar-link" >
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0">
+                <circle cx="9" cy="8" r="3" /><path d="M3 21v-3a6 6 0 0 1 12 0v3M16 5a3 3 0 0 1 0 6M21 21v-3a6 6 0 0 0-4-5.65" />
+            </svg>
+        <span class="flex-1">User Accounts</span>
+        <span class="size-1.5 rounded-full bg-teal-300" aria-hidden="true"></span>
+    </a>
+                                                                                                                <a href="http://127.0.0.1:8087/admin/roles" class="sidebar-link" >
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0">
+                <path d="m12 2 9 4v6c0 5-9 10-9 10S3 17 3 12V6l9-4ZM8 12l3 3 5-6" />
+            </svg>
+        <span class="flex-1">Roles &amp; Permissions</span>
+        <span class="size-1.5 rounded-full bg-teal-300" aria-hidden="true"></span>
+    </a>
+                                                                                                                <a href="http://127.0.0.1:8087/admin/permissions" class="sidebar-link" >
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0">
+                <rect x="5" y="10" width="14" height="11" rx="2" /><path d="M8 10V6a4 4 0 0 1 8 0v4M12 14v3" />
+            </svg>
+        <span class="flex-1">Permissions</span>
+        <span class="size-1.5 rounded-full bg-teal-300" aria-hidden="true"></span>
+    </a>
+                                                                                                                <button type="button" class="sidebar-link sidebar-link-disabled w-full text-left" disabled aria-disabled="true">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0 opacity-70">
+                <path d="m12 2 9 4v6c0 5-9 10-9 10S3 17 3 12V6l9-4ZM8 12l3 3 5-6" />
+            </svg>
+        <span class="flex-1">Authorized Approvals</span>
+        <span class="soon-label">Coming soon</span>
+    </button>
+                                                                                                                <a href="http://127.0.0.1:8087/reports" class="sidebar-link" >
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0">
+                <path d="M3 3v18h18M7 16v-4M12 16V7M17 16v-7" />
+            </svg>
+        <span class="flex-1">Reports</span>
+        <span class="size-1.5 rounded-full bg-teal-300" aria-hidden="true"></span>
+    </a>
+                                                                                                                <a href="http://127.0.0.1:8087/backups" class="sidebar-link" >
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0">
+                <ellipse cx="12" cy="5" rx="9" ry="3" /><path d="M3 5v7c0 4 18 4 18 0V5M3 12v7c0 4 18 4 18 0v-7" />
+            </svg>
+        <span class="flex-1">Backup &amp; Restore</span>
+        <span class="size-1.5 rounded-full bg-teal-300" aria-hidden="true"></span>
+    </a>
+                                                                                                                <a href="http://127.0.0.1:8087/settings" class="sidebar-link" >
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0">
+                <path d="m9 3-.6 2.3-2 .9-2.2-.6-2 3.4 1.6 1.7v2.6L2.2 15l2 3.4 2.2-.6 2 .9L9 21h4l.6-2.3 2-.9 2.2.6 2-3.4-1.6-1.7v-2.6L19.8 9l-2-3.4-2.2.6-2-.9L13 3H9Z" /><circle cx="11" cy="12" r="3" />
+            </svg>
+        <span class="flex-1">System Settings</span>
+        <span class="size-1.5 rounded-full bg-teal-300" aria-hidden="true"></span>
+    </a>
+                                                                                                                <a href="http://127.0.0.1:8087/print-templates" class="sidebar-link" >
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6ZM14 2v6h6M8 13h8M8 17h5" />
+            </svg>
+        <span class="flex-1">Print templates</span>
+        <span class="size-1.5 rounded-full bg-teal-300" aria-hidden="true"></span>
+    </a>
+                                                                                                                <a href="http://127.0.0.1:8087/audit-logs" class="sidebar-link" >
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="shrink-0">
+                <path d="M3 12h4l3-8 4 16 3-8h4" />
+            </svg>
+        <span class="flex-1">Audit log</span>
+        <span class="size-1.5 rounded-full bg-teal-300" aria-hidden="true"></span>
+    </a>
+                                                                        </div>
+                </div>
+                    </nav>
+                <div class="shrink-0 border-t border-white/8 bg-black/10 p-4">
+            <div class="flex items-center gap-3 px-1">
+                <span class="flex size-9 shrink-0 items-center justify-center rounded-xl bg-white/10 text-sm font-semibold text-teal-200" aria-hidden="true">D</span>
+                <div class="min-w-0 flex-1">
+                    <p class="truncate text-xs font-semibold text-white">Documentation Operator (Test)</p>
+                    <p class="mt-0.5 truncate text-[10px] text-slate-400">zachery81@example.net</p>
+                </div>
+                <form method="POST" action="http://127.0.0.1:8087/logout">
+                    <input type="hidden" name="_token" value="77GUxEfYNjomrFTXuDve4JxkvzacWuRY3dTC5XZ9" autocomplete="off">                    <button type="submit" class="rounded-lg p-2 text-slate-400 transition hover:bg-white/10 hover:text-white" aria-label="Sign out" title="Sign out"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M9 4H4v16h5M14 8l4 4-4 4M8 12h13" />
+            </svg>
+</button>
+                </form>
+            </div>
+        </div>
+    </aside>
+
+    <div class="app-workspace">
+        <header class="app-topbar">
+            <div class="flex min-w-0 items-center gap-4">
+                <button type="button" x-ref="menuButton" class="-ml-2 rounded-lg p-2 text-slate-600 hover:bg-slate-100 lg:hidden" x-on:click="sidebarOpen = true; $nextTick(() => $refs.closeNavigation.focus())" aria-controls="main-sidebar" :aria-expanded="sidebarOpen" aria-label="Open navigation"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+</button>
+                <div class="flex min-w-0 items-center gap-2.5 text-xs">
+                    <span class="hidden text-slate-400 sm:inline">Workspace</span>
+                    <span class="hidden text-slate-300 sm:inline" aria-hidden="true">/</span>
+                    <span class="font-semibold text-slate-700">Repair Receipts</span>
+                </div>
+            </div>
+            <div class="flex shrink-0 items-center gap-4">
+                <div class="hidden items-center gap-2 text-[11px] text-slate-500 md:flex">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="3" y="5" width="18" height="16" rx="2" /><path d="M7 3v4M17 3v4M3 11h18M8 15h2M14 15h2" />
+            </svg>
+                    <time datetime="2026-10-20">Tue, 20 Oct 2026</time>
+                    <span class="ml-1 border-l border-slate-200 pl-2 text-[10px] text-slate-400">Asia/Colombo</span>
+                </div>
+                <div class="flex items-center gap-1.5 rounded-lg border border-slate-200 px-2.5 py-1.5 text-[10px] font-semibold text-slate-600" title="Current language"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="9" /><ellipse cx="12" cy="12" rx="4" ry="9" /><path d="M3 12h18" />
+            </svg>
+<span>EN</span></div>
+                <span class="hidden size-8 items-center justify-center rounded-full border-2 border-white bg-teal-50 text-[11px] font-bold text-teal-700 ring-1 ring-slate-200 sm:flex" aria-hidden="true">D</span>
+            </div>
+        </header>
+
+        <main id="main-content" class="mx-auto w-full max-w-[1600px] flex-1 px-5 py-7 sm:px-8 lg:px-9 lg:py-9" tabindex="-1">
+                <div class="mb-7 flex flex-wrap items-end justify-between gap-4">
+        <div>
+            <p class="mb-2 text-[10px] font-semibold tracking-[0.15em] text-teal-700 uppercase">Workshop</p>
+            <h1 class="text-2xl font-bold tracking-tight text-slate-900">Repair Receipts</h1>
+            <p class="mt-1 text-sm text-slate-500">Register repair items, manage receipt copies, and open the linked repair jobs.</p>
+        </div>
+                    <a href="http://127.0.0.1:8087/repair-receipts/create" class="rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white hover:bg-teal-800">New repair receipt</a>
+            </div>
+
+    
+    <form method="GET" action="http://127.0.0.1:8087/repair-receipts" class="mb-5 grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 md:grid-cols-3 xl:grid-cols-6">
+        <input name="q" value="" class="form-input xl:col-span-2" placeholder="Search reference, job number, customer, mobile, or item" aria-label="Search repair receipts">
+        <input type="date" name="date_from" value="" class="form-input" aria-label="Date from">
+        <input type="date" name="date_to" value="" class="form-input" aria-label="Date to">
+        <select name="job_type" class="form-input" aria-label="Job type">
+            <option value="">All job types</option>
+                            <option value="normal" >Normal</option>
+                            <option value="special" >Special</option>
+                            <option value="urgent" >Urgent</option>
+                    </select>
+        <select name="status" class="form-input" aria-label="Job Status">
+            <option value="">All statuses</option>
+                            <option value="Received" >Received</option>
+                            <option value="Pending Inspection" >Pending Inspection</option>
+                            <option value="Under Inspection" >Under Inspection</option>
+                            <option value="Quotation Pending" >Quotation Pending</option>
+                            <option value="Waiting for Customer Approval" >Waiting for Customer Approval</option>
+                            <option value="Customer Contact Failed" >Customer Contact Failed</option>
+                            <option value="Advance Payment Pending" >Advance Payment Pending</option>
+                            <option value="Waiting for Spare Parts" >Waiting for Spare Parts</option>
+                            <option value="Under Repair" >Under Repair</option>
+                            <option value="Price Modification" >Price Modification</option>
+                            <option value="Re – Assembling" >Re – Assembling</option>
+                            <option value="Repair Completed" >Repair Completed</option>
+                            <option value="Ready for Collection" >Ready for Collection</option>
+                            <option value="Customer Contact Failed After Ready" >Customer Contact Failed After Ready</option>
+                            <option value="Delivered" >Delivered</option>
+                            <option value="Cancelled" >Cancelled</option>
+                            <option value="Unable to Repair" >Unable to Repair</option>
+                    </select>
+        <select name="received_by" class="form-input" aria-label="Received by">
+            <option value="">All employees</option>
+                            <option value="1" >Documentation Staff (Test)</option>
+                    </select>
+        <button class="rounded-xl border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">Filter</button>
+            </form>
+
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+        <div class="overflow-x-auto">
+            <table class="w-full min-w-[1200px] text-left text-xs">
+                <thead class="bg-slate-50 text-[10px] font-semibold tracking-wide text-slate-500 uppercase">
+                    <tr>
+                        <th class="px-4 py-3">Job reference</th>
+                        <th class="px-4 py-3">Manual job number</th>
+                        <th class="px-4 py-3">Received date</th>
+                        <th class="px-4 py-3">Customer</th>
+                        <th class="px-4 py-3">Mobile number</th>
+                        <th class="px-4 py-3">Item name</th>
+                        <th class="px-4 py-3">Brand / model</th>
+                        <th class="px-4 py-3">Job type</th>
+                        <th class="px-4 py-3">Job Status</th>
+                        <th class="px-4 py-3">Received by</th>
+                        <th class="px-4 py-3">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                                                                    <tr class="text-slate-700">
+                            <td class="px-4 py-4 font-mono font-semibold text-teal-800">JOB-00004</td>
+                            <td class="px-4 py-4 font-mono">DOC-JOB-4</td>
+                            <td class="px-4 py-4">20 Oct 2026 07:53 PM</td>
+                            <td class="px-4 py-4">Documentation Customer (Test)</td>
+                            <td class="px-4 py-4">0000000000</td>
+                            <td class="px-4 py-4">Demonstration Motor (Test)</td>
+                            <td class="px-4 py-4">Documentation DOC-01</td>
+                            <td class="px-4 py-4">Normal</td>
+                            <td class="px-4 py-4"><span class="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold text-slate-700">Repair Completed</span></td>
+                            <td class="px-4 py-4">Documentation Staff (Test)</td>
+                            <td class="px-4 py-4">
+                                <div class="flex gap-3">
+                                    <a href="http://127.0.0.1:8087/repair-receipts/4" class="font-semibold text-teal-700 hover:text-teal-900">View</a>
+                                                                            <a href="http://127.0.0.1:8087/repair-receipts/4/print" class="font-semibold text-slate-600 hover:text-slate-900">Print</a>
+                                                                    </div>
+                            </td>
+                        </tr>
+                                                                    <tr class="text-slate-700">
+                            <td class="px-4 py-4 font-mono font-semibold text-teal-800">JOB-00003</td>
+                            <td class="px-4 py-4 font-mono">DOC-JOB-3</td>
+                            <td class="px-4 py-4">20 Oct 2026 07:53 PM</td>
+                            <td class="px-4 py-4">Documentation Customer (Test)</td>
+                            <td class="px-4 py-4">0000000000</td>
+                            <td class="px-4 py-4">Demonstration Motor (Test)</td>
+                            <td class="px-4 py-4">Documentation DOC-01</td>
+                            <td class="px-4 py-4">Normal</td>
+                            <td class="px-4 py-4"><span class="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold text-slate-700">Waiting for Customer Approval</span></td>
+                            <td class="px-4 py-4">Documentation Staff (Test)</td>
+                            <td class="px-4 py-4">
+                                <div class="flex gap-3">
+                                    <a href="http://127.0.0.1:8087/repair-receipts/3" class="font-semibold text-teal-700 hover:text-teal-900">View</a>
+                                                                            <a href="http://127.0.0.1:8087/repair-receipts/3/print" class="font-semibold text-slate-600 hover:text-slate-900">Print</a>
+                                                                    </div>
+                            </td>
+                        </tr>
+                                                                    <tr class="text-slate-700">
+                            <td class="px-4 py-4 font-mono font-semibold text-teal-800">JOB-00002</td>
+                            <td class="px-4 py-4 font-mono">DOC-JOB-2</td>
+                            <td class="px-4 py-4">20 Oct 2026 07:53 PM</td>
+                            <td class="px-4 py-4">Documentation Customer (Test)</td>
+                            <td class="px-4 py-4">0000000000</td>
+                            <td class="px-4 py-4">Demonstration Motor (Test)</td>
+                            <td class="px-4 py-4">Documentation DOC-01</td>
+                            <td class="px-4 py-4">Normal</td>
+                            <td class="px-4 py-4"><span class="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold text-slate-700">Repair Completed</span></td>
+                            <td class="px-4 py-4">Documentation Staff (Test)</td>
+                            <td class="px-4 py-4">
+                                <div class="flex gap-3">
+                                    <a href="http://127.0.0.1:8087/repair-receipts/2" class="font-semibold text-teal-700 hover:text-teal-900">View</a>
+                                                                            <a href="http://127.0.0.1:8087/repair-receipts/2/print" class="font-semibold text-slate-600 hover:text-slate-900">Print</a>
+                                                                    </div>
+                            </td>
+                        </tr>
+                                                                    <tr class="text-slate-700">
+                            <td class="px-4 py-4 font-mono font-semibold text-teal-800">JOB-00001</td>
+                            <td class="px-4 py-4 font-mono">DOC-JOB-1</td>
+                            <td class="px-4 py-4">20 Oct 2026 07:53 PM</td>
+                            <td class="px-4 py-4">Documentation Customer (Test)</td>
+                            <td class="px-4 py-4">0000000000</td>
+                            <td class="px-4 py-4">Demonstration Motor (Test)</td>
+                            <td class="px-4 py-4">Documentation DOC-01</td>
+                            <td class="px-4 py-4">Normal</td>
+                            <td class="px-4 py-4"><span class="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold text-slate-700">Repair Completed</span></td>
+                            <td class="px-4 py-4">Documentation Staff (Test)</td>
+                            <td class="px-4 py-4">
+                                <div class="flex gap-3">
+                                    <a href="http://127.0.0.1:8087/repair-receipts/1" class="font-semibold text-teal-700 hover:text-teal-900">View</a>
+                                                                            <a href="http://127.0.0.1:8087/repair-receipts/1/print" class="font-semibold text-slate-600 hover:text-slate-900">Print</a>
+                                                                    </div>
+                            </td>
+                        </tr>
+                                    </tbody>
+            </table>
+        </div>
+        <div class="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 px-5 py-4">
+            <p class="text-xs text-slate-500">Showing 4 of 4 records</p>
+                    </div>
+    </div>
+        </main>
+        <footer class="mx-5 flex flex-wrap items-center justify-between gap-2 border-t border-slate-200/80 py-5 text-[10px] text-slate-400 sm:mx-8 lg:mx-9">
+            <p>© 2026 Nilambara Electricals</p>
+            <p>LKR <span class="mx-1.5 text-slate-300" aria-hidden="true">·</span> Asia/Colombo</p>
+        </footer>
+    </div>
+    <script src="http://127.0.0.1:8087/livewire-a43603f8/livewire.min.js?id=8ea5922c"   data-csrf="77GUxEfYNjomrFTXuDve4JxkvzacWuRY3dTC5XZ9" data-module-url="http://127.0.0.1:8087/livewire-a43603f8" data-update-uri="http://127.0.0.1:8087/livewire-a43603f8/update" data-navigate-once="true"></script>
+</body>
+</html>

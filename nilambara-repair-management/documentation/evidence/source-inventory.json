@@ -1,0 +1,4236 @@
+[
+  {
+    "path": "app/Console/Commands/AssignInitialAdministratorCommand.php",
+    "sha256": "e69e4e83a680bc50aea19a6ec649ab1069d47769793df54dcb40e1a2a061f03f",
+    "lines": 62,
+    "classes": [
+      "AssignInitialAdministratorCommand"
+    ],
+    "functions": [
+      "handle"
+    ]
+  },
+  {
+    "path": "app/Console/Commands/CreateDatabaseBackupCommand.php",
+    "sha256": "410d92a521b18802857fef8fd92929dfd401958e98aee4d41439efe7b0459c43",
+    "lines": 28,
+    "classes": [
+      "CreateDatabaseBackupCommand"
+    ],
+    "functions": [
+      "handle"
+    ]
+  },
+  {
+    "path": "app/Console/Commands/CreateUserCommand.php",
+    "sha256": "5e33f1ab4b6039ee0a7317a097d81e26c299cafdb32e209d73b50554ed6f8185",
+    "lines": 94,
+    "classes": [
+      "CreateUserCommand"
+    ],
+    "functions": [
+      "handle"
+    ]
+  },
+  {
+    "path": "app/Console/Commands/RestoreDatabaseBackupCommand.php",
+    "sha256": "d76d791554a85ad6e1ec652f5947fbef65000ff01210c74a21812c93fe397f7a",
+    "lines": 178,
+    "classes": [
+      "RestoreDatabaseBackupCommand"
+    ],
+    "functions": [
+      "handle"
+    ]
+  },
+  {
+    "path": "app/Enums/ApprovalStatus.php",
+    "sha256": "db6ab04179ceae2fa4e133cac58be721b5a4bbd0035ae130569364ccbbe278c5",
+    "lines": 15,
+    "classes": [],
+    "functions": [
+      "label"
+    ]
+  },
+  {
+    "path": "app/Enums/CustomerType.php",
+    "sha256": "169b97c7ead04295942634aea02604accc1939099674f5738803948263c34af4",
+    "lines": 14,
+    "classes": [],
+    "functions": [
+      "label"
+    ]
+  },
+  {
+    "path": "app/Enums/DocumentStatus.php",
+    "sha256": "a137fd65dc380b3d352ada36ab97185f3ff774a5cb2b0b10df127997b59c2745",
+    "lines": 15,
+    "classes": [],
+    "functions": [
+      "label"
+    ]
+  },
+  {
+    "path": "app/Enums/JobStatus.php",
+    "sha256": "b3fa74884283ed412b4566700d30de309d425c8a0f9511399b3fd8c9509e571b",
+    "lines": 29,
+    "classes": [],
+    "functions": [
+      "label"
+    ]
+  },
+  {
+    "path": "app/Enums/PaymentMethod.php",
+    "sha256": "5b9fcbeffada2815ae84304c7531c40ddcee00ef289e5ec8078cccaf6a359539",
+    "lines": 15,
+    "classes": [],
+    "functions": [
+      "label"
+    ]
+  },
+  {
+    "path": "app/Enums/PaymentStatus.php",
+    "sha256": "bbf486e27d2bdb1f165afce3a5eb0a160592f610f19253943e27af29769a8217",
+    "lines": 15,
+    "classes": [],
+    "functions": [
+      "label"
+    ]
+  },
+  {
+    "path": "app/Enums/PaymentTerms.php",
+    "sha256": "995e636d7431897bbe7e0c2fd38f8bfc2f759b5ee6c30302c7ca32d2ffd10f2c",
+    "lines": 14,
+    "classes": [],
+    "functions": [
+      "label"
+    ]
+  },
+  {
+    "path": "app/Enums/QuotationPreparationStatus.php",
+    "sha256": "a10bafa4e43eac567a98292929b3bd7e1eff519c352aed5cc2cbb69c8bd3a43b",
+    "lines": 16,
+    "classes": [],
+    "functions": [
+      "label"
+    ]
+  },
+  {
+    "path": "app/Http/Controllers/Controller.php",
+    "sha256": "25d1c1ef8e6cc8a376553faacfba2b07d9dfaee9bdbb84f14f77517580e9deb1",
+    "lines": 8,
+    "classes": [
+      "Controller"
+    ],
+    "functions": []
+  },
+  {
+    "path": "app/Http/Controllers/DashboardController.php",
+    "sha256": "9be35f473ee8006b02e62856373d4969b806e5cf53cca5265275c3c7846f0f1f",
+    "lines": 21,
+    "classes": [
+      "DashboardController"
+    ],
+    "functions": [
+      "__invoke"
+    ]
+  },
+  {
+    "path": "app/Http/Middleware/ApplySystemSettings.php",
+    "sha256": "ded7eae34f70980be13a794f9aba5685da1049d4754d8f34c6450521f65dfb75",
+    "lines": 18,
+    "classes": [
+      "ApplySystemSettings"
+    ],
+    "functions": [
+      "handle"
+    ]
+  },
+  {
+    "path": "app/Http/Middleware/EnsureActiveAccount.php",
+    "sha256": "57420c15c19cd4dd02c4207ec430068ac1ae7a13014808e220f696005b433855",
+    "lines": 27,
+    "classes": [
+      "EnsureActiveAccount"
+    ],
+    "functions": [
+      "handle"
+    ]
+  },
+  {
+    "path": "app/Livewire/DashboardOverview.php",
+    "sha256": "e8980fb5441f552928be01aa52c3dbb63b57d15ea8487eda72eecb69d5093e80",
+    "lines": 23,
+    "classes": [
+      "DashboardOverview"
+    ],
+    "functions": [
+      "render"
+    ]
+  },
+  {
+    "path": "app/Models/BusinessModel.php",
+    "sha256": "94cfb86b551d895742f821785e648bedc2dd544796ad1470b2e7e2c82cb77ce1",
+    "lines": 49,
+    "classes": [
+      "BusinessModel"
+    ],
+    "functions": [
+      "boot"
+    ]
+  },
+  {
+    "path": "app/Models/User.php",
+    "sha256": "ace10f68eee220a8dbd3ea47a31b43ca0fb2bcd7ff10c3fcce1d95ce20ef15a2",
+    "lines": 59,
+    "classes": [
+      "User"
+    ],
+    "functions": [
+      "employee",
+      "isExplicitlyDeniedPermission",
+      "hasActiveAccount",
+      "auditLogs",
+      "casts"
+    ]
+  },
+  {
+    "path": "app/Modules/AuditLogs/Controllers/AuditLogController.php",
+    "sha256": "32a6ce4c60811e07394dd9d4cb31e52f9b449a70d9c351e7b41d7cee24a3a6a2",
+    "lines": 41,
+    "classes": [
+      "AuditLogController"
+    ],
+    "functions": [
+      "index"
+    ]
+  },
+  {
+    "path": "app/Modules/AuditLogs/Models/AuditLog.php",
+    "sha256": "e87ea72eeb84ea9b00c84771409e6b6f111bb84ddab99ee1d420b76795c91fed",
+    "lines": 69,
+    "classes": [
+      "AuditLog"
+    ],
+    "functions": [
+      "oldValues",
+      "newValues",
+      "auditValuesAttribute",
+      "casts",
+      "user"
+    ]
+  },
+  {
+    "path": "app/Modules/BackupRestore/Controllers/BackupController.php",
+    "sha256": "108b920038c906835d8f9e8d11b300129f309d3d1816749036bb59bf52376520",
+    "lines": 99,
+    "classes": [
+      "BackupController"
+    ],
+    "functions": [
+      "index",
+      "create",
+      "download",
+      "verify",
+      "configure"
+    ]
+  },
+  {
+    "path": "app/Modules/BackupRestore/Models/BackupHistory.php",
+    "sha256": "4ae1099288133ee91b5895be2d828f76f7715b90a37e1a828129beeef0a65143",
+    "lines": 54,
+    "classes": [
+      "BackupHistory"
+    ],
+    "functions": [
+      "casts",
+      "initiatedByUser",
+      "backupRestores"
+    ]
+  },
+  {
+    "path": "app/Modules/BackupRestore/Models/BackupRestore.php",
+    "sha256": "90629f001ed8ae9462bea187600652b8fb425cc3c41ed425c2aa39a71f8f9b1f",
+    "lines": 47,
+    "classes": [
+      "BackupRestore"
+    ],
+    "functions": [
+      "casts",
+      "backupHistory",
+      "initiatedByUser"
+    ]
+  },
+  {
+    "path": "app/Modules/BackupRestore/Services/BackupConfigurationService.php",
+    "sha256": "cee35a5df4db03a561696577edfa9e2f19bd3b17bb1592cc8c8309bff0425931",
+    "lines": 44,
+    "classes": [
+      "BackupConfigurationService"
+    ],
+    "functions": [
+      "apply",
+      "update"
+    ]
+  },
+  {
+    "path": "app/Modules/BackupRestore/Services/BackupService.php",
+    "sha256": "e7936a5dca36a82e2da2cd84a15252422fe2de60894bc16dd8957f1b87eb5c81",
+    "lines": 409,
+    "classes": [
+      "BackupService"
+    ],
+    "functions": [
+      "isConfigured",
+      "create",
+      "verify",
+      "downloadPath",
+      "restoreDump",
+      "writeDumpChunk",
+      "removeTemporaryCredentialFile",
+      "cleanupVerifiedBackups",
+      "recordAudit",
+      "credentialFile",
+      "backupPath",
+      "requireRoot",
+      "safeRoot",
+      "isWithin",
+      "timestamp",
+      "isSafeDestination",
+      "executable"
+    ]
+  },
+  {
+    "path": "app/Modules/BackupRestore/Services/GoogleDriveBackupService.php",
+    "sha256": "c437cd2c399a7a075bcdb80bf643a39c855768ab2f7b89a6e40176f80dbd70dd",
+    "lines": 68,
+    "classes": [
+      "GoogleDriveBackupService"
+    ],
+    "functions": [
+      "configured",
+      "copy"
+    ]
+  },
+  {
+    "path": "app/Modules/CreditManagement/Controllers/CreditInvoiceController.php",
+    "sha256": "037fbd75cc4d26ac08d7ce32c988d12664116e03deb10062174fb22af6ee5cbb",
+    "lines": 95,
+    "classes": [
+      "CreditInvoiceController"
+    ],
+    "functions": [
+      "index",
+      "show",
+      "collect"
+    ]
+  },
+  {
+    "path": "app/Modules/CreditManagement/Models/CustomerAccountEntry.php",
+    "sha256": "0329631ea9c6b2fd0a2f1deb77be53b159623d2f8a3e0c7f57a548372df0bbfa",
+    "lines": 88,
+    "classes": [
+      "CustomerAccountEntry"
+    ],
+    "functions": [
+      "casts",
+      "customer",
+      "recordedByUser",
+      "invoice",
+      "posSale",
+      "payment",
+      "paymentReversal",
+      "reversesEntry",
+      "relatedCustomerAccountEntries"
+    ]
+  },
+  {
+    "path": "app/Modules/Customers/Controllers/CustomerController.php",
+    "sha256": "40dcac41302744633c02eab56d4c74e9b4d0308efbc3fd6b0f929a3b23f51f0b",
+    "lines": 256,
+    "classes": [
+      "CustomerController"
+    ],
+    "functions": [
+      "index",
+      "create",
+      "store",
+      "search",
+      "show",
+      "edit",
+      "update",
+      "activate",
+      "deactivate",
+      "statement",
+      "statementPrint",
+      "statementPdf",
+      "recordStatementPrint",
+      "statementTemplateData",
+      "statementFilters"
+    ]
+  },
+  {
+    "path": "app/Modules/Customers/Models/Customer.php",
+    "sha256": "866a38401228d32ffae10c8ed93b444b74ebe057033972ea3df80114ced6aeb0",
+    "lines": 128,
+    "classes": [
+      "Customer"
+    ],
+    "functions": [
+      "casts",
+      "displayName",
+      "repairJobs",
+      "repairReceipts",
+      "quotations",
+      "invoices",
+      "invoiceJobs",
+      "posSales",
+      "payments",
+      "paymentAllocations",
+      "paymentReversals",
+      "customerAccountEntries",
+      "documentPrintHistories",
+      "receipts",
+      "accountEntries"
+    ]
+  },
+  {
+    "path": "app/Modules/Customers/Policies/CustomerPolicy.php",
+    "sha256": "70211688d8c180cc41f0af3d9c2d4af7109397980b0ee818e567b296e40b111d",
+    "lines": 49,
+    "classes": [
+      "CustomerPolicy"
+    ],
+    "functions": [
+      "viewAny",
+      "view",
+      "create",
+      "update",
+      "activate",
+      "deactivate",
+      "statement",
+      "search"
+    ]
+  },
+  {
+    "path": "app/Modules/Customers/Requests/StoreCustomerRequest.php",
+    "sha256": "cd84cd8940f7765f4b76d634920c59fe669e2584f1070f8b16b34e940dc471f2",
+    "lines": 50,
+    "classes": [
+      "StoreCustomerRequest"
+    ],
+    "functions": [
+      "authorize",
+      "rules"
+    ]
+  },
+  {
+    "path": "app/Modules/Customers/Requests/UpdateCustomerRequest.php",
+    "sha256": "fb4c51e6e00a1617ec88a381a4602da881778287132012a3fece5ac3da865d2d",
+    "lines": 42,
+    "classes": [
+      "UpdateCustomerRequest"
+    ],
+    "functions": [
+      "authorize",
+      "rules"
+    ]
+  },
+  {
+    "path": "app/Modules/Customers/Services/CustomerService.php",
+    "sha256": "e1d2aad03600416a8b11daaa6dca49f90cf382ce545e97cdf6206263cc7e11ee",
+    "lines": 164,
+    "classes": [
+      "CustomerService"
+    ],
+    "functions": [
+      "register",
+      "update",
+      "setActive",
+      "audit",
+      "nullableString"
+    ]
+  },
+  {
+    "path": "app/Modules/Customers/Services/CustomerStatementService.php",
+    "sha256": "3cd537b817f7beda30663453963156fcddf99272a5196980368fc2cf78fa4152",
+    "lines": 90,
+    "classes": [
+      "CustomerStatementService"
+    ],
+    "functions": [
+      "__construct",
+      "data"
+    ]
+  },
+  {
+    "path": "app/Modules/Dashboard/Services/DashboardService.php",
+    "sha256": "f38c42c9fed2fe5c5280b14ba16ea7cddc0345c3c5130e58a16db8ce1d3dbb61",
+    "lines": 149,
+    "classes": [
+      "DashboardService"
+    ],
+    "functions": [
+      "__construct",
+      "data",
+      "money",
+      "recentJobs"
+    ]
+  },
+  {
+    "path": "app/Modules/Employees/Controllers/EmployeeController.php",
+    "sha256": "a1ef7e034808a1a0d463f27aa9850bce2a47077b20633fb48673e77cb38422f2",
+    "lines": 127,
+    "classes": [
+      "EmployeeController"
+    ],
+    "functions": [
+      "index",
+      "create",
+      "store",
+      "show",
+      "edit",
+      "update",
+      "permissions"
+    ]
+  },
+  {
+    "path": "app/Modules/Employees/Controllers/UserController.php",
+    "sha256": "59edadacce669d216fc9501681f6de2243810394bc965493c1f6ebe0d8012825",
+    "lines": 159,
+    "classes": [
+      "UserController"
+    ],
+    "functions": [
+      "index",
+      "show",
+      "update",
+      "updateRole",
+      "setEnabled",
+      "resetPassword",
+      "updateOverrides",
+      "permissions",
+      "audit"
+    ]
+  },
+  {
+    "path": "app/Modules/Employees/Models/Employee.php",
+    "sha256": "4fb5958d98f87bdd1c10498bbd8e7391da230232fe24954b568ee6c6359aae2a",
+    "lines": 90,
+    "classes": [
+      "Employee"
+    ],
+    "functions": [
+      "casts",
+      "user",
+      "receivedByEmployeeRepairJobs",
+      "technicianRepairJobs",
+      "inspectedByEmployeeJobInspections",
+      "repairedByEmployeeJobInspections",
+      "goodsReceivedNotes",
+      "invoices",
+      "posSales",
+      "payments"
+    ]
+  },
+  {
+    "path": "app/Modules/Employees/Requests/StoreEmployeeRequest.php",
+    "sha256": "26a6e252d509228b493cd816c5f51ee2b2945cb499cbc99bd3414dd0ff46b70e",
+    "lines": 60,
+    "classes": [
+      "StoreEmployeeRequest"
+    ],
+    "functions": [
+      "prepareForValidation",
+      "authorize",
+      "rules"
+    ]
+  },
+  {
+    "path": "app/Modules/Employees/Requests/UpdateEmployeeRequest.php",
+    "sha256": "e587cecaa5d60efed3af3b8cb151a9301fa9d8fc6f51d38510f0ea96df13d8ff",
+    "lines": 26,
+    "classes": [
+      "UpdateEmployeeRequest"
+    ],
+    "functions": [
+      "authorize",
+      "rules"
+    ]
+  },
+  {
+    "path": "app/Modules/Employees/Services/EmployeeRegistrationService.php",
+    "sha256": "d5432f4fef4e8c153680793b836f1699e40f553dd9f62c2dbe28c503e3ad6806",
+    "lines": 104,
+    "classes": [
+      "EmployeeRegistrationService"
+    ],
+    "functions": [
+      "register",
+      "update",
+      "audit"
+    ]
+  },
+  {
+    "path": "app/Modules/Employees/Services/UserAccountService.php",
+    "sha256": "a4947e8a6916e45ff02cea1d2491511bb5ba9b1b56004aa541417581a51a4ab1",
+    "lines": 145,
+    "classes": [
+      "UserAccountService"
+    ],
+    "functions": [
+      "assignRole",
+      "setEnabled",
+      "resetPassword",
+      "syncPermissionOverrides",
+      "preventSelfPrivilegeChange",
+      "ensureAdministratorRemains",
+      "audit"
+    ]
+  },
+  {
+    "path": "app/Modules/Inventory/Controllers/InventoryController.php",
+    "sha256": "7c965852317e4b7f7144787ee12698abc37646969f8202b4a999f7311004c134",
+    "lines": 159,
+    "classes": [
+      "InventoryController"
+    ],
+    "functions": [
+      "index",
+      "form",
+      "save",
+      "show",
+      "reference",
+      "operation",
+      "issues",
+      "requestPart",
+      "issue",
+      "cancelUsage"
+    ]
+  },
+  {
+    "path": "app/Modules/Inventory/Models/JobPartUsage.php",
+    "sha256": "8efb7b99b9bb96d4751a185142ae416a82179201541b81bce146ebcf8cc0f329",
+    "lines": 75,
+    "classes": [
+      "JobPartUsage"
+    ],
+    "functions": [
+      "casts",
+      "repairJob",
+      "sparePart",
+      "location",
+      "requestedByUser",
+      "approvedByUser",
+      "stockMovements"
+    ]
+  },
+  {
+    "path": "app/Modules/Inventory/Models/SparePart.php",
+    "sha256": "5dd1a9d4e7ed34e3451d4f212a9ef01a831b01243074a1df98be9ac2bdeaf098",
+    "lines": 127,
+    "classes": [
+      "SparePart"
+    ],
+    "functions": [
+      "casts",
+      "brand",
+      "category",
+      "unit",
+      "supplier",
+      "defaultLocation",
+      "quotationItems",
+      "purchaseItems",
+      "goodsReceivedNoteItems",
+      "invoiceItems",
+      "posSaleItems",
+      "jobPartUsages",
+      "stockAdjustmentItems",
+      "stockCountItems",
+      "stockReturnItems",
+      "stockMovements"
+    ]
+  },
+  {
+    "path": "app/Modules/Inventory/Models/SparePartBrand.php",
+    "sha256": "1cf7f49ea3ecf545c246373b810b694f2765faa1dde189811cd72a280b29fd27",
+    "lines": 32,
+    "classes": [
+      "SparePartBrand"
+    ],
+    "functions": [
+      "casts",
+      "spareParts"
+    ]
+  },
+  {
+    "path": "app/Modules/Inventory/Models/SparePartCategory.php",
+    "sha256": "b53de93fec102650dfbc20577990f7c5a35cdce3089f165a182cf4f1ac67f5f2",
+    "lines": 33,
+    "classes": [
+      "SparePartCategory"
+    ],
+    "functions": [
+      "casts",
+      "spareParts"
+    ]
+  },
+  {
+    "path": "app/Modules/Inventory/Models/StockAdjustment.php",
+    "sha256": "b4cbdc3c1c0b74ae67542e1f06429d654e18b1559bebae59f1b275d616f47a19",
+    "lines": 60,
+    "classes": [
+      "StockAdjustment"
+    ],
+    "functions": [
+      "casts",
+      "createdByUser",
+      "approvedByUser",
+      "stockAdjustmentItems",
+      "items"
+    ]
+  },
+  {
+    "path": "app/Modules/Inventory/Models/StockAdjustmentItem.php",
+    "sha256": "040997a216a6f0bc2b76e43a4bd230017103f060cac4d2e3746a584482419848",
+    "lines": 53,
+    "classes": [
+      "StockAdjustmentItem"
+    ],
+    "functions": [
+      "casts",
+      "stockAdjustment",
+      "sparePart",
+      "location",
+      "stockMovements"
+    ]
+  },
+  {
+    "path": "app/Modules/Inventory/Models/StockCount.php",
+    "sha256": "580136b34b3403dfe3ae03bc66057f82414e205fe6f52a3fde5f16dd1203b23e",
+    "lines": 51,
+    "classes": [
+      "StockCount"
+    ],
+    "functions": [
+      "casts",
+      "countedByUser",
+      "stockCountItems",
+      "items"
+    ]
+  },
+  {
+    "path": "app/Modules/Inventory/Models/StockCountItem.php",
+    "sha256": "3913bf700b37435cde1b074dde0a87bd2e97aeb10bd55fb0f358c33269785bce",
+    "lines": 55,
+    "classes": [
+      "StockCountItem"
+    ],
+    "functions": [
+      "casts",
+      "stockCount",
+      "sparePart",
+      "location",
+      "stockMovements"
+    ]
+  },
+  {
+    "path": "app/Modules/Inventory/Models/StockLocation.php",
+    "sha256": "3a447ff40d829bb850331f6bb3e187f45970226307c9fb51f0081eeaeb31f2f9",
+    "lines": 71,
+    "classes": [
+      "StockLocation"
+    ],
+    "functions": [
+      "casts",
+      "spareParts",
+      "goodsReceivedNoteItems",
+      "posSaleItems",
+      "jobPartUsages",
+      "stockAdjustmentItems",
+      "stockCountItems",
+      "stockReturnItems",
+      "stockMovements"
+    ]
+  },
+  {
+    "path": "app/Modules/Inventory/Models/StockMovement.php",
+    "sha256": "e499b6ca0f8b6c0aed0e9eb442afb8db57594f4a2415549c71b194762a847a99",
+    "lines": 105,
+    "classes": [
+      "StockMovement"
+    ],
+    "functions": [
+      "casts",
+      "sparePart",
+      "location",
+      "recordedByUser",
+      "grnItem",
+      "jobPartUsage",
+      "posSaleItem",
+      "returnItem",
+      "adjustmentItem",
+      "countItem",
+      "reversesMovement",
+      "relatedStockMovements"
+    ]
+  },
+  {
+    "path": "app/Modules/Inventory/Models/StockReturn.php",
+    "sha256": "136b93b17e887ce1ce74a7674ab41083fe9b119e7da68cf8ada27019794cb767",
+    "lines": 84,
+    "classes": [
+      "StockReturn"
+    ],
+    "functions": [
+      "casts",
+      "repairJob",
+      "posSale",
+      "purchase",
+      "recordedByUser",
+      "refundPaymentReversal",
+      "stockReturnItems",
+      "items"
+    ]
+  },
+  {
+    "path": "app/Modules/Inventory/Models/StockReturnItem.php",
+    "sha256": "3029b1a1c86f26bc4a87d87c28d2f0ee9db6615c015e27b18ecf1ee296d774a5",
+    "lines": 65,
+    "classes": [
+      "StockReturnItem"
+    ],
+    "functions": [
+      "casts",
+      "stockReturn",
+      "posSaleItem",
+      "sparePart",
+      "location",
+      "stockMovements"
+    ]
+  },
+  {
+    "path": "app/Modules/Inventory/Models/UnitOfMeasure.php",
+    "sha256": "ad0655f4b925341be114b5387cb30122670fd61efc531b6b9b7d7c8e4d4cb087",
+    "lines": 33,
+    "classes": [
+      "UnitOfMeasure"
+    ],
+    "functions": [
+      "casts",
+      "spareParts"
+    ]
+  },
+  {
+    "path": "app/Modules/Inventory/Services/InventoryService.php",
+    "sha256": "c295eff1a16e393b97c1ea3ab9bc29e4b5a791b5004c133aa15b4c312db9a9d0",
+    "lines": 166,
+    "classes": [
+      "InventoryService"
+    ],
+    "functions": [
+      "latestUnitCost",
+      "valuationCostQuery",
+      "availableAtDefaultLocation",
+      "defaultLocationBalancesQuery",
+      "lockSaleableParts",
+      "recordPosSale",
+      "recordResalableReturn",
+      "balance"
+    ]
+  },
+  {
+    "path": "app/Modules/Inventory/Services/StockWorkflowService.php",
+    "sha256": "5080dab220eec3eba68aac8fce1a234219cba30c47f3c736097edcdb7da894de",
+    "lines": 246,
+    "classes": [
+      "StockWorkflowService"
+    ],
+    "functions": [
+      "quantity",
+      "balance",
+      "lockPart",
+      "register",
+      "request",
+      "issue",
+      "adjust",
+      "cancelUsage",
+      "count",
+      "movement",
+      "ensureAvailable",
+      "assertUnbilled",
+      "same"
+    ]
+  },
+  {
+    "path": "app/Modules/Invoices/Controllers/InvoiceController.php",
+    "sha256": "cdc539d398ef8a27f33a0971e3a957f2a5bcc8ec855eedb435713bdf63ca4705",
+    "lines": 263,
+    "classes": [
+      "InvoiceController"
+    ],
+    "functions": [
+      "index",
+      "create",
+      "eligibleJobs",
+      "store",
+      "show",
+      "edit",
+      "update",
+      "issue",
+      "cancel",
+      "print",
+      "duplicate",
+      "pdf"
+    ]
+  },
+  {
+    "path": "app/Modules/Invoices/Models/Invoice.php",
+    "sha256": "c1de72feae1c146f52e468a810f8f9fb56fc99872d2aeb3d6b927aadb5968063",
+    "lines": 157,
+    "classes": [
+      "Invoice"
+    ],
+    "functions": [
+      "booted",
+      "casts",
+      "customer",
+      "cashierEmployee",
+      "cancelledByUser",
+      "invoiceJobs",
+      "invoiceItems",
+      "paymentAllocations",
+      "customerAccountEntries",
+      "documentPrintHistories",
+      "items",
+      "jobLinks",
+      "allocations",
+      "history",
+      "repairJobs"
+    ]
+  },
+  {
+    "path": "app/Modules/Invoices/Models/InvoiceHistory.php",
+    "sha256": "28dff2a51fd8ca58970a085bd206964cc68ffb9b2997b3b5d4389f9bc0fa99b5",
+    "lines": 46,
+    "classes": [
+      "InvoiceHistory"
+    ],
+    "functions": [
+      "casts",
+      "invoice",
+      "actor"
+    ]
+  },
+  {
+    "path": "app/Modules/Invoices/Models/InvoiceItem.php",
+    "sha256": "d827aed8e83c0b5d2fbb3a19c48736921e1769fabc06ac5035ca1c08b835904f",
+    "lines": 80,
+    "classes": [
+      "InvoiceItem"
+    ],
+    "functions": [
+      "casts",
+      "invoice",
+      "invoiceJob",
+      "quotationItem",
+      "sparePart"
+    ]
+  },
+  {
+    "path": "app/Modules/Invoices/Models/InvoiceJob.php",
+    "sha256": "af64bbec63021fbceeef973fb3b617c5e7d96de54bc4b4014c9754118c1e2ad3",
+    "lines": 56,
+    "classes": [
+      "InvoiceJob"
+    ],
+    "functions": [
+      "casts",
+      "invoice",
+      "repairJob",
+      "customer",
+      "invoiceItems"
+    ]
+  },
+  {
+    "path": "app/Modules/Invoices/Policies/InvoicePolicy.php",
+    "sha256": "a17c59b6ff96a124f03319e1cbc197525ffdcf6fa104f0b24d0114a9a2b4fd3f",
+    "lines": 53,
+    "classes": [
+      "InvoicePolicy"
+    ],
+    "functions": [
+      "viewAny",
+      "view",
+      "create",
+      "updateDraft",
+      "issue",
+      "cancel",
+      "print",
+      "export"
+    ]
+  },
+  {
+    "path": "app/Modules/Invoices/Requests/CancelInvoiceRequest.php",
+    "sha256": "5dbf18bc396a6318fe2ea374322e3b9809568d2100e9cb46ba7604882ae4f789",
+    "lines": 20,
+    "classes": [
+      "CancelInvoiceRequest"
+    ],
+    "functions": [
+      "authorize",
+      "rules"
+    ]
+  },
+  {
+    "path": "app/Modules/Invoices/Requests/StoreInvoiceRequest.php",
+    "sha256": "9049d69ccd5721b6c446c776e250ae04ca8326cf95e3dd584f5461411ba3de53",
+    "lines": 35,
+    "classes": [
+      "StoreInvoiceRequest"
+    ],
+    "functions": [
+      "authorize",
+      "rules"
+    ]
+  },
+  {
+    "path": "app/Modules/Invoices/Requests/UpdateInvoiceRequest.php",
+    "sha256": "7205ca398a974b1fb8d32765286ba5eea6413bf69da0264d23ceea06ef721251",
+    "lines": 34,
+    "classes": [
+      "UpdateInvoiceRequest"
+    ],
+    "functions": [
+      "authorize",
+      "rules"
+    ]
+  },
+  {
+    "path": "app/Modules/Invoices/Services/InvoiceBalanceService.php",
+    "sha256": "9cd15013ffd498cb73da816ac1a0873b3177bb1cf8b3e0de31b70353d868fc13",
+    "lines": 99,
+    "classes": [
+      "InvoiceBalanceService"
+    ],
+    "functions": [
+      "summary",
+      "constrainPaymentStatus",
+      "netPaidExpression",
+      "netAllocated"
+    ]
+  },
+  {
+    "path": "app/Modules/Invoices/Services/InvoiceCalculationService.php",
+    "sha256": "5d609114b75ebea5864824e222f011792ddabd3ab7fb96764b3499e564b3b10a",
+    "lines": 216,
+    "classes": [
+      "InvoiceCalculationService"
+    ],
+    "functions": [
+      "billableLines",
+      "issuedUsageLines",
+      "quotedLines",
+      "assertLinesMatchTotal",
+      "line",
+      "money",
+      "unitPrice"
+    ]
+  },
+  {
+    "path": "app/Modules/Invoices/Services/InvoicePrintService.php",
+    "sha256": "56b87d3e792ca86452696407d90b577ccea326a3d8137f7b48d8d53426b42e8e",
+    "lines": 143,
+    "classes": [
+      "InvoicePrintService"
+    ],
+    "functions": [
+      "__construct",
+      "prepare",
+      "render",
+      "safeMargin",
+      "logoDataUri"
+    ]
+  },
+  {
+    "path": "app/Modules/Invoices/Services/InvoiceService.php",
+    "sha256": "1e6dc4b669109aed4e1a48c317391504425b7b5b0730b294b336095755fafc2c",
+    "lines": 447,
+    "classes": [
+      "InvoiceService"
+    ],
+    "functions": [
+      "__construct",
+      "create",
+      "updateDraft",
+      "issue",
+      "cancel",
+      "snapshot",
+      "issueLocked",
+      "lockEligibleJobs",
+      "linkJob",
+      "updateTotals",
+      "snapshotRelations",
+      "jobIds",
+      "activeEmployeeFor",
+      "numberFor",
+      "summary",
+      "recordHistory",
+      "amount",
+      "nullableTrim"
+    ]
+  },
+  {
+    "path": "app/Modules/JobCards/Controllers/JobCardController.php",
+    "sha256": "ffbe51caa2737a0f61ea5181abf1f98770d5a5895aa0f65ea1e3a6fee8484f8d",
+    "lines": 165,
+    "classes": [
+      "JobCardController"
+    ],
+    "functions": [
+      "index",
+      "print",
+      "duplicate",
+      "pdf",
+      "render",
+      "safeMillimetres"
+    ]
+  },
+  {
+    "path": "app/Modules/JobCards/Models/JobCard.php",
+    "sha256": "69c0e0ca03f57d0b745d1f1c83247105b7d42e61694d0ec83be530d732522b25",
+    "lines": 49,
+    "classes": [
+      "JobCard"
+    ],
+    "functions": [
+      "casts",
+      "repairJob",
+      "printTemplate",
+      "documentPrintHistories"
+    ]
+  },
+  {
+    "path": "app/Modules/JobTracking/Models/JobStatusHistory.php",
+    "sha256": "1e9612db7b6f2c45496a2972717648567d7246ac577d9680f6aa77212d27a02d",
+    "lines": 48,
+    "classes": [
+      "JobStatusHistory"
+    ],
+    "functions": [
+      "casts",
+      "repairJob",
+      "changedByUser"
+    ]
+  },
+  {
+    "path": "app/Modules/Payments/Controllers/PaymentController.php",
+    "sha256": "9b7ca9ef3f4d1abcd14f96fb82be33709b455d69d9cc0430d07211a94a2fddf1",
+    "lines": 227,
+    "classes": [
+      "PaymentController"
+    ],
+    "functions": [
+      "index",
+      "create",
+      "jobs",
+      "store",
+      "show",
+      "reverse",
+      "print",
+      "duplicate",
+      "pdf"
+    ]
+  },
+  {
+    "path": "app/Modules/Payments/Models/Expense.php",
+    "sha256": "a7c32524d2fe9e55a31292c274b87c05d003db8a72789127844c8d00e97cd09e",
+    "lines": 56,
+    "classes": [
+      "Expense"
+    ],
+    "functions": [
+      "casts",
+      "expenseCategory",
+      "recordedByUser"
+    ]
+  },
+  {
+    "path": "app/Modules/Payments/Models/ExpenseCategory.php",
+    "sha256": "b10587686478aedb4e1e77808b6fabf46edbff0e7d63f5f88e24b73329e47f3d",
+    "lines": 33,
+    "classes": [
+      "ExpenseCategory"
+    ],
+    "functions": [
+      "casts",
+      "expenses"
+    ]
+  },
+  {
+    "path": "app/Modules/Payments/Models/Payment.php",
+    "sha256": "7df842d473d2d717d988c06dece837475447285dbfe2f74f4b5305563e7dcf5d",
+    "lines": 97,
+    "classes": [
+      "Payment"
+    ],
+    "functions": [
+      "casts",
+      "customer",
+      "receivedByEmployee",
+      "paymentAllocations",
+      "paymentReversals",
+      "paymentAllocationReleases",
+      "customerAccountEntries",
+      "documentPrintHistories",
+      "allocations",
+      "reversals"
+    ]
+  },
+  {
+    "path": "app/Modules/Payments/Models/PaymentAllocation.php",
+    "sha256": "5a27a4b0623a26e105abca24dd9958e008fdf2adb88a3d45ac08741709a4282e",
+    "lines": 86,
+    "classes": [
+      "PaymentAllocation"
+    ],
+    "functions": [
+      "casts",
+      "payment",
+      "customer",
+      "repairJob",
+      "invoice",
+      "posSale",
+      "allocatedByUser",
+      "paymentAllocationReleases",
+      "releases"
+    ]
+  },
+  {
+    "path": "app/Modules/Payments/Models/PaymentAllocationRelease.php",
+    "sha256": "9de0da34004182cac290167980526f1cdfada1c1e474a04e86fa5a4a50bd9374",
+    "lines": 58,
+    "classes": [
+      "PaymentAllocationRelease"
+    ],
+    "functions": [
+      "casts",
+      "paymentAllocation",
+      "payment",
+      "paymentReversal",
+      "releasedByUser"
+    ]
+  },
+  {
+    "path": "app/Modules/Payments/Models/PaymentReversal.php",
+    "sha256": "9d6159826294558451d5aaf6e8f3fb544a043d44547fc9691bc280570d40c78a",
+    "lines": 72,
+    "classes": [
+      "PaymentReversal"
+    ],
+    "functions": [
+      "casts",
+      "payment",
+      "customer",
+      "reversedByUser",
+      "paymentAllocationReleases",
+      "customerAccountEntries"
+    ]
+  },
+  {
+    "path": "app/Modules/Payments/Policies/PaymentPolicy.php",
+    "sha256": "7a4936a0f41d7b995afabd9254736e84b845f3c12f39e597bd8aea8596cb1acd",
+    "lines": 39,
+    "classes": [
+      "PaymentPolicy"
+    ],
+    "functions": [
+      "viewAny",
+      "view",
+      "create",
+      "reverse",
+      "print",
+      "export"
+    ]
+  },
+  {
+    "path": "app/Modules/Payments/Requests/ReversePaymentRequest.php",
+    "sha256": "2ca269eff4e0c8efe54c8adc38601bf5a0058e35a536e3c62ef61b90cd8c65df",
+    "lines": 35,
+    "classes": [
+      "ReversePaymentRequest"
+    ],
+    "functions": [
+      "prepareForValidation",
+      "authorize",
+      "rules"
+    ]
+  },
+  {
+    "path": "app/Modules/Payments/Requests/StorePaymentRequest.php",
+    "sha256": "fd638457699127b9ffdaaf8be80e0f5e64ee51e82fa07d7e32b90adb914ae058",
+    "lines": 76,
+    "classes": [
+      "StorePaymentRequest"
+    ],
+    "functions": [
+      "prepareForValidation",
+      "authorize",
+      "rules",
+      "after"
+    ]
+  },
+  {
+    "path": "app/Modules/Payments/Services/PaymentAllocationService.php",
+    "sha256": "ac9e43ef373693c14104771a51ac47a904962e6a5982d8a698115f5f4f56cb6e",
+    "lines": 177,
+    "classes": [
+      "PaymentAllocationService"
+    ],
+    "functions": [
+      "__construct",
+      "allocateToInvoice",
+      "applyAvailableAdvances",
+      "releaseForReversal",
+      "createAllocation",
+      "assertInvoiceCustomer",
+      "assertPositive"
+    ]
+  },
+  {
+    "path": "app/Modules/Payments/Services/PaymentBalanceService.php",
+    "sha256": "ca88c30e3ebe146054f7d4c0c5008a5ee24010995723fc06fd30f9fa458d99a3",
+    "lines": 82,
+    "classes": [
+      "PaymentBalanceService"
+    ],
+    "functions": [
+      "summary",
+      "netAllocation",
+      "constrainStatus"
+    ]
+  },
+  {
+    "path": "app/Modules/Payments/Services/PaymentPrintService.php",
+    "sha256": "96b14c89493309391b3e4200c5374c167b0dd380c030d710099c9b6c1f326d40",
+    "lines": 166,
+    "classes": [
+      "PaymentPrintService"
+    ],
+    "functions": [
+      "__construct",
+      "prepare",
+      "render",
+      "logoDataUri",
+      "safeMargin"
+    ]
+  },
+  {
+    "path": "app/Modules/Payments/Services/PaymentService.php",
+    "sha256": "543868b0394df6e27febdf2d1a406a50cf040b95767c77255d6fd3f20616d54f",
+    "lines": 482,
+    "classes": [
+      "PaymentService"
+    ],
+    "functions": [
+      "__construct",
+      "receiveInvoicePayment",
+      "receiveAdvance",
+      "receivePosPayment",
+      "reverse",
+      "createPayment",
+      "recordPaymentLedger",
+      "existingPayment",
+      "assertInvoiceReceivable",
+      "authorizeReceiver",
+      "activeEmployee",
+      "paidAt",
+      "money",
+      "nullableTrim"
+    ]
+  },
+  {
+    "path": "app/Modules/POS/Controllers/POSController.php",
+    "sha256": "fedc42fe47922117e821010525049ba17f7b52212f63da6143437b49077c02ee",
+    "lines": 354,
+    "classes": [
+      "POSController"
+    ],
+    "functions": [
+      "index",
+      "addProduct",
+      "updateQuantity",
+      "removeProduct",
+      "clearCart",
+      "checkout",
+      "sales",
+      "show",
+      "verify",
+      "cancel",
+      "returns",
+      "reports",
+      "print",
+      "reprint",
+      "pdf",
+      "cart"
+    ]
+  },
+  {
+    "path": "app/Modules/POS/Controllers/POSReturnController.php",
+    "sha256": "b7d911248ad7570a6be1f79db1fe1f33587afb36efdefed7b69130737f93c885",
+    "lines": 19,
+    "classes": [
+      "POSReturnController"
+    ],
+    "functions": [
+      "store"
+    ]
+  },
+  {
+    "path": "app/Modules/POS/Models/PosSale.php",
+    "sha256": "7196f3893d3bb7be1e1dbd5f5ad805228e5d3ecd69427a90d67473913d87df7d",
+    "lines": 129,
+    "classes": [
+      "PosSale"
+    ],
+    "functions": [
+      "casts",
+      "customer",
+      "cashierEmployee",
+      "posSaleItems",
+      "paymentAllocations",
+      "paymentReversals",
+      "customerAccountEntries",
+      "stockReturns",
+      "documentPrintHistories",
+      "items"
+    ]
+  },
+  {
+    "path": "app/Modules/POS/Models/PosSaleItem.php",
+    "sha256": "f292d4eb7094598acbe5c1ebebf505f6786f951d686d981071a5c0a926138e87",
+    "lines": 73,
+    "classes": [
+      "PosSaleItem"
+    ],
+    "functions": [
+      "casts",
+      "posSale",
+      "sparePart",
+      "location",
+      "stockMovements",
+      "returnItems"
+    ]
+  },
+  {
+    "path": "app/Modules/POS/Policies/PosSalePolicy.php",
+    "sha256": "31397d5a17afea5040a480ddb94ab933eba716a413410f4dd21471b870232b54",
+    "lines": 34,
+    "classes": [
+      "PosSalePolicy"
+    ],
+    "functions": [
+      "view",
+      "print",
+      "verifyPayment",
+      "cancel",
+      "returnItems"
+    ]
+  },
+  {
+    "path": "app/Modules/POS/Requests/CheckoutRequest.php",
+    "sha256": "0ef3caed17a8329bfe706044c9141901560a026af52859c648c5ffa06a2d9807",
+    "lines": 38,
+    "classes": [
+      "CheckoutRequest"
+    ],
+    "functions": [
+      "prepareForValidation",
+      "authorize",
+      "rules"
+    ]
+  },
+  {
+    "path": "app/Modules/POS/Requests/POSReturnRequest.php",
+    "sha256": "513f3f1d601fce52b72e06559e448bacd80b9da6fde01b31e91af6cf065928e7",
+    "lines": 42,
+    "classes": [
+      "POSReturnRequest"
+    ],
+    "functions": [
+      "prepareForValidation",
+      "authorize",
+      "rules"
+    ]
+  },
+  {
+    "path": "app/Modules/POS/Services/POSCalculationService.php",
+    "sha256": "d0114cd48352a9f45d6d6ed65697d48756854d9c90b748b13e67e6f52157f9fa",
+    "lines": 65,
+    "classes": [
+      "POSCalculationService"
+    ],
+    "functions": [
+      "__construct",
+      "calculate"
+    ]
+  },
+  {
+    "path": "app/Modules/POS/Services/POSCheckoutService.php",
+    "sha256": "f85ac87b4df878f716d2893f97e95bb9d4c54019ad6b4ee762aad1439b3e5244",
+    "lines": 371,
+    "classes": [
+      "POSCheckoutService"
+    ],
+    "functions": [
+      "__construct",
+      "checkout",
+      "verifyAndFinalize",
+      "cancelPending",
+      "postStockMovements",
+      "quantities",
+      "assertQuantityPrecision",
+      "assertUniqueExternalReference",
+      "idempotencyHash",
+      "assertIdempotentReplay",
+      "snapshot"
+    ]
+  },
+  {
+    "path": "app/Modules/POS/Services/POSReceiptService.php",
+    "sha256": "35e21f1ec2f45dcb7604146b23db3f7c114b2adfa856d7c7de1e6d5978d0c82a",
+    "lines": 121,
+    "classes": [
+      "POSReceiptService"
+    ],
+    "functions": [
+      "prepare",
+      "render",
+      "logoDataUri",
+      "safeMargin"
+    ]
+  },
+  {
+    "path": "app/Modules/POS/Services/POSReturnService.php",
+    "sha256": "dc12e081b6edd94254bc67643fca96fb553fe6e80891acd6d2dd355e2a8fab32",
+    "lines": 199,
+    "classes": [
+      "POSReturnService"
+    ],
+    "functions": [
+      "__construct",
+      "record",
+      "returnNumber",
+      "idempotencyHash",
+      "assertIdempotentReplay"
+    ]
+  },
+  {
+    "path": "app/Modules/PrintTemplates/Controllers/PrintTemplateController.php",
+    "sha256": "eb8aecaaee81d612225b18532fe4ed6ebaf5c7c645529a22e8c5e0c18c383df7",
+    "lines": 134,
+    "classes": [
+      "PrintTemplateController"
+    ],
+    "functions": [
+      "index",
+      "preview",
+      "update",
+      "reset",
+      "createVersion",
+      "paperSizes"
+    ]
+  },
+  {
+    "path": "app/Modules/PrintTemplates/Models/DocumentPrintHistory.php",
+    "sha256": "9ed3163e509cb7eda18b3cad93ff619cb28175dd4d1b0f1aa925b1109791ee43",
+    "lines": 103,
+    "classes": [
+      "DocumentPrintHistory"
+    ],
+    "functions": [
+      "casts",
+      "printTemplate",
+      "repairReceipt",
+      "jobCard",
+      "quotation",
+      "invoice",
+      "posSale",
+      "payment",
+      "customer",
+      "purchase",
+      "printedByUser"
+    ]
+  },
+  {
+    "path": "app/Modules/PrintTemplates/Models/PrintTemplate.php",
+    "sha256": "033ad019f16eda36974c63c1389f7904531a492ede85f04320d410d98fb1f52a",
+    "lines": 69,
+    "classes": [
+      "PrintTemplate"
+    ],
+    "functions": [
+      "casts",
+      "jobCards",
+      "documentPrintHistories"
+    ]
+  },
+  {
+    "path": "app/Modules/PrintTemplates/Services/IntakePdfService.php",
+    "sha256": "3f3a141fc2234b8bfeb9436fd95c8a7b6640d361de39cdfe9b76279ffb360ca7",
+    "lines": 43,
+    "classes": [
+      "IntakePdfService"
+    ],
+    "functions": [
+      "download"
+    ]
+  },
+  {
+    "path": "app/Modules/Purchases/Controllers/PurchaseController.php",
+    "sha256": "0236e50291bdac319e5e5c2bf161c36b9e3b820cb767e383e2af2122837aac30",
+    "lines": 109,
+    "classes": [
+      "PurchaseController"
+    ],
+    "functions": [
+      "document",
+      "grnDocument",
+      "index",
+      "create",
+      "store",
+      "show",
+      "finalize",
+      "receive",
+      "pay",
+      "reverse",
+      "returnStock"
+    ]
+  },
+  {
+    "path": "app/Modules/Purchases/Models/GoodsReceivedNote.php",
+    "sha256": "c29e3af6d362fbae60f5057b63cff9fa707c455f3c40c9d41b1178534a978f0b",
+    "lines": 66,
+    "classes": [
+      "GoodsReceivedNote"
+    ],
+    "functions": [
+      "casts",
+      "purchase",
+      "supplier",
+      "receivedByEmployee",
+      "goodsReceivedNoteItems",
+      "items"
+    ]
+  },
+  {
+    "path": "app/Modules/Purchases/Models/GoodsReceivedNoteItem.php",
+    "sha256": "05b8dcd271963ffe87fa3b6c47a118a29933cfbf737ea0dcd83c9959542d31ff",
+    "lines": 69,
+    "classes": [
+      "GoodsReceivedNoteItem"
+    ],
+    "functions": [
+      "casts",
+      "goodsReceivedNote",
+      "purchase",
+      "purchaseItem",
+      "sparePart",
+      "location",
+      "stockMovements"
+    ]
+  },
+  {
+    "path": "app/Modules/Purchases/Models/Purchase.php",
+    "sha256": "182dbd539a924fff337d443be0c8406d21a48577c5a5645c3db76e8f121c4581",
+    "lines": 112,
+    "classes": [
+      "Purchase"
+    ],
+    "functions": [
+      "casts",
+      "supplier",
+      "createdByUser",
+      "purchaseItems",
+      "goodsReceivedNotes",
+      "goodsReceivedNoteItems",
+      "supplierPaymentAllocations",
+      "supplierAccountEntries",
+      "stockReturns",
+      "documentPrintHistories",
+      "items"
+    ]
+  },
+  {
+    "path": "app/Modules/Purchases/Models/PurchaseItem.php",
+    "sha256": "355146046e85532e8ef8f8c5997d7b5666e42dc02ac4649c920cbe16cbebb564",
+    "lines": 56,
+    "classes": [
+      "PurchaseItem"
+    ],
+    "functions": [
+      "casts",
+      "purchase",
+      "sparePart",
+      "goodsReceivedNoteItems"
+    ]
+  },
+  {
+    "path": "app/Modules/Purchases/Services/PurchasePrintService.php",
+    "sha256": "3cf15af10ace0891df901c9eaacad1eef1a85cd85590884fd54e7a381314082a",
+    "lines": 47,
+    "classes": [
+      "PurchasePrintService"
+    ],
+    "functions": [
+      "prepare"
+    ]
+  },
+  {
+    "path": "app/Modules/Purchases/Services/PurchaseWorkflowService.php",
+    "sha256": "c8847269abe2081e190246b3e112f75148194e52c54229a5b7f4d0e97c5ba1b4",
+    "lines": 197,
+    "classes": [
+      "PurchaseWorkflowService"
+    ],
+    "functions": [
+      "__construct",
+      "create",
+      "sameDraft",
+      "finalize",
+      "receive",
+      "returnStock"
+    ]
+  },
+  {
+    "path": "app/Modules/Quotations/Controllers/QuotationController.php",
+    "sha256": "2c649b0dfc1efbc02196abd7471b8a6e85b801085abfdb1b2820e4db96723ada",
+    "lines": 489,
+    "classes": [
+      "QuotationController"
+    ],
+    "functions": [
+      "index",
+      "create",
+      "store",
+      "show",
+      "edit",
+      "update",
+      "issue",
+      "decision",
+      "revise",
+      "cancel",
+      "print",
+      "duplicate",
+      "pdf",
+      "repairJobs",
+      "spareParts",
+      "preparePrint",
+      "recordPrint",
+      "draftSnapshot",
+      "restrictToVisibleJobs",
+      "safeMargin",
+      "logoDataUri"
+    ]
+  },
+  {
+    "path": "app/Modules/Quotations/Models/Quotation.php",
+    "sha256": "4dffbcf484fd65d199a0916316cf30c6805b5c94adbf84c908666d091eb22a0d",
+    "lines": 134,
+    "classes": [
+      "Quotation"
+    ],
+    "functions": [
+      "casts",
+      "revisesQuotation",
+      "relatedQuotations",
+      "repairJob",
+      "customer",
+      "createdByUser",
+      "updatedByUser",
+      "quotationItems",
+      "quotationApprovals",
+      "documentPrintHistories",
+      "items",
+      "approvals",
+      "revisions",
+      "history"
+    ]
+  },
+  {
+    "path": "app/Modules/Quotations/Models/QuotationApproval.php",
+    "sha256": "a081263dacb92d5b4665b827a77b7e05ddc525e020938b885772cadf8356caae",
+    "lines": 47,
+    "classes": [
+      "QuotationApproval"
+    ],
+    "functions": [
+      "casts",
+      "quotation",
+      "recordedByUser"
+    ]
+  },
+  {
+    "path": "app/Modules/Quotations/Models/QuotationHistory.php",
+    "sha256": "675ddb0869d7f1066bf8d10ffda7f8dedce6b7c317eb150f37f20fb498f0f8eb",
+    "lines": 46,
+    "classes": [
+      "QuotationHistory"
+    ],
+    "functions": [
+      "casts",
+      "quotation",
+      "actor"
+    ]
+  },
+  {
+    "path": "app/Modules/Quotations/Models/QuotationItem.php",
+    "sha256": "3e81e63f0e82479528fa5724dba93b735b8a7353ed3e2b9fb3abe8a990395642",
+    "lines": 62,
+    "classes": [
+      "QuotationItem"
+    ],
+    "functions": [
+      "casts",
+      "quotation",
+      "sparePart",
+      "invoiceItems"
+    ]
+  },
+  {
+    "path": "app/Modules/Quotations/Policies/QuotationPolicy.php",
+    "sha256": "857f7ef5f09dfcdf86ffc59749b2c83aecf2ad242322f6c0a7198746638aec36",
+    "lines": 82,
+    "classes": [
+      "QuotationPolicy"
+    ],
+    "functions": [
+      "viewAny",
+      "view",
+      "create",
+      "update",
+      "issue",
+      "recordDecision",
+      "revise",
+      "cancel",
+      "print"
+    ]
+  },
+  {
+    "path": "app/Modules/Quotations/Requests/RecordQuotationDecisionRequest.php",
+    "sha256": "1b393b5bc158d6b670f031bca7886cce0ba7ff674d0bed08a079d301b0916363",
+    "lines": 29,
+    "classes": [
+      "RecordQuotationDecisionRequest"
+    ],
+    "functions": [
+      "authorize",
+      "rules"
+    ]
+  },
+  {
+    "path": "app/Modules/Quotations/Requests/StoreQuotationRequest.php",
+    "sha256": "4e0f35cccc4dfc56ef9da45e1433995d1efc752ee568df83cfa5130c5a475d5f",
+    "lines": 32,
+    "classes": [
+      "StoreQuotationRequest"
+    ],
+    "functions": [
+      "authorize",
+      "rules"
+    ]
+  },
+  {
+    "path": "app/Modules/Quotations/Requests/UpdateQuotationRequest.php",
+    "sha256": "0e7068fb38060c6022b3bf9d7d86adbe72b2b9caf3f3e58da215c24e868b9b31",
+    "lines": 35,
+    "classes": [
+      "UpdateQuotationRequest"
+    ],
+    "functions": [
+      "authorize",
+      "rules"
+    ]
+  },
+  {
+    "path": "app/Modules/Quotations/Services/QuotationApprovalService.php",
+    "sha256": "4bb3c56f92b6df0476c05c02af715d2a36e6787dfbf1a788b6b8a2971a3e40fe",
+    "lines": 147,
+    "classes": [
+      "QuotationApprovalService"
+    ],
+    "functions": [
+      "__construct",
+      "recordDecision",
+      "nullableTrim"
+    ]
+  },
+  {
+    "path": "app/Modules/Quotations/Services/QuotationCalculationService.php",
+    "sha256": "559c26f7a518b2dfb2673b1401657959052b4da87026d7957d7d6f66ecf9029b",
+    "lines": 61,
+    "classes": [
+      "QuotationCalculationService"
+    ],
+    "functions": [
+      "calculate"
+    ]
+  },
+  {
+    "path": "app/Modules/Quotations/Services/QuotationService.php",
+    "sha256": "d2cd15d682aa11c231260722ee0c4ad2236d771222f62ae68796ac6ecc960597",
+    "lines": 505,
+    "classes": [
+      "QuotationService"
+    ],
+    "functions": [
+      "__construct",
+      "create",
+      "updateDraft",
+      "issue",
+      "createRevision",
+      "cancel",
+      "replaceDraftItems",
+      "issueLocked",
+      "snapshot",
+      "summary",
+      "recordHistory",
+      "ensureDraft",
+      "ensureJobIsQuoteable",
+      "numberFor",
+      "nullableTrim"
+    ]
+  },
+  {
+    "path": "app/Modules/RepairJobs/Controllers/RepairJobController.php",
+    "sha256": "a069f952597913b1663093b0057bcd1ef125abe973a52ae43b4ee046b8c633ea",
+    "lines": 244,
+    "classes": [
+      "RepairJobController"
+    ],
+    "functions": [
+      "setLabourCharge",
+      "index",
+      "myAssigned",
+      "statusSearch",
+      "show",
+      "edit",
+      "update",
+      "assignForm",
+      "assign",
+      "inspect",
+      "saveRepair",
+      "updateStatus",
+      "filteredJobs",
+      "technicians",
+      "advancePaid"
+    ]
+  },
+  {
+    "path": "app/Modules/RepairJobs/Enums/RepairJobType.php",
+    "sha256": "6b86acb2ba47c57c27f6529904819980a2686019ad368046e6e9c561d6b4b740",
+    "lines": 15,
+    "classes": [],
+    "functions": [
+      "label"
+    ]
+  },
+  {
+    "path": "app/Modules/RepairJobs/Models/JobApproval.php",
+    "sha256": "013cd8035170f9b107d3da7f00b27101923a952c9d9704617a74ca8cae363f8b",
+    "lines": 46,
+    "classes": [
+      "JobApproval"
+    ],
+    "functions": [
+      "casts",
+      "repairJob",
+      "recordedByUser"
+    ]
+  },
+  {
+    "path": "app/Modules/RepairJobs/Models/JobInspection.php",
+    "sha256": "e337eae2b5102c7a99df77feb02340601f123d9f3680287c4da0eef1704f3d4e",
+    "lines": 58,
+    "classes": [
+      "JobInspection"
+    ],
+    "functions": [
+      "casts",
+      "repairJob",
+      "inspectedByEmployee",
+      "repairedByEmployee"
+    ]
+  },
+  {
+    "path": "app/Modules/RepairJobs/Models/RepairJob.php",
+    "sha256": "422f80b725f0dc7060d8dd034101a86d9e4b24363a862ea1dd6426ea0508ff4d",
+    "lines": 183,
+    "classes": [
+      "RepairJob"
+    ],
+    "functions": [
+      "casts",
+      "customer",
+      "receivedByEmployee",
+      "technician",
+      "cancelledByUser",
+      "repairReceipts",
+      "jobStatusHistories",
+      "jobInspections",
+      "jobCards",
+      "jobApprovals",
+      "quotations",
+      "invoiceJobs",
+      "paymentAllocations",
+      "jobPartUsages",
+      "stockReturns",
+      "receipt",
+      "statusHistories",
+      "inspections",
+      "partsUsages",
+      "jobCard",
+      "invoices"
+    ]
+  },
+  {
+    "path": "app/Modules/RepairJobs/Policies/RepairJobPolicy.php",
+    "sha256": "410043cb7882f66905a78584141031b3b1e2d8c9c7133fd2688a1e8b14939b46",
+    "lines": 62,
+    "classes": [
+      "RepairJobPolicy"
+    ],
+    "functions": [
+      "viewAny",
+      "view",
+      "inspect",
+      "update",
+      "assign",
+      "repair",
+      "updateStatus",
+      "complete",
+      "cancel"
+    ]
+  },
+  {
+    "path": "app/Modules/RepairJobs/Requests/AssignTechnicianRequest.php",
+    "sha256": "c75d5ac76e28e7da23abcbda20d05d891ed1a4d24b969e0c099903f525ddb8b7",
+    "lines": 42,
+    "classes": [
+      "AssignTechnicianRequest"
+    ],
+    "functions": [
+      "authorize",
+      "rules",
+      "after"
+    ]
+  },
+  {
+    "path": "app/Modules/RepairJobs/Requests/SaveJobInspectionRequest.php",
+    "sha256": "34a66e8e594f02071e834f6d966b80110f3fffa7b1107d824233e4672af95624",
+    "lines": 44,
+    "classes": [
+      "SaveJobInspectionRequest"
+    ],
+    "functions": [
+      "authorize",
+      "rules",
+      "after"
+    ]
+  },
+  {
+    "path": "app/Modules/RepairJobs/Requests/SaveRepairInformationRequest.php",
+    "sha256": "4893ecc104125b6d65e60a8e8b676527406da37492ce6d32c777da11a3a7ae55",
+    "lines": 47,
+    "classes": [
+      "SaveRepairInformationRequest"
+    ],
+    "functions": [
+      "authorize",
+      "rules",
+      "after"
+    ]
+  },
+  {
+    "path": "app/Modules/RepairJobs/Requests/UpdateJobStatusRequest.php",
+    "sha256": "5ac7b9b8d9ab1ebb1d2e234c0426b5302e2740a8ceeb7f302af93075910b8c28",
+    "lines": 45,
+    "classes": [
+      "UpdateJobStatusRequest"
+    ],
+    "functions": [
+      "authorize",
+      "rules",
+      "withValidator"
+    ]
+  },
+  {
+    "path": "app/Modules/RepairJobs/Requests/UpdateRepairJobRequest.php",
+    "sha256": "c2466df85a37adc36f47e015e2ccbe7572198d66cb302a69c6acbfd281e32dbb",
+    "lines": 34,
+    "classes": [
+      "UpdateRepairJobRequest"
+    ],
+    "functions": [
+      "authorize",
+      "rules"
+    ]
+  },
+  {
+    "path": "app/Modules/RepairJobs/Services/RepairJobService.php",
+    "sha256": "37cb0a6c71b414541b8a60f7a88b7636630446b5c4b94b27d9ed17a1787f2fc2",
+    "lines": 289,
+    "classes": [
+      "RepairJobService"
+    ],
+    "functions": [
+      "setLabourCharge",
+      "updateDetails",
+      "assignTechnician",
+      "recordInspection",
+      "recordRepairInformation",
+      "updateStatus",
+      "activeEmployeeFor"
+    ]
+  },
+  {
+    "path": "app/Modules/RepairReceipts/Controllers/RepairReceiptController.php",
+    "sha256": "b140bb26229fcb92e7de8775e0d732eb0d2ccc5af7ab28505b6bb499efdaa467",
+    "lines": 267,
+    "classes": [
+      "RepairReceiptController"
+    ],
+    "functions": [
+      "index",
+      "create",
+      "store",
+      "show",
+      "print",
+      "duplicate",
+      "pdf",
+      "renderPrint",
+      "printSettings",
+      "safeMillimetres"
+    ]
+  },
+  {
+    "path": "app/Modules/RepairReceipts/Models/RepairReceipt.php",
+    "sha256": "d629396940f9bd0a1f988c40a5b27d89e673ad1d8a4643b06c9968924a5ffc3f",
+    "lines": 53,
+    "classes": [
+      "RepairReceipt"
+    ],
+    "functions": [
+      "casts",
+      "repairJob",
+      "customer",
+      "documentPrintHistories"
+    ]
+  },
+  {
+    "path": "app/Modules/RepairReceipts/Requests/StoreRepairReceiptRequest.php",
+    "sha256": "8e125e9d3d53b6df76e139d72cb2f3c2668c8f86364c9369a0e815fea0c7a6d8",
+    "lines": 58,
+    "classes": [
+      "StoreRepairReceiptRequest"
+    ],
+    "functions": [
+      "authorize",
+      "rules",
+      "after"
+    ]
+  },
+  {
+    "path": "app/Modules/RepairReceipts/Services/RepairReceiptService.php",
+    "sha256": "c7fe230794382a61bd15fdad30b82ca481e80430ced9ab4b1dd7c39cef376c5b",
+    "lines": 209,
+    "classes": [
+      "RepairReceiptService"
+    ],
+    "functions": [
+      "__construct",
+      "register",
+      "recordAdvancePayment",
+      "currency",
+      "nullableTrim"
+    ]
+  },
+  {
+    "path": "app/Modules/Reports/Controllers/ReportController.php",
+    "sha256": "3b33feb8575a76ed5e2e53a46b1b40ade480ca727287d5c6689f43cf1828a016",
+    "lines": 176,
+    "classes": [
+      "ReportController"
+    ],
+    "functions": [
+      "index",
+      "show",
+      "export",
+      "authorizeReport",
+      "authorized",
+      "safeCsvValue",
+      "sort"
+    ]
+  },
+  {
+    "path": "app/Modules/Reports/Services/ReportDataService.php",
+    "sha256": "cbc2fd153896a934af0fab549396683c7e1af4f56104f4c16cbbacb7730e0f0b",
+    "lines": 667,
+    "classes": [
+      "ReportDataService"
+    ],
+    "functions": [
+      "__construct",
+      "build",
+      "repair",
+      "technicians",
+      "sales",
+      "financial",
+      "paymentQuery",
+      "customerCreditQuery",
+      "overdueInvoicesQuery",
+      "supplierOutstandingQuery",
+      "purchaseQuery",
+      "expenseQuery",
+      "inventoryReport",
+      "profitEstimate",
+      "repairCostData",
+      "ledgerReport",
+      "stockFilters",
+      "dateFilters",
+      "employeeId",
+      "columns",
+      "money",
+      "countRows"
+    ]
+  },
+  {
+    "path": "app/Modules/Reports/Services/ReportDateRange.php",
+    "sha256": "97ee5542d5e265309b08d96b5ab388dcf3d56eb78d5ce1199fdd4109a3ff5a3d",
+    "lines": 41,
+    "classes": [
+      "ReportDateRange"
+    ],
+    "functions": [
+      "resolve"
+    ]
+  },
+  {
+    "path": "app/Modules/Reports/Services/XlsxReportExporter.php",
+    "sha256": "7df5080489bcf1dd3399bff8aa4c64c9b27aa927452d7fafd5b6bf08f4d27d7a",
+    "lines": 169,
+    "classes": [
+      "XlsxReportExporter"
+    ],
+    "functions": [
+      "create",
+      "writeRow",
+      "columnName",
+      "write"
+    ]
+  },
+  {
+    "path": "app/Modules/RolesPermissions/Controllers/RoleController.php",
+    "sha256": "72883328e6fad5c6fe85f192e51cea4781af2e27cdcb439c7cf0d3acbc57aa96",
+    "lines": 68,
+    "classes": [
+      "RoleController"
+    ],
+    "functions": [
+      "index",
+      "edit",
+      "update"
+    ]
+  },
+  {
+    "path": "app/Modules/RolesPermissions/Models/Permission.php",
+    "sha256": "5358571bcebff1cd5ca5d935460868dedca71b4026ecca0626d981ca97d354d6",
+    "lines": 20,
+    "classes": [
+      "Permission"
+    ],
+    "functions": [
+      "getLabelAttribute",
+      "casts"
+    ]
+  },
+  {
+    "path": "app/Modules/RolesPermissions/Models/Role.php",
+    "sha256": "6d84f8a7ba0f756fada8c8cfe5eec96ffe686c43e5c3c6b5891162ef3cbb4680",
+    "lines": 20,
+    "classes": [
+      "Role"
+    ],
+    "functions": [
+      "getLabelAttribute",
+      "casts"
+    ]
+  },
+  {
+    "path": "app/Modules/Settings/Controllers/SystemSettingController.php",
+    "sha256": "6963174dbfd159eddbe1df257d47817d166200a283d8612f4389f27353c3a0db",
+    "lines": 60,
+    "classes": [
+      "SystemSettingController"
+    ],
+    "functions": [
+      "index",
+      "update"
+    ]
+  },
+  {
+    "path": "app/Modules/Settings/Models/DocumentSequence.php",
+    "sha256": "49ef971129952f86b0073fd251d1a5f33a89393740940e14f72c4968472560e3",
+    "lines": 30,
+    "classes": [
+      "DocumentSequence"
+    ],
+    "functions": [
+      "casts"
+    ]
+  },
+  {
+    "path": "app/Modules/Settings/Models/SystemSetting.php",
+    "sha256": "9a590c48452d28cdfc5c7673d2231cd4b44cc973afcae5a43e607e8d9fca9369",
+    "lines": 102,
+    "classes": [
+      "SystemSetting"
+    ],
+    "functions": [
+      "boot",
+      "group",
+      "key",
+      "settingNameAttribute",
+      "value",
+      "assertSafeForStorage",
+      "casts",
+      "updatedByUser"
+    ]
+  },
+  {
+    "path": "app/Modules/Settings/Services/SystemSettingService.php",
+    "sha256": "312ba05b01defbe2909d8a070e63f379a58f0706225481feac9dfd3183fdd424",
+    "lines": 74,
+    "classes": [
+      "SystemSettingService"
+    ],
+    "functions": [
+      "apply",
+      "update"
+    ]
+  },
+  {
+    "path": "app/Modules/Suppliers/Controllers/SupplierController.php",
+    "sha256": "d4e9c1b0ecb656984eeb0e341ab59ec1007a768e24894e33f13bd1080918bc5b",
+    "lines": 73,
+    "classes": [
+      "SupplierController"
+    ],
+    "functions": [
+      "index",
+      "form",
+      "save",
+      "show",
+      "payOpening"
+    ]
+  },
+  {
+    "path": "app/Modules/Suppliers/Models/Supplier.php",
+    "sha256": "a6c6ebd03c3c3d3487cde7e3860e08397d45c43eba80f60e3c57a6a2ef6270cd",
+    "lines": 89,
+    "classes": [
+      "Supplier"
+    ],
+    "functions": [
+      "casts",
+      "spareParts",
+      "purchases",
+      "goodsReceivedNotes",
+      "supplierPayments",
+      "supplierPaymentAllocations",
+      "supplierPaymentReversals",
+      "supplierAccountEntries",
+      "accountEntries",
+      "payments"
+    ]
+  },
+  {
+    "path": "app/Modules/Suppliers/Models/SupplierAccountEntry.php",
+    "sha256": "28a7e3546aec747c36edc0289c748fb2055264280fe5daec973bf1525486d14f",
+    "lines": 78,
+    "classes": [
+      "SupplierAccountEntry"
+    ],
+    "functions": [
+      "casts",
+      "supplier",
+      "recordedByUser",
+      "purchase",
+      "supplierPayment",
+      "supplierPaymentReversal",
+      "reversesEntry",
+      "relatedSupplierAccountEntries"
+    ]
+  },
+  {
+    "path": "app/Modules/Suppliers/Models/SupplierAllocationRelease.php",
+    "sha256": "a8182f4e2e6ed15cbd7578e3efec11b85338bbcd7af59c6806cef017c1c3acd4",
+    "lines": 57,
+    "classes": [
+      "SupplierAllocationRelease"
+    ],
+    "functions": [
+      "casts",
+      "supplierPaymentAllocation",
+      "supplierPayment",
+      "supplierPaymentReversal",
+      "releasedByUser"
+    ]
+  },
+  {
+    "path": "app/Modules/Suppliers/Models/SupplierPayment.php",
+    "sha256": "3409a681329cee7a4aa0988a77a17c6682acfeae226febadb7035fb4cc3eb22e",
+    "lines": 85,
+    "classes": [
+      "SupplierPayment"
+    ],
+    "functions": [
+      "casts",
+      "supplier",
+      "paidByUser",
+      "supplierPaymentAllocations",
+      "supplierPaymentReversals",
+      "supplierAllocationReleases",
+      "supplierAccountEntries",
+      "allocations",
+      "reversals"
+    ]
+  },
+  {
+    "path": "app/Modules/Suppliers/Models/SupplierPaymentAllocation.php",
+    "sha256": "e869f9b50e3ff2845f5513bf9ed97c0314d8bbd947d2aba5cdd6ce6039ac33b2",
+    "lines": 69,
+    "classes": [
+      "SupplierPaymentAllocation"
+    ],
+    "functions": [
+      "casts",
+      "supplierPayment",
+      "supplier",
+      "purchase",
+      "allocatedByUser",
+      "supplierAllocationReleases",
+      "releases"
+    ]
+  },
+  {
+    "path": "app/Modules/Suppliers/Models/SupplierPaymentReversal.php",
+    "sha256": "9a15619208fbe495906392ddca331b4eab00f557a00dfaf32b87b543a15c7e27",
+    "lines": 64,
+    "classes": [
+      "SupplierPaymentReversal"
+    ],
+    "functions": [
+      "casts",
+      "supplierPayment",
+      "supplier",
+      "reversedByUser",
+      "supplierAllocationReleases",
+      "supplierAccountEntries"
+    ]
+  },
+  {
+    "path": "app/Modules/Suppliers/Services/SupplierPaymentService.php",
+    "sha256": "8c5c22f737ce225d5d8eef772ac8ac52509dd8ad0fbbe3f93476382a9ec8f163",
+    "lines": 139,
+    "classes": [
+      "SupplierPaymentService"
+    ],
+    "functions": [
+      "openingOutstanding",
+      "payOpening",
+      "outstanding",
+      "assertTenderSame",
+      "pay",
+      "reverse"
+    ]
+  },
+  {
+    "path": "app/Providers/AppServiceProvider.php",
+    "sha256": "7ecbd2bd95e56b10af16ff67d063d3531bd62bc090bc07ce30b939b4a422a082",
+    "lines": 134,
+    "classes": [
+      "AppServiceProvider"
+    ],
+    "functions": [
+      "register",
+      "boot",
+      "configureDefaults",
+      "registerAuthorizationAndAudit",
+      "recordAudit"
+    ]
+  },
+  {
+    "path": "app/Providers/FortifyServiceProvider.php",
+    "sha256": "776ed275c1c423cf3bdb3824dd6555b2cff1a71bf508de0525d3c14fd6da0766",
+    "lines": 49,
+    "classes": [
+      "FortifyServiceProvider"
+    ],
+    "functions": [
+      "register",
+      "boot"
+    ]
+  },
+  {
+    "path": "app/Support/BusinessAudit.php",
+    "sha256": "e5b23aba2e5884340271f8708a5a811dee999cc185962846a95ba749a395102f",
+    "lines": 34,
+    "classes": [
+      "BusinessAudit"
+    ],
+    "functions": [
+      "record"
+    ]
+  },
+  {
+    "path": "app/Support/SensitiveData.php",
+    "sha256": "983f7e4878309911f0ca124cd2c56e44049eb98daf43f55b46414aff33751bb0",
+    "lines": 92,
+    "classes": [
+      "SensitiveData"
+    ],
+    "functions": [
+      "isSensitiveKey",
+      "decodeJsonValue",
+      "redact",
+      "assertSafeStructure"
+    ]
+  },
+  {
+    "path": "routes/console.php",
+    "sha256": "edbf276f6549aea70438c0e7d2d97e4ac80519e0ed285a90d00f2ea7451c9836",
+    "lines": 12,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "routes/modules/audit-logs.php",
+    "sha256": "570bb8ef0a1692087fd1d5ae23c95e60349a404669b543ec07871c436573ee5b",
+    "lines": 7,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "routes/modules/backups.php",
+    "sha256": "45d458858d2744d033b55bf5eeee4cb5df6b21885a166bb4a4631d1b83e8887c",
+    "lines": 11,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "routes/modules/credit.php",
+    "sha256": "bf79b63b41d19a51ea941c1719069d4efbc5669db72f7bcdf0b389f51ea19785",
+    "lines": 16,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "routes/modules/customers.php",
+    "sha256": "63968a7a20b14d2852e4c65d7b0ff79acdd9dff441f2c1574aeed763a2f9a3b3",
+    "lines": 52,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "routes/modules/employees.php",
+    "sha256": "aaaf0290dbed32c4b2ec0be0fdeeb069bc7f923b27219bdf92b6e3cc0f3be9eb",
+    "lines": 38,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "routes/modules/invoices.php",
+    "sha256": "b086040998f1dd312a75408c2a55876c780d87ecf67d49da6013274142a8c354",
+    "lines": 52,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "routes/modules/job-cards.php",
+    "sha256": "1c79ad6c49cd4ee71ce7aaa5762e954066be1fd7be24e4b7b76139615b2a6711",
+    "lines": 18,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "routes/modules/payments.php",
+    "sha256": "57c696f2445bbd2b67f9b1f66c3300e91c1bfa4174000527fc0215df5a703474",
+    "lines": 40,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "routes/modules/pos.php",
+    "sha256": "f8e26998219480804965882cacf15a5718c5f68a578bbfc564f3d10d4ce7cb44",
+    "lines": 24,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "routes/modules/print-templates.php",
+    "sha256": "1bcae331599242df219bd9be348f00ed8c2d32e0da2947933b0356795e7b80c9",
+    "lines": 10,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "routes/modules/quotations.php",
+    "sha256": "01ba98fc580f529db83c7cff31a482c0da5fd81426a25bf2e44ba9cd09073279",
+    "lines": 44,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "routes/modules/repair-jobs.php",
+    "sha256": "ec7d0c9c06fb1615ec9bba43fe3f07dd7f7c6e62ac85252c686f8a15a650735a",
+    "lines": 35,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "routes/modules/repair-receipts.php",
+    "sha256": "7a67ec44e5246ea3c3ae71544e6577615d5c9a52529a2e89fa8c86e4af27438e",
+    "lines": 27,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "routes/modules/reports.php",
+    "sha256": "6e32b4949c56a4f2ac69cf17e1af33b11f13a54c5450711f12f02bbce7b57f05",
+    "lines": 10,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "routes/modules/roles.php",
+    "sha256": "c496ebb6f26dda2211d3a376f7eb7557dc04e0a690feacafbc9ce1dd702465b6",
+    "lines": 10,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "routes/modules/settings.php",
+    "sha256": "8b9e77adb9d1021d7bd6b89435c2d79122119243a9cdbbdf2fc571cb0eec0157",
+    "lines": 7,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "routes/modules/stock-purchasing.php",
+    "sha256": "837411dbaa4b05a173ed1e84385c96c4a67fcc8b53c3887917e2bd94f4685b56",
+    "lines": 39,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "routes/web.php",
+    "sha256": "9ad65b80cd296ec489cc2738f0bd8990a675951ffbdb43ac38a6c47b6ffdbc32",
+    "lines": 25,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "database/factories/UserFactory.php",
+    "sha256": "af0cac15cd79ee7e093a6f8c8e2feb16077f6c4c14dcc6eca571c14170132f72",
+    "lines": 34,
+    "classes": [
+      "UserFactory"
+    ],
+    "functions": [
+      "definition"
+    ]
+  },
+  {
+    "path": "database/migrations/0001_01_01_000000_create_users_table.php",
+    "sha256": "10d79883bc08ce46510f9ad8b1830b4d06d586dc56ae2c8bac3b3e491f69a90f",
+    "lines": 49,
+    "classes": [
+      "extends"
+    ],
+    "functions": [
+      "up",
+      "down"
+    ]
+  },
+  {
+    "path": "database/migrations/0001_01_01_000001_create_cache_table.php",
+    "sha256": "fbb4665e5a977e71df4e74ec75b3c06ca4f17ad0de7138fe9786639189978e77",
+    "lines": 35,
+    "classes": [
+      "extends"
+    ],
+    "functions": [
+      "up",
+      "down"
+    ]
+  },
+  {
+    "path": "database/migrations/0001_01_01_000002_create_jobs_table.php",
+    "sha256": "df4910687180313a14a3f96a8bddd808ae145ed1b107cd772caf865c0dc2b746",
+    "lines": 59,
+    "classes": [
+      "extends"
+    ],
+    "functions": [
+      "up",
+      "down"
+    ]
+  },
+  {
+    "path": "database/migrations/2026_10_18_100001_create_access_tables.php",
+    "sha256": "6c4e6d651f53d617e922c6e1170797e8777365dcc63921e34402ce24c4dc30f1",
+    "lines": 126,
+    "classes": [
+      "extends"
+    ],
+    "functions": [
+      "up",
+      "down"
+    ]
+  },
+  {
+    "path": "database/migrations/2026_10_18_100002_create_customers_suppliers_tables.php",
+    "sha256": "3d57b70951289bc129a397ff3e726406410219520ebb61577e66e137b177da05",
+    "lines": 78,
+    "classes": [
+      "extends"
+    ],
+    "functions": [
+      "up",
+      "down"
+    ]
+  },
+  {
+    "path": "database/migrations/2026_10_18_100003_create_inventory_reference_tables.php",
+    "sha256": "d64791a2ce8c00303968bf2f6f0c32051df184e1ec89406afbbbbad80e769165",
+    "lines": 142,
+    "classes": [
+      "extends"
+    ],
+    "functions": [
+      "up",
+      "down"
+    ]
+  },
+  {
+    "path": "database/migrations/2026_10_18_100004_create_system_support_tables.php",
+    "sha256": "3756ee2fac4a9151e439640d9b7b03c0cfb2a1bf215f7cc774eebe0af2fa3e6a",
+    "lines": 163,
+    "classes": [
+      "extends"
+    ],
+    "functions": [
+      "up",
+      "down"
+    ]
+  },
+  {
+    "path": "database/migrations/2026_10_18_100005_create_repair_tables.php",
+    "sha256": "4ef05a565d2000c2adb2f4123dcd14ad0f364cdd46cd63f0d0308931b5bbdbf3",
+    "lines": 194,
+    "classes": [
+      "extends"
+    ],
+    "functions": [
+      "up",
+      "down"
+    ]
+  },
+  {
+    "path": "database/migrations/2026_10_18_100006_create_quotation_tables.php",
+    "sha256": "b861869b939811f5c18c755ac371de72b8e440025130bd9ae9630f63895293d2",
+    "lines": 124,
+    "classes": [
+      "extends"
+    ],
+    "functions": [
+      "up",
+      "down"
+    ]
+  },
+  {
+    "path": "database/migrations/2026_10_18_100007_create_purchasing_tables.php",
+    "sha256": "213fe856bb8a8a44b4de3e61bf851356e4172cb7bca15d5289f2bcafd64f11e0",
+    "lines": 155,
+    "classes": [
+      "extends"
+    ],
+    "functions": [
+      "up",
+      "down"
+    ]
+  },
+  {
+    "path": "database/migrations/2026_10_18_100008_create_sales_tables.php",
+    "sha256": "107f490eb232c9cd6253e1037798ee5ad7879671cba48f8d6e44fb884690b04d",
+    "lines": 212,
+    "classes": [
+      "extends"
+    ],
+    "functions": [
+      "up",
+      "down"
+    ]
+  },
+  {
+    "path": "database/migrations/2026_10_18_100009_create_customer_payment_tables.php",
+    "sha256": "1b8ea583fd710857de256f750251922d6da4ef1cf1207ba8c4235ecbbb18b7b9",
+    "lines": 172,
+    "classes": [
+      "extends"
+    ],
+    "functions": [
+      "up",
+      "down"
+    ]
+  },
+  {
+    "path": "database/migrations/2026_10_18_100010_create_supplier_payment_tables.php",
+    "sha256": "911e8fc65284372254340d0a1925e9385335524d3f7eee0ec0640875606de662",
+    "lines": 145,
+    "classes": [
+      "extends"
+    ],
+    "functions": [
+      "up",
+      "down"
+    ]
+  },
+  {
+    "path": "database/migrations/2026_10_18_100011_create_account_ledger_tables.php",
+    "sha256": "11c95f7560094b93f9f5aaeee2977683feec4f63b41424fca713529f8edad940",
+    "lines": 120,
+    "classes": [
+      "extends"
+    ],
+    "functions": [
+      "up",
+      "down"
+    ]
+  },
+  {
+    "path": "database/migrations/2026_10_18_100012_create_inventory_operations_tables.php",
+    "sha256": "1be1486701f8fc2b22ca8adb41d969c820ab0525181f65263c7a48f11f4285b3",
+    "lines": 207,
+    "classes": [
+      "extends"
+    ],
+    "functions": [
+      "up",
+      "down"
+    ]
+  },
+  {
+    "path": "database/migrations/2026_10_18_100013_create_stock_ledger_tables.php",
+    "sha256": "d71c010ebcd2e4720c263ceb9e991ba3bebc8fa9007394c61865710bac33e295",
+    "lines": 86,
+    "classes": [
+      "extends"
+    ],
+    "functions": [
+      "up",
+      "down"
+    ]
+  },
+  {
+    "path": "database/migrations/2026_10_18_100014_create_expense_tables.php",
+    "sha256": "e829e23272d3102b7b3f9febae46fa4088eba8246face90e373ba6582940fa5f",
+    "lines": 65,
+    "classes": [
+      "extends"
+    ],
+    "functions": [
+      "up",
+      "down"
+    ]
+  },
+  {
+    "path": "database/migrations/2026_10_18_100015_create_document_print_history_tables.php",
+    "sha256": "8e4a41dfe5f6d05793a270fad58dd8add0e5c1a9a407eaa3fe752f3cf0b42ed7",
+    "lines": 66,
+    "classes": [
+      "extends"
+    ],
+    "functions": [
+      "up",
+      "down"
+    ]
+  },
+  {
+    "path": "database/migrations/2026_10_19_100016_add_reporting_indexes_to_business_tables.php",
+    "sha256": "61202f6586dba086e12e1197f02cdbd5cdf6fd200f18ada89de39caa33c27c3c",
+    "lines": 50,
+    "classes": [
+      "extends"
+    ],
+    "functions": [
+      "up",
+      "down"
+    ]
+  },
+  {
+    "path": "database/migrations/2026_10_19_100017_upgrade_step3_access_control.php",
+    "sha256": "099b1a08035bb31c7e6e8f1d72f708eb36a347940460ea5c4cbf2f78c25965b1",
+    "lines": 114,
+    "classes": [
+      "extends"
+    ],
+    "functions": [
+      "up",
+      "down"
+    ]
+  },
+  {
+    "path": "database/migrations/2026_10_19_100018_add_parts_details_to_job_inspections.php",
+    "sha256": "7e2e39377a384135304f0469a86c3aee5fd03e75f14e6793ec0a9bf0fcf8734b",
+    "lines": 23,
+    "classes": [
+      "extends"
+    ],
+    "functions": [
+      "up",
+      "down"
+    ]
+  },
+  {
+    "path": "database/migrations/2026_10_19_100019_upgrade_quotation_workflow.php",
+    "sha256": "2f9eedeff8ee4c597b4cd4ba626cf18673a84d530caa3e2343b3a259db49628b",
+    "lines": 94,
+    "classes": [
+      "extends"
+    ],
+    "functions": [
+      "up",
+      "down"
+    ]
+  },
+  {
+    "path": "database/migrations/2026_10_19_100020_backfill_quotation_preparation_status.php",
+    "sha256": "c97264c8e3786c303b554c56f6e806dfd6610e6f1a576821e6e6494d0514c43b",
+    "lines": 30,
+    "classes": [
+      "extends"
+    ],
+    "functions": [
+      "up",
+      "down"
+    ]
+  },
+  {
+    "path": "database/migrations/2026_10_19_170000_add_invoice_workflow_support.php",
+    "sha256": "97d7184ab651375258823ce6409543434b20cd98a3d877c398c13b9aad8e6b95",
+    "lines": 46,
+    "classes": [
+      "extends"
+    ],
+    "functions": [
+      "up",
+      "down"
+    ]
+  },
+  {
+    "path": "database/migrations/2026_10_19_190000_add_step10_pos_checkout_support.php",
+    "sha256": "853bacd0e772044582a1cfa2f2faa05a51d83135dbb43b18860f6b65dae877e6",
+    "lines": 140,
+    "classes": [
+      "extends"
+    ],
+    "functions": [
+      "up",
+      "down"
+    ]
+  },
+  {
+    "path": "database/migrations/2026_10_20_100000_extend_step11_backup_metadata.php",
+    "sha256": "924b018d94b38fdaac1c2b86525825d9875dea70c17e3a447d73c73612dccca4",
+    "lines": 29,
+    "classes": [
+      "extends"
+    ],
+    "functions": [
+      "up",
+      "down"
+    ]
+  },
+  {
+    "path": "database/seeders/DatabaseSeeder.php",
+    "sha256": "e8e96be9ef65cd378f7abd44d6e580be3540de53c61062adaa93bf212a3936ca",
+    "lines": 13,
+    "classes": [
+      "DatabaseSeeder"
+    ],
+    "functions": [
+      "run"
+    ]
+  },
+  {
+    "path": "database/seeders/RoleSeeder.php",
+    "sha256": "d5c1ecafc7dd1dcebedc4e6df010bce60c51ce2fb0e4e53bfd0c50e54d9217eb",
+    "lines": 191,
+    "classes": [
+      "RoleSeeder"
+    ],
+    "functions": [
+      "run"
+    ]
+  },
+  {
+    "path": "database/seeders/Step11TemplateSeeder.php",
+    "sha256": "60d0989e697d075979c102759f0147673db6dd460cd4b7c69fe432f25813e3a1",
+    "lines": 26,
+    "classes": [
+      "Step11TemplateSeeder"
+    ],
+    "functions": [
+      "run"
+    ]
+  },
+  {
+    "path": "resources/views/auth/login.blade.php",
+    "sha256": "ba136a51e438c4ad92eaeac4ef40e961865a7d5097ea3869726f3074742ab1bb",
+    "lines": 40,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/components/app-logo.blade.php",
+    "sha256": "7ddd3991cc4cc7ad6b53c5774f4281f5974194d10d4213e3386ea665b8e5d945",
+    "lines": 20,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/components/customer-search.blade.php",
+    "sha256": "167810356eb84921ce5d66a68b642e5080ffe1de5fac89220701323bf8e7f3ec",
+    "lines": 61,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/components/document-layout-settings.blade.php",
+    "sha256": "1ee7846eb1a5e47668ca02d26e075d4af53a6cd4189cb8bc06db559902271602",
+    "lines": 12,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/components/icon.blade.php",
+    "sha256": "3c643ec4092ce538e8c295c2b933cbf1dde4e009125bc6d7b0f32e3352f2c823",
+    "lines": 98,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/components/nav-item.blade.php",
+    "sha256": "cc53a4fcee4b8fc40188b336d7e4f28ab0188b0cd902a9505bf58791228c1626",
+    "lines": 16,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/components/stat-card.blade.php",
+    "sha256": "e6fa2a658bc848e308e2d98b2881c448f5cbecd9934f1526483c339155685c2f",
+    "lines": 15,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/dashboard/index.blade.php",
+    "sha256": "026751815edefdb12de60f224f70937655274bb31a62a4771520b7891d902af0",
+    "lines": 90,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/errors/403.blade.php",
+    "sha256": "e4212a16e1e34e835a8367e62b7c79d7bc407cc246af1f985b35e84aec0d4637",
+    "lines": 17,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/layouts/app.blade.php",
+    "sha256": "beb351e9499c7c22dc81fa42eed6d741a52e7026906ed1321800c386289b28b2",
+    "lines": 78,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/layouts/auth.blade.php",
+    "sha256": "2d460d1c4802cc2a9424824bf36047eefd4c3dfeb9562a1fd2e5c8466da7867e",
+    "lines": 29,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/livewire/dashboard-overview.blade.php",
+    "sha256": "e0e67fc454e92affa489de488c616191d415cde70de93564e8cac856d2960765",
+    "lines": 53,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/audit-logs/index.blade.php",
+    "sha256": "e48a8e21620523c362c69edf30a3d9bc6f7ae19b001f1c9322364ee9a126df14",
+    "lines": 33,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/backup-restore/index.blade.php",
+    "sha256": "130f316996cf0d794e90c5be8bed09af7bd1a1414a8a36650200f0c6d45e8659",
+    "lines": 54,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/credit-management/index.blade.php",
+    "sha256": "f3fdc4320ff223c67900ecacea86823477a9de2ca570f1540c861a807f085d6f",
+    "lines": 42,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/credit-management/show.blade.php",
+    "sha256": "7d0567c496928f32a597752be7a1a2a963e8257e9238551d7421aeeb625a3df8",
+    "lines": 45,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/customers/create.blade.php",
+    "sha256": "bdbbfeda6d86b9e6f7ea7a03f8a01f549a1cc0dbe94f8a786acee4dcd4c1b19f",
+    "lines": 12,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/customers/edit.blade.php",
+    "sha256": "0507a14e4cc318d41028450eeb9ad91b00a7f994b3a02a09d2eb7a918d41d158",
+    "lines": 12,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/customers/form.blade.php",
+    "sha256": "0d7862650d46941d59015b6704824714bed8f6303b5787d1190d8e594d7a383d",
+    "lines": 103,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/customers/index.blade.php",
+    "sha256": "ae8858999dfb412fa1bba425f4fce04c6cab7ce4196d7c609e9532d31850b38f",
+    "lines": 90,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/customers/show.blade.php",
+    "sha256": "3f1477805d7815fe7340186e3be77eeba7e046a6ea2c60be94bef96ffe339eb2",
+    "lines": 97,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/customers/statement-print.blade.php",
+    "sha256": "9194cfe23e2ade122e2447d80757f03de55cf99461c83ee009002ebda29399bb",
+    "lines": 52,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/customers/statement-summary.blade.php",
+    "sha256": "437ab3ee8ae8616f912dac22ef6b583d4a63ac95a12a8eb09eaa00535d19a5da",
+    "lines": 5,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/customers/statement-table.blade.php",
+    "sha256": "7ee3a9c958f0d7543f3138b36b6ea4a29a75ebb086ac73f4f0b2ed871dfea3b8",
+    "lines": 25,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/customers/statement.blade.php",
+    "sha256": "8e6bea05c826292fb764102ed280b73e7aaa2d61e7ff4ce211316ba6114d0187",
+    "lines": 32,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/employees/create.blade.php",
+    "sha256": "51f0e7722a3e98641a81dff3f6202e3986696d868844ac3ca5ffe755f8515646",
+    "lines": 12,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/employees/edit.blade.php",
+    "sha256": "3bd4b22ac5a85855d7d73f9fa26ed59471bd267731f332f50ea22b153262c09e",
+    "lines": 12,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/employees/form.blade.php",
+    "sha256": "639f1a99dbfd0020bf330161bd338f1545da10adcace9c15a3bd1fb164e78564",
+    "lines": 99,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/employees/index.blade.php",
+    "sha256": "dd763e988beecc7027d5a60950fd712cf8df0161642ec492918d2e819efff0d8",
+    "lines": 92,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/employees/permissions.blade.php",
+    "sha256": "d28c336253e0173c4961f62879ea57ed2e09c6b8c291ad2394ec67935989fd8c",
+    "lines": 31,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/employees/show.blade.php",
+    "sha256": "734636a401127b2ccbe1b93f67e2406d00d2e36a378c6348d62130819a65a537",
+    "lines": 71,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/inventory/feedback.blade.php",
+    "sha256": "2cccd4f59ae9354848ee5c91de3c07280ce428df4ae3699f025ec5dfe117f031",
+    "lines": 7,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/inventory/form.blade.php",
+    "sha256": "a78c126bd2e67542dbfbfc8f510cb3f6d24af78180806541b7f2f69c4237ecc4",
+    "lines": 43,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/inventory/index.blade.php",
+    "sha256": "db3075f7954ddc31aa6855dacdc036fbeeb0e53364f64bcfdfb51c2aa732ec31",
+    "lines": 17,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/inventory/issues.blade.php",
+    "sha256": "596208f1dc2e9344125aca9fe1859404f6d614a8636d25c362d9849fe9750626",
+    "lines": 34,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/inventory/show.blade.php",
+    "sha256": "63f91b920c41d64e2796c2d5997c69fbd2120060038d2b14f1efe289b9236faa",
+    "lines": 25,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/invoices/create.blade.php",
+    "sha256": "977a62ac3b00df6b936337f6dcd6367f48d48b6f93003a2188b20e03eee2772c",
+    "lines": 375,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/invoices/index.blade.php",
+    "sha256": "4054405adda4a06bf133a22230dd6b9fb8bb0acdecd8f616a3dee199345879b1",
+    "lines": 68,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/invoices/print.blade.php",
+    "sha256": "d21f2daa6af143b9a04393197872724f8154d2d35e50b8ba22e4167a0e951a0e",
+    "lines": 96,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/invoices/show.blade.php",
+    "sha256": "d6fb1f8a72be0abc1a113f26dade61a1e841ce9163f1166904c9f8778608b70f",
+    "lines": 148,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/job-cards/index.blade.php",
+    "sha256": "fc4cea6af19bae4bf5621141ccbb537b4c6e0abb73a18576ab084c713c57ae5c",
+    "lines": 44,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/job-cards/print.blade.php",
+    "sha256": "88a3cb6b98a9a7b3d212dc8630e82eac9bd5b394486b165a65f9d6f382a73ef1",
+    "lines": 114,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/payments/create.blade.php",
+    "sha256": "6a486cde9a133a18f2665722ce571e92ce7cfdc8b1da29b6f6fdf79ee0e2fd77",
+    "lines": 179,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/payments/index.blade.php",
+    "sha256": "cbc5d71f4c3bb9dd77386a959262e55910f67004baddbbca9e34fd6d95f2a6ac",
+    "lines": 63,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/payments/print.blade.php",
+    "sha256": "e673d80d54d1d43d60930110b83cb04a3acce9f7469afe1d169fbd748e9a0901",
+    "lines": 65,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/payments/show.blade.php",
+    "sha256": "00c803c8fdfd3c25ddfd120257d58caaba79cf6e966cbcdeef4cd16370785625",
+    "lines": 122,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/permissions/index.blade.php",
+    "sha256": "51fc0bb512498ab2016cb0b845d1a8f7bc9069fbc3a52f3e6187836c061fb6e3",
+    "lines": 26,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/pos/index.blade.php",
+    "sha256": "051ce844457d64df5da683e0908e72ef49d15bec80255da830e58c230dd98260",
+    "lines": 99,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/pos/receipt.blade.php",
+    "sha256": "bf549701b82f7a16dfcf980e48e3bbcf889febbeaaad82800a935b9152255e73",
+    "lines": 52,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/pos/reports.blade.php",
+    "sha256": "8f1595d1c20d106e4bef13bc5b8ca485029338b9b4bb3c495e9f9eaf3467d950",
+    "lines": 16,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/pos/returns.blade.php",
+    "sha256": "eb6994756cbb86750aac6337a849b8735a1ceac126b816b164adf9ee0cb305c2",
+    "lines": 12,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/pos/sales.blade.php",
+    "sha256": "00dec7b044b587174a6fe93785a00a377f8d68e6092624625d56a98f1c2b7431",
+    "lines": 27,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/pos/show.blade.php",
+    "sha256": "bc0d8906f72a85d11d8a73568cd480dc98351698e21f995a296bd80cb9698437",
+    "lines": 61,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/print-templates/index.blade.php",
+    "sha256": "4cd7d968c85e385d4b416c058d316b81014678ad00d7916fd63938382f74eb2b",
+    "lines": 24,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/print-templates/preview.blade.php",
+    "sha256": "83220e6c1e9031ec280984b6e9733718133a23ca30dc27d9d04c77c5abb795c2",
+    "lines": 67,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/purchases/create.blade.php",
+    "sha256": "2be381147fdd92f4a20b9776d22654e1eab83926c946ac4630df13b1570171ef",
+    "lines": 18,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/purchases/document.blade.php",
+    "sha256": "f18b46c72e64f8663a8813f822fb3d6535109d5898a7e22b8695936f01f3691f",
+    "lines": 17,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/purchases/index.blade.php",
+    "sha256": "cc2fa5c74d2ab387966a47e09f405e2b92154598ceb2faa5706ef3c8d7bf2027",
+    "lines": 16,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/purchases/show.blade.php",
+    "sha256": "b9f1bd50edd8a0ef62255b41c173120ffa193ff8177273671da64f339093b2fa",
+    "lines": 67,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/quotations/create.blade.php",
+    "sha256": "d9a85af820ba78ec5e75eb85d7a2ea9127ca40fbba13d1fae1e78fd5bc4003cc",
+    "lines": 326,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/quotations/index.blade.php",
+    "sha256": "ca7bf2cc0a2ace05079ccb1ae32f281b0d3df487a0501d0ff514d155569afcc9",
+    "lines": 59,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/quotations/print.blade.php",
+    "sha256": "ec6ea86128685a660797e88f45d3f4a13a60542a5cd5055494ee9c4f9a92d46f",
+    "lines": 148,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/quotations/show.blade.php",
+    "sha256": "2d5fa00bb3b1c15ea824f674800add3c609ca1c583f7df1b6114fa54109c1ee1",
+    "lines": 165,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/repair-jobs/assign.blade.php",
+    "sha256": "ce8e94ad0b9922b26d7e97ddab4f2c6ba6d1647c9abdbc0e0e4eafe9e22673da",
+    "lines": 26,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/repair-jobs/edit.blade.php",
+    "sha256": "421ac4c314ee9f0e29338e61ba0347497461db74f9812c344c007550893b3af4",
+    "lines": 34,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/repair-jobs/index.blade.php",
+    "sha256": "d416312bb7736e18236dbb372c247fd41a3357ce9b3754e539e48a760e417c86",
+    "lines": 93,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/repair-jobs/show.blade.php",
+    "sha256": "9ec8a14adb6f03a9eef8766000621ede8db100ed0eb52a8433f3fdef4c29352c",
+    "lines": 254,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/repair-jobs/status-search.blade.php",
+    "sha256": "9fd8f015687ae2d74dac5fc9ef0f7fe1e54e825b834074ae9a9f21a90fb6a86e",
+    "lines": 66,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/repair-receipts/create.blade.php",
+    "sha256": "432c1549103965e7b6b9a8afe82c10956dd43a6021b29723b2ce41b8ea6e140d",
+    "lines": 173,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/repair-receipts/index.blade.php",
+    "sha256": "1a7907c82f581ce117e50b49897a05f897d96712ebbae24e5f83cf2e0c6836eb",
+    "lines": 101,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/repair-receipts/print.blade.php",
+    "sha256": "e6c2ce2a2b13aeefed1959c4240a81312f44a9ffaff925834e6aad559a47a3fa",
+    "lines": 102,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/repair-receipts/show.blade.php",
+    "sha256": "5fc88b464906527d251ad5ab250e48dfa51b970004782dcb3f7f250b2a7619f2",
+    "lines": 98,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/reports/index.blade.php",
+    "sha256": "65f6186d343e523027ee8592c1c6c3e6288bbee4dc0d65254f3483735eed973a",
+    "lines": 22,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/reports/pdf.blade.php",
+    "sha256": "82ce1ae20dc90171c9377b4ada3e7c0320f3f0fce56a8803f554e9f927ea1852",
+    "lines": 28,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/reports/show.blade.php",
+    "sha256": "211a51a1d7737d5b510bdec79e0bea6cc1cce26e1aed84b4c2588f92c61e07a1",
+    "lines": 69,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/roles/edit.blade.php",
+    "sha256": "673ec64bfd9a6f6c5c03a58461591891916a1c652c37e88fdc734dd7d1382987",
+    "lines": 40,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/roles/index.blade.php",
+    "sha256": "8f564d1c8846f173f5efcbb6dbcc9b3987e899370496d8e98db66b6e85289a9f",
+    "lines": 35,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/settings/index.blade.php",
+    "sha256": "2cfb102dd48dae7812d8fc30b107c2876389b7180a5a57f7b338f8343337f031",
+    "lines": 34,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/suppliers/form.blade.php",
+    "sha256": "86630cc23cf9cfe417d745e31d970a21ae06956fd335c6087246f883334b89c4",
+    "lines": 21,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/suppliers/index.blade.php",
+    "sha256": "f929d6619f7d53bc3c378f628aa8e312e61dcd3e5dee5243dace94e8156a754f",
+    "lines": 16,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/suppliers/show.blade.php",
+    "sha256": "e0afc47006ea11e4fa418aa71135502c8bbf09ea39c42ad4aff0f3e30f7552ec",
+    "lines": 41,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/users/index.blade.php",
+    "sha256": "681c23d576daadf7fe2185a5341400c94bc4c6d84d6e9bb196ebdea81401be3a",
+    "lines": 38,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/modules/users/show.blade.php",
+    "sha256": "fc2da7838b573ec79967b7a2b4453495e9123e986343cd8c9d7474a2d9c3a1a9",
+    "lines": 110,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "resources/views/partials/head.blade.php",
+    "sha256": "7b300ef1c4e7fb4684eead7b3db377b50e9b26f7c082e4cbba0ce790db21758b",
+    "lines": 8,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "tests/Feature/Auth/AuthenticationTest.php",
+    "sha256": "a6197c415ef598314932c62d67ab04f861698daba9d7e1c6778b45c993aeed81",
+    "lines": 186,
+    "classes": [
+      "AuthenticationTest"
+    ],
+    "functions": [
+      "test_login_screen_renders_a_csrf_protected_form",
+      "test_users_can_log_in_and_the_session_id_is_regenerated",
+      "test_users_cannot_log_in_with_an_invalid_password",
+      "test_login_requires_a_username_and_password",
+      "test_login_rejects_non_string_credentials",
+      "test_login_is_throttled_after_five_attempts_per_username_and_ip",
+      "test_logout_invalidates_the_session_and_regenerates_the_csrf_token",
+      "test_login_rejects_requests_without_a_csrf_token_when_verification_is_active",
+      "test_unused_authentication_features_are_not_exposed",
+      "test_public_registration_is_not_available",
+      "test_disabled_accounts_cannot_log_in"
+    ]
+  },
+  {
+    "path": "tests/Feature/BackupManagementTest.php",
+    "sha256": "2bc3df5297ccb8bb194608faf9b52d8a1d1e3d3557af09e79ed7b4797c52dd49",
+    "lines": 35,
+    "classes": [
+      "BackupManagementTest"
+    ],
+    "functions": [
+      "test_backup_destination_is_disabled_until_private_mysql_tools_are_configured",
+      "test_database_restore_is_not_available_over_http"
+    ]
+  },
+  {
+    "path": "tests/Feature/CreateUserCommandTest.php",
+    "sha256": "29438bea1f5744f8662f59b93e01815b27fc8a56ae37efb586d966afe61c2ed3",
+    "lines": 105,
+    "classes": [
+      "CreateUserCommandTest"
+    ],
+    "functions": [
+      "test_private_bootstrap_creates_a_linked_administrator_with_a_hashed_password",
+      "test_duplicate_usernames_are_rejected_before_creating_an_account",
+      "test_unconfirmed_passwords_are_rejected",
+      "test_passwords_shorter_than_twelve_characters_are_rejected",
+      "test_invalid_identity_fields_are_rejected",
+      "test_the_default_seeder_does_not_create_demo_accounts"
+    ]
+  },
+  {
+    "path": "tests/Feature/CustomerManagementTest.php",
+    "sha256": "e3260e2faeb0a9f071d0503d792dd6cbfc6def04d656e68f35382a0856a4479e",
+    "lines": 341,
+    "classes": [
+      "CustomerManagementTest"
+    ],
+    "functions": [
+      "setUp",
+      "test_receptionist_can_register_individual_and_company_customers",
+      "test_authorized_financial_user_records_opening_balance_once",
+      "test_zero_opening_balance_does_not_create_a_ledger_entry",
+      "test_customer_forms_show_only_fields_allowed_by_the_users_permissions",
+      "test_receptionist_cannot_submit_financial_balance_or_inactive_status",
+      "test_customer_validation_requires_type_name_address_and_valid_contact_data",
+      "test_company_type_requires_company_name_but_email_and_contact_person_are_optional",
+      "test_customer_search_matches_customer_code_name_and_mobile_and_excludes_inactive",
+      "test_customer_list_searches_company_name_filters_and_paginates_in_database",
+      "test_customer_can_be_updated_without_changing_id_or_opening_balance",
+      "test_customer_model_prevents_id_code_and_opening_balance_changes",
+      "test_deactivation_requires_permission_preserves_history_and_activation_uses_update_permission",
+      "test_customer_statement_and_financial_fields_require_statement_permission",
+      "test_unauthorized_registration_and_updates_are_blocked",
+      "userWithRole",
+      "registerCustomer",
+      "validIndividual",
+      "validCompany"
+    ]
+  },
+  {
+    "path": "tests/Feature/DashboardTest.php",
+    "sha256": "88ec88a60c6dc0b9cd596f1487ff55bfb62e56486e4c4820852bdee49e0dc34e",
+    "lines": 69,
+    "classes": [
+      "DashboardTest"
+    ],
+    "functions": [
+      "test_home_redirects_to_the_dashboard",
+      "test_guests_are_redirected_to_login",
+      "test_authenticated_users_can_view_the_dashboard_without_email_verification",
+      "test_unimplemented_business_modules_do_not_have_working_crud_endpoints",
+      "test_health_endpoint_is_available",
+      "test_reports_require_the_reports_view_permission"
+    ]
+  },
+  {
+    "path": "tests/Feature/Database/BusinessConstraintsTest.php",
+    "sha256": "c89dbcbbdb51933bbd0fe3919ea15248d2cea5838508f349f27bd5846143c863",
+    "lines": 396,
+    "classes": [
+      "BusinessConstraintsTest"
+    ],
+    "functions": [
+      "test_job_numbers_cannot_be_duplicated",
+      "test_invoice_numbers_cannot_be_duplicated",
+      "test_quotation_numbers_cannot_be_duplicated",
+      "test_customer_codes_and_skus_cannot_be_duplicated",
+      "test_optional_barcodes_allow_nulls_but_nonnull_values_are_unique",
+      "test_both_composite_foreign_keys_reject_cross_customer_invoice_job_links",
+      "test_one_job_cannot_be_reserved_for_billing_by_two_invoices",
+      "test_orphan_foreign_keys_and_parent_deletion_are_rejected_by_the_database",
+      "test_customer_type_requires_the_corresponding_name_and_nonblank_contact_fields",
+      "test_nonpositive_payments_and_invalid_header_totals_are_rejected",
+      "test_payment_and_allocation_idempotency_keys_are_unique",
+      "test_payment_allocations_cannot_cross_customer_boundaries_or_name_multiple_targets",
+      "test_stock_operations_reject_duplicate_keys_duplicate_issue_sources_and_invalid_signs",
+      "test_job_identifiers_cannot_be_changed_through_the_model",
+      "test_status_history_cannot_be_updated_through_the_model",
+      "test_status_history_cannot_be_deleted_through_the_model",
+      "test_nullable_customer_ids_cannot_bypass_payment_owner_consistency",
+      "test_allocation_releases_cannot_use_a_reversal_of_another_payment",
+      "test_stock_movements_cannot_use_a_source_from_another_location",
+      "test_the_job_status_enum_matches_all_seventeen_brd_statuses",
+      "statusHistory"
+    ]
+  },
+  {
+    "path": "tests/Feature/Database/BusinessRelationshipsTest.php",
+    "sha256": "d1564de70c133ffbc3fca1d7af90db1eb7797d459c19fa9d4e0226ffd4ad4634",
+    "lines": 285,
+    "classes": [
+      "BusinessRelationshipsTest"
+    ],
+    "functions": [
+      "test_customers_relate_to_their_jobs_receipts_invoices_payments_and_account_entries",
+      "test_repair_jobs_retain_multiple_status_history_inspection_and_parts_usage_records",
+      "test_one_invoice_retains_multiple_jobs_and_each_jobs_amount",
+      "test_payments_allocations_and_reversals_retain_their_relationships",
+      "test_suppliers_purchases_and_goods_received_notes_share_the_ordered_parts",
+      "test_pos_and_repair_usage_reference_the_same_spare_parts_and_movement_history",
+      "test_an_employee_can_link_to_one_existing_login_account",
+      "test_money_unit_prices_and_quantities_are_returned_as_decimal_strings"
+    ]
+  },
+  {
+    "path": "tests/Feature/Database/CreatesDatabaseRecords.php",
+    "sha256": "550c3e4e80f01e6112edf90b10c4e48fd71db418047a39ef8a10b23741dcc011",
+    "lines": 164,
+    "classes": [],
+    "functions": [
+      "code",
+      "employee",
+      "customerAttributes",
+      "customer",
+      "job",
+      "invoice",
+      "part",
+      "location",
+      "payment",
+      "quotation",
+      "movement",
+      "assertDatabaseRejects"
+    ]
+  },
+  {
+    "path": "tests/Feature/Database/MigrationLifecycleTest.php",
+    "sha256": "fc601545128d69622c76ee66255021cbe594f376a0ca913345baa478d46bea15",
+    "lines": 135,
+    "classes": [
+      "MigrationLifecycleTest"
+    ],
+    "functions": [
+      "test_the_complete_schema_can_migrate_rollback_and_migrate_again_on_an_isolated_database"
+    ]
+  },
+  {
+    "path": "tests/Feature/Database/SchemaIntegrityTest.php",
+    "sha256": "7a65cca5c16c0f8e0c0c3dcc581172a1dca13ea370681d032d29283f4793b965",
+    "lines": 112,
+    "classes": [
+      "SchemaIntegrityTest"
+    ],
+    "functions": [
+      "test_foreign_key_enforcement_is_enabled_on_the_test_connection",
+      "test_transaction_records_are_not_cascade_deleted",
+      "test_no_schema_column_uses_binary_floating_point_storage",
+      "test_mysql_tables_use_innodb_and_utf8mb4",
+      "test_mysql_money_fields_are_fixed_precision_decimals",
+      "test_mysql_round_trips_amounts_above_binary_floating_point_integer_precision"
+    ]
+  },
+  {
+    "path": "tests/Feature/EmployeeManagementTest.php",
+    "sha256": "9fc92336861eaaea76eb51a89b3c707f39fc1ccb8e2a950bf12ad0e806604cbd",
+    "lines": 283,
+    "classes": [
+      "EmployeeManagementTest"
+    ],
+    "functions": [
+      "setUp",
+      "test_administrator_can_register_employee_and_link_a_hashed_login_account",
+      "test_receptionist_cannot_register_employees_or_create_accounts",
+      "test_username_uniqueness_is_case_insensitive_and_rejected_before_creation",
+      "test_employee_ids_are_unique_for_multiple_registrations",
+      "test_individual_denial_overrides_role_permission",
+      "test_administrator_management_pages_render",
+      "test_technician_policy_only_allows_assigned_jobs",
+      "test_employee_deactivation_disables_linked_login_without_deleting_history",
+      "test_failed_employee_account_transaction_leaves_no_partial_records",
+      "test_role_seeder_is_idempotent_and_administrator_receives_all_permissions",
+      "test_default_role_permissions_follow_the_restricted_matrix",
+      "test_disabled_user_is_logged_out_on_the_next_request",
+      "test_last_active_administrator_cannot_be_disabled",
+      "administrator"
+    ]
+  },
+  {
+    "path": "tests/Feature/InvoiceManagementTest.php",
+    "sha256": "72d98d2e5911c4587b39341fe35e0f374ed8d3104202216e216fa59c67913c45",
+    "lines": 511,
+    "classes": [
+      "InvoiceManagementTest"
+    ],
+    "functions": [
+      "setUp",
+      "test_creates_unique_draft_invoices_with_multiple_job_totals",
+      "test_invoice_form_restores_customer_and_jobs_after_validation_failure",
+      "test_rejects_cross_customer_duplicate_and_uncompleted_jobs_atomically",
+      "test_actual_issued_part_usages_are_itemized_with_decimal_rounding_without_stock_changes",
+      "test_draft_update_appends_jobs_and_saves_delivery_metadata_without_removing_links",
+      "test_invoice_transaction_rolls_back_when_a_billing_line_cannot_be_written",
+      "test_approved_quotation_prices_are_snapshotted_and_mismatches_are_blocked",
+      "test_invoice_balance_uses_existing_advance_and_payment_allocations_without_accepting_payments",
+      "test_issued_snapshot_is_immutable_and_payment_prevents_cancellation",
+      "test_invoice_with_allocated_payment_cannot_be_cancelled",
+      "test_cancelled_invoice_keeps_its_number_and_job_reservation",
+      "test_cashier_can_create_issue_and_print_but_technician_cannot_manage_invoices",
+      "test_print_duplicate_and_a5_pdf_use_saved_data_and_log_each_output",
+      "test_invoice_print_uses_active_template_layout_and_footer",
+      "test_search_and_filters_use_invoice_customer_and_repair_job_records",
+      "test_step_four_customer_search_and_billable_job_lookup_are_reused",
+      "userWithRole",
+      "billableJob",
+      "approvedQuotation",
+      "createIssuedInvoice",
+      "invoiceData",
+      "allocation"
+    ]
+  },
+  {
+    "path": "tests/Feature/LatestPurchaseCostTest.php",
+    "sha256": "7cda07383e5a48b1da4f3296431f05575551a9f89c12cb19ac86d1490f72f4eb",
+    "lines": 73,
+    "classes": [
+      "LatestPurchaseCostTest"
+    ],
+    "functions": [
+      "test_correcting_a_payment_changes_collections_without_reducing_the_issued_sale",
+      "test_old_customer_return_does_not_replace_latest_purchase_cost_for_pos_or_valuation"
+    ]
+  },
+  {
+    "path": "tests/Feature/PaymentManagementTest.php",
+    "sha256": "be2f2cd790ac5f0a29e676fc2151f25a8af569f6c5b43ecaac0aa3e0d05cf301",
+    "lines": 360,
+    "classes": [
+      "PaymentManagementTest"
+    ],
+    "functions": [
+      "setUp",
+      "test_cash_bank_and_cheque_partial_payments_settle_an_invoice",
+      "test_customer_advance_is_applied_once_when_invoice_is_issued",
+      "test_job_advance_is_linked_to_the_customer_job_and_printed_receipt",
+      "test_repair_receipt_records_authorized_advance_and_snapshots_payment_reference",
+      "test_idempotency_blocks_duplicate_invoice_payment_and_overpayment",
+      "test_cross_customer_allocation_is_rejected_without_creating_an_allocation",
+      "test_refund_and_full_accounting_reversal_restore_invoice_balance_and_log_entries",
+      "test_only_authorized_roles_can_reverse_and_receiver_impersonation_is_restricted",
+      "test_customer_statement_uses_ledger_running_balance_and_pdf_route",
+      "test_credit_collections_are_permission_checked_and_support_repeated_partial_payments",
+      "userWithRole",
+      "issuedInvoice",
+      "paymentData",
+      "postPayment"
+    ]
+  },
+  {
+    "path": "tests/Feature/POSManagementTest.php",
+    "sha256": "3dfd93c9cb7223002ffe7ca69325e58d9569d3c27966fc16a6c56a4559312b08",
+    "lines": 472,
+    "classes": [
+      "POSManagementTest"
+    ],
+    "functions": [
+      "setUp",
+      "test_cashier_scans_repeated_barcodes_and_completes_sale_with_shared_stock_and_payment",
+      "test_unverified_bank_and_cheque_sales_do_not_post_payment_or_reduce_stock_until_authorized",
+      "test_checkout_revalidates_stock_and_idempotency_prevents_duplicate_cash_postings",
+      "test_pos_payments_appear_in_payment_history_and_show_their_sale_reference",
+      "test_cashier_cannot_apply_discount_or_view_pos_without_permission",
+      "test_returns_preserve_original_sale_and_restore_only_resalable_stock_with_authorized_refunds",
+      "test_cashier_may_not_record_a_pos_return_or_manager_verification_without_role_permission",
+      "test_whole_unit_products_reject_fractional_cart_checkout_and_returns_without_server_errors",
+      "test_discounted_returns_cannot_refund_the_undiscounted_item_value",
+      "test_receipt_uses_sale_snapshots_and_all_paper_formats_generate_pdfs",
+      "test_pending_sale_cancellation_has_no_stock_or_payment_effects_and_cannot_be_verified",
+      "test_client_totals_are_ignored_and_inactive_customers_are_rejected",
+      "test_cart_refresh_update_remove_and_clear_never_change_inventory",
+      "test_stock_posting_failure_rolls_back_sale_payment_allocation_and_number",
+      "test_refund_only_reporting_period_includes_negative_net_sales_and_collections",
+      "test_final_partial_return_can_refund_the_remaining_rounding_cent",
+      "test_discount_rounding_across_lines_allows_exact_full_refund",
+      "cashCheckoutData",
+      "userWithRole",
+      "saleablePart"
+    ]
+  },
+  {
+    "path": "tests/Feature/PrintGapCompletionTest.php",
+    "sha256": "8751058d316d677543845c7e7dd1828800b79cde55309127e80c26d2d53f77a9",
+    "lines": 62,
+    "classes": [
+      "PrintGapCompletionTest"
+    ],
+    "functions": [
+      "administrator",
+      "test_customer_statement_uses_template_title_paper_orientation_sinhala_font_and_print_history",
+      "test_purchase_and_grn_print_pdf_and_duplicate_output_preserve_their_source"
+    ]
+  },
+  {
+    "path": "tests/Feature/PrintTemplateManagementTest.php",
+    "sha256": "4d38e719570e10d6a80dbc885d85ff78689c2c1bfeb9495f156d9178e8d65fc3",
+    "lines": 108,
+    "classes": [
+      "PrintTemplateManagementTest"
+    ],
+    "functions": [
+      "test_print_template_edits_create_new_active_versions_and_can_reset_to_original",
+      "test_paper_size_validation_matches_quotation_renderer_support"
+    ]
+  },
+  {
+    "path": "tests/Feature/QuotationManagementTest.php",
+    "sha256": "46da0695c28743dcfc4dc979dab1ee438bd8b7af310a9c54c67468bdcfd2b210",
+    "lines": 356,
+    "classes": [
+      "QuotationManagementTest"
+    ],
+    "functions": [
+      "setUp",
+      "test_draft_quote_calculates_decimal_totals_without_touching_inventory_or_billing",
+      "test_draft_edits_retain_removed_lines_and_audit_the_line_level_change",
+      "test_issue_and_customer_approval_are_recorded_with_job_status_history",
+      "test_customer_rejection_sets_customer_contact_failed_and_is_append_only",
+      "test_revision_copies_quote_items_and_supersedes_the_previous_issued_quote",
+      "test_revision_of_expired_quotation_gets_a_fresh_validity_period",
+      "test_unapproved_quotation_is_not_visible_to_cashier",
+      "test_repair_cannot_start_until_an_issued_quotation_is_approved",
+      "test_expired_quotation_cannot_be_approved",
+      "test_future_customer_decision_date_is_rejected_without_saving_a_decision",
+      "test_a4_and_a5_pdfs_render_with_sinhala_font_and_log_each_export",
+      "issueQuotation",
+      "userWithRole",
+      "quotationData"
+    ]
+  },
+  {
+    "path": "tests/Feature/RepairReceiptAndJobManagementTest.php",
+    "sha256": "ef287762650450d49a5284e0c980a54c4e3b26a46c213115a9d90fc610f9c5bf",
+    "lines": 399,
+    "classes": [
+      "RepairReceiptAndJobManagementTest"
+    ],
+    "functions": [
+      "setUp",
+      "test_receptionist_saves_receipt_and_creates_linked_job_history_and_a6_card",
+      "test_automatic_references_use_the_database_sequence_and_manual_numbers_are_unique",
+      "test_receipt_validation_rejects_inactive_customers_and_missing_required_fields",
+      "test_advance_payment_is_recorded_once_in_payment_allocation_and_customer_ledger",
+      "test_receipt_and_duplicate_print_use_snapshot_without_job_type_and_log_each_copy",
+      "test_failed_advance_recording_rolls_back_the_entire_job_registration",
+      "test_authorized_status_changes_append_history_and_do_not_invent_transitions",
+      "test_job_assignment_and_record_level_access_are_limited_to_active_technicians",
+      "test_receptionist_can_register_and_print_but_cannot_assign_or_change_status",
+      "test_technician_can_record_inspection_and_repair_notes_without_stock_deduction",
+      "test_job_card_print_is_two_page_a6_and_contains_writable_work_areas",
+      "test_search_and_filters_return_database_paginated_jobs",
+      "test_repair_job_identifiers_cannot_be_changed_after_creation",
+      "userWithRole",
+      "receiptData"
+    ]
+  },
+  {
+    "path": "tests/Feature/ReportsTest.php",
+    "sha256": "39ad81cbeb3f2b53e87b65d82aa46f8f82ed8d06421a84342b40ce031617d1b8",
+    "lines": 75,
+    "classes": [
+      "ReportsTest"
+    ],
+    "functions": [
+      "test_administrator_can_open_every_report_with_empty_business_data",
+      "test_administrator_can_export_reports_as_xlsx_pdf_and_csv",
+      "test_xlsx_export_is_a_valid_excel_workbook_with_inline_text_cells",
+      "test_cashier_cannot_view_financial_reports_or_export_reports"
+    ]
+  },
+  {
+    "path": "tests/Feature/Step11BackupTest.php",
+    "sha256": "65a27d13d43883c759391799d60acacc1aed4d9bb08c8172719b0481ee6a371e",
+    "lines": 125,
+    "classes": [
+      "Step11BackupTest"
+    ],
+    "functions": [
+      "tearDown",
+      "backup",
+      "test_retention_preserves_manual_and_latest_recoverable_copy_and_keeps_history",
+      "test_changed_missing_or_path_traversal_backups_fail_verification",
+      "test_private_destination_validation_rejects_all_web_roots",
+      "test_google_drive_stays_disabled_when_configuration_is_blank",
+      "test_google_drive_adapter_checks_remote_checksum_and_size_with_mocked_api",
+      "test_backup_configuration_is_administrator_only_and_does_not_reveal_paths"
+    ]
+  },
+  {
+    "path": "tests/Feature/Step11ReportingTest.php",
+    "sha256": "833e3e72237b5a85c6c0e73bc6f7aabd8ab7075e090dffd968b159b63b08be04",
+    "lines": 129,
+    "classes": [
+      "Step11ReportingTest"
+    ],
+    "functions": [
+      "administrator",
+      "test_all_grouped_sales_statements_and_refund_reports_and_exports_work_on_empty_data",
+      "test_collections_use_actual_reversal_dates_instead_of_rewriting_prior_days",
+      "test_grouped_sales_count_multi_job_invoices_once_and_ignore_drafts",
+      "test_dashboard_date_cohort_and_inventory_aggregates_use_real_records",
+      "test_cashier_own_collections_and_technician_reports_do_not_grant_financial_access",
+      "test_report_pdf_and_workbook_preserve_real_unicode_money_and_dates"
+    ]
+  },
+  {
+    "path": "tests/Feature/Step12AuditTest.php",
+    "sha256": "1542fb1343708579eeca0c40008a86f87f7a67a97350fca7b9819ef47b967e44",
+    "lines": 77,
+    "classes": [
+      "Step12AuditTest"
+    ],
+    "functions": [
+      "administrator",
+      "test_customer_search_treats_sql_payload_as_data_and_escapes_stored_html",
+      "test_all_report_queries_execute_with_linked_fixture_and_record_local_timings"
+    ]
+  },
+  {
+    "path": "tests/Feature/StockPurchasingWorkflowTest.php",
+    "sha256": "884b12b969340c587e820998d2ba7e3520f04852fa89ca1f73c01d8b04c8846a",
+    "lines": 324,
+    "classes": [
+      "StockPurchasingWorkflowTest"
+    ],
+    "functions": [
+      "actor",
+      "supplier",
+      "draft",
+      "test_purchase_grn_payment_reversal_and_shared_stock_integrate_without_duplicate_posting",
+      "test_repair_request_does_not_deduct_stock_and_repeated_issue_deducts_once",
+      "test_stock_correction_damage_count_and_replay_preserve_history",
+      "test_new_pages_render_and_cashier_cannot_change_stock_or_suppliers",
+      "test_http_master_registration_validates_precision_and_records_opening_balance",
+      "test_complete_unused_repair_issue_can_be_returned_once_without_deleting_history",
+      "test_receiving_more_than_ordered_is_rejected_atomically",
+      "test_storekeeper_can_receive_but_cannot_pay_or_reverse_supplier_money",
+      "test_supplier_edit_and_search_preserve_the_opening_ledger",
+      "test_unquoted_labour_charge_is_authorized_audited_and_used_for_billing",
+      "test_real_intake_approval_stock_invoice_payment_and_delivery_workflow_needs_no_manual_job_pricing",
+      "test_supplier_opening_balance_payment_and_reversal_use_existing_supplier_ledger",
+      "test_supplier_return_reduces_stock_and_only_agreed_credit_reduces_payable",
+      "test_receipt_and_card_pdf_routes_render_local_sinhala_and_record_exports"
+    ]
+  },
+  {
+    "path": "tests/Feature/SystemSupportTest.php",
+    "sha256": "96d0e78b6817c4751c1108e8d8113bdd94ea34beee39710b8ba0ff98b1449633",
+    "lines": 78,
+    "classes": [
+      "SystemSupportTest"
+    ],
+    "functions": [
+      "test_administrator_can_update_safe_business_settings_and_values_apply_on_requests",
+      "test_business_settings_reject_unknown_and_secret_fields",
+      "test_administrator_can_browse_redacted_audit_history"
+    ]
+  },
+  {
+    "path": "tests/TestCase.php",
+    "sha256": "85379b55535501066a73d30abe31b7f1676102731fa9f78b09c79a46579a78db",
+    "lines": 15,
+    "classes": [
+      "TestCase"
+    ],
+    "functions": [
+      "setUp"
+    ]
+  },
+  {
+    "path": "tests/Unit/AuditSafetyTest.php",
+    "sha256": "fb82bf41c7991877e8a3d4fd2a7a3fec24f9d506a71b23db38ed9ca8986f94c8",
+    "lines": 128,
+    "classes": [
+      "AuditSafetyTest"
+    ],
+    "functions": [
+      "tearDown",
+      "test_credential_key_variants_are_redacted_in_both_audit_snapshots",
+      "credentialKeys",
+      "test_preencoded_json_is_redacted_once_and_null_remains_null",
+      "test_hydrated_legacy_audit_values_are_redacted_when_read",
+      "test_unrelated_business_fields_and_scalar_settings_are_preserved",
+      "test_settings_reject_credential_names_on_assignment",
+      "unsafeSettingNames",
+      "test_settings_reject_nested_sensitive_fields_in_json_strings",
+      "test_saving_rechecks_unsafe_raw_attributes_without_a_database"
+    ]
+  },
+  {
+    "path": "config/app.php",
+    "sha256": "198f9831fa7d1fb6a54d1d6f2e2684ef636ae3ffb3a73b423792e094268f2b43",
+    "lines": 126,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "config/auth.php",
+    "sha256": "c7e204e9785c9f596d66fb884b493f658f2327f157646bdb4088efd6b3a7773f",
+    "lines": 117,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "config/backup.php",
+    "sha256": "f5d7e9b24980b629a1aa4878ba9c40ea362460ea588301044e903f2dc87ce97a",
+    "lines": 18,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "config/business.php",
+    "sha256": "628b776bfc5c23617fb25a6650adc8a4dbda22052b58f42c0a894a04c0bd942c",
+    "lines": 24,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "config/cache.php",
+    "sha256": "ee4ad2bba1edfcff52e9599f37371f2370d0b167cc226ce72d46cdf6edf2dc55",
+    "lines": 136,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "config/database.php",
+    "sha256": "c20514e3a12b37b854d1ec58a0d95c25a24cdca3d70a1073071f086d0bc31745",
+    "lines": 184,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "config/filesystems.php",
+    "sha256": "7e51d9aed3ee11bd8e15b6cdda38d02eebb378166cbe7c9f23980e1e6e3964b5",
+    "lines": 80,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "config/fortify.php",
+    "sha256": "481f93b48355f1fb5d3e34da1239bd8a720112732f41118220c25585d31f515b",
+    "lines": 20,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "config/inventory.php",
+    "sha256": "58f0dd3575c6b00e5d590f1721125b328197d42b4344b43b478298e046d416ee",
+    "lines": 6,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "config/logging.php",
+    "sha256": "beb1ffd0db910f6f0b4f75214c3d5aa385d692733ece8a450f4c169d2c99ce38",
+    "lines": 140,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "config/mail.php",
+    "sha256": "c43ff49a31c5f32ce21eb7159f2a4b3cd2f4074eaed5838d265646dbfedd3474",
+    "lines": 118,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "config/navigation.php",
+    "sha256": "47575dc269be93ce80cd77fd8b12aed729eb5151f6eb5be32c1cd949aecaea33",
+    "lines": 78,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "config/numbering.php",
+    "sha256": "150b16bff67314869627dbacb4edad1a92cc4e531a7ca4d0796d79845774c65a",
+    "lines": 15,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "config/permission.php",
+    "sha256": "fa4e00269200979497a49918ef18905ebaaf4729824724a384a5a1635ab1a3e1",
+    "lines": 219,
+    "classes": [
+      "will",
+      "to",
+      "to",
+      "and"
+    ],
+    "functions": []
+  },
+  {
+    "path": "config/queue.php",
+    "sha256": "6101774da7c8b79af46d0028f2b8b31a484c3f7eda10b76e5b27b6093ad364a4",
+    "lines": 129,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "config/services.php",
+    "sha256": "b7ee786ea1adbc92db9f229f479431c94503527c47051da3862eb0e4d7db70aa",
+    "lines": 38,
+    "classes": [],
+    "functions": []
+  },
+  {
+    "path": "config/session.php",
+    "sha256": "91935781ffb201a205c655a80f5ffbc6a8229cb27d02ab8f75010ae42fd1f9cd",
+    "lines": 233,
+    "classes": [],
+    "functions": []
+  }
+]

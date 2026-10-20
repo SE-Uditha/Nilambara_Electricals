@@ -1,0 +1,538 @@
+[Tue Oct 20 19:53:22 2026] PHP 8.5.11 Development Server (http://127.0.0.1:8087) started
+[Tue Oct 20 19:53:22 2026] 127.0.0.1:64443 Accepted
+[Tue Oct 20 19:53:22 2026] 127.0.0.1:64443 [GET] URI: /login
+[Tue Oct 20 19:53:22 2026] 127.0.0.1:64443 Closing
+[Tue Oct 20 19:53:23 2026] 127.0.0.1:63530 Accepted
+[Tue Oct 20 19:53:23 2026] 127.0.0.1:63530 [GET] URI: /login
+[Tue Oct 20 19:53:23 2026] 127.0.0.1:63530 Closing
+[Tue Oct 20 19:53:23 2026] 127.0.0.1:57226 Accepted
+[Tue Oct 20 19:53:23 2026] 127.0.0.1:57226 [200]: GET /build/assets/app-CDRURyWK.css
+[Tue Oct 20 19:53:23 2026] 127.0.0.1:50779 Accepted
+[Tue Oct 20 19:53:23 2026] 127.0.0.1:51533 Accepted
+[Tue Oct 20 19:53:23 2026] 127.0.0.1:57226 Closing
+[Tue Oct 20 19:53:23 2026] 127.0.0.1:50779 [200]: GET /build/assets/app-BvRk9kiK.js
+[Tue Oct 20 19:53:23 2026] 127.0.0.1:51533 [200]: GET /images/nilambara-electrical-logo.png
+[Tue Oct 20 19:53:23 2026] 127.0.0.1:50779 Closing
+[Tue Oct 20 19:53:23 2026] 127.0.0.1:51533 Closing
+[Tue Oct 20 19:53:24 2026] 127.0.0.1:65326 Accepted
+[Tue Oct 20 19:53:24 2026] 127.0.0.1:65326 [POST] URI: /login
+[Tue Oct 20 19:53:24 2026] 127.0.0.1:65326 Closing
+[Tue Oct 20 19:53:24 2026] 127.0.0.1:62925 Accepted
+[Tue Oct 20 19:53:24 2026] 127.0.0.1:62925 [GET] URI: /dashboard
+[Tue Oct 20 19:53:24 2026] 127.0.0.1:62925 Closing
+[Tue Oct 20 19:53:24 2026] 127.0.0.1:56517 Accepted
+[Tue Oct 20 19:53:24 2026] 127.0.0.1:56517 [200]: GET /build/assets/app-CDRURyWK.css
+[Tue Oct 20 19:53:24 2026] 127.0.0.1:57930 Accepted
+[Tue Oct 20 19:53:24 2026] 127.0.0.1:57930 [200]: GET /build/assets/app-BvRk9kiK.js
+[Tue Oct 20 19:53:24 2026] 127.0.0.1:56517 Closing
+[Tue Oct 20 19:53:24 2026] 127.0.0.1:57930 Closing
+[Tue Oct 20 19:53:24 2026] 127.0.0.1:63298 Accepted
+[Tue Oct 20 19:53:24 2026] 127.0.0.1:63298 [200]: GET /images/nilambara-electrical-logo.png
+[Tue Oct 20 19:53:24 2026] 127.0.0.1:63298 Closing
+[Tue Oct 20 19:53:25 2026] 127.0.0.1:52286 Accepted
+[Tue Oct 20 19:53:25 2026] 127.0.0.1:52286 [GET] URI: /dashboard
+[Tue Oct 20 19:53:25 2026] 127.0.0.1:52286 Closing
+[Tue Oct 20 19:53:25 2026] 127.0.0.1:55813 Accepted
+[Tue Oct 20 19:53:25 2026] 127.0.0.1:55813 [200]: GET /build/assets/app-CDRURyWK.css
+[Tue Oct 20 19:53:25 2026] 127.0.0.1:55813 Closing
+[Tue Oct 20 19:53:25 2026] 127.0.0.1:60030 Accepted
+[Tue Oct 20 19:53:25 2026] 127.0.0.1:60030 [200]: GET /build/assets/app-BvRk9kiK.js
+[Tue Oct 20 19:53:25 2026] 127.0.0.1:60030 Closing
+[Tue Oct 20 19:53:25 2026] 127.0.0.1:54052 Accepted
+[Tue Oct 20 19:53:25 2026] 127.0.0.1:54052 [200]: GET /images/nilambara-electrical-logo.png
+[Tue Oct 20 19:53:25 2026] 127.0.0.1:54052 Closing
+[Tue Oct 20 19:53:25 2026] 127.0.0.1:58819 Accepted
+[Tue Oct 20 19:53:25 2026] 127.0.0.1:58819 [GET] URI: /customers
+[Tue Oct 20 19:53:26 2026] 127.0.0.1:58819 Closing
+[Tue Oct 20 19:53:26 2026] 127.0.0.1:59721 Accepted
+[Tue Oct 20 19:53:26 2026] 127.0.0.1:59721 [200]: GET /build/assets/app-CDRURyWK.css
+[Tue Oct 20 19:53:26 2026] 127.0.0.1:61559 Accepted
+[Tue Oct 20 19:53:26 2026] 127.0.0.1:59721 Closing
+[Tue Oct 20 19:53:26 2026] 127.0.0.1:61559 [200]: GET /build/assets/app-BvRk9kiK.js
+[Tue Oct 20 19:53:26 2026] 127.0.0.1:61559 Closing
+[Tue Oct 20 19:53:26 2026] 127.0.0.1:64353 Accepted
+[Tue Oct 20 19:53:26 2026] 127.0.0.1:64353 [200]: GET /images/nilambara-electrical-logo.png
+[Tue Oct 20 19:53:26 2026] 127.0.0.1:64353 Closing
+[Tue Oct 20 19:53:26 2026] 127.0.0.1:63081 Accepted
+[Tue Oct 20 19:53:26 2026] 127.0.0.1:63081 [GET] URI: /customers/create
+[Tue Oct 20 19:53:26 2026] 127.0.0.1:63081 Closing
+[Tue Oct 20 19:53:26 2026] 127.0.0.1:56560 Accepted
+[Tue Oct 20 19:53:26 2026] 127.0.0.1:56560 [200]: GET /build/assets/app-CDRURyWK.css
+[Tue Oct 20 19:53:26 2026] 127.0.0.1:52430 Accepted
+[Tue Oct 20 19:53:26 2026] 127.0.0.1:52430 [200]: GET /build/assets/app-BvRk9kiK.js
+[Tue Oct 20 19:53:26 2026] 127.0.0.1:56560 Closing
+[Tue Oct 20 19:53:26 2026] 127.0.0.1:52430 Closing
+[Tue Oct 20 19:53:26 2026] 127.0.0.1:49379 Accepted
+[Tue Oct 20 19:53:26 2026] 127.0.0.1:49379 [200]: GET /images/nilambara-electrical-logo.png
+[Tue Oct 20 19:53:26 2026] 127.0.0.1:49379 Closing
+[Tue Oct 20 19:53:27 2026] 127.0.0.1:62594 Accepted
+[Tue Oct 20 19:53:27 2026] 127.0.0.1:62594 [GET] URI: /customers/create
+[Tue Oct 20 19:53:27 2026] 127.0.0.1:62594 Closing
+[Tue Oct 20 19:53:27 2026] 127.0.0.1:57367 Accepted
+[Tue Oct 20 19:53:27 2026] 127.0.0.1:57367 [200]: GET /build/assets/app-CDRURyWK.css
+[Tue Oct 20 19:53:27 2026] 127.0.0.1:62868 Accepted
+[Tue Oct 20 19:53:27 2026] 127.0.0.1:57367 Closing
+[Tue Oct 20 19:53:27 2026] 127.0.0.1:62868 [200]: GET /build/assets/app-BvRk9kiK.js
+[Tue Oct 20 19:53:27 2026] 127.0.0.1:62868 Closing
+[Tue Oct 20 19:53:27 2026] 127.0.0.1:63652 Accepted
+[Tue Oct 20 19:53:27 2026] 127.0.0.1:63652 [200]: GET /images/nilambara-electrical-logo.png
+[Tue Oct 20 19:53:27 2026] 127.0.0.1:63652 Closing
+[Tue Oct 20 19:53:28 2026] 127.0.0.1:55433 Accepted
+[Tue Oct 20 19:53:28 2026] 127.0.0.1:55433 [GET] URI: /customers/1
+[Tue Oct 20 19:53:28 2026] 127.0.0.1:55433 Closing
+[Tue Oct 20 19:53:28 2026] 127.0.0.1:59591 Accepted
+[Tue Oct 20 19:53:28 2026] 127.0.0.1:59591 [200]: GET /build/assets/app-CDRURyWK.css
+[Tue Oct 20 19:53:28 2026] 127.0.0.1:62223 Accepted
+[Tue Oct 20 19:53:28 2026] 127.0.0.1:62223 [200]: GET /build/assets/app-BvRk9kiK.js
+[Tue Oct 20 19:53:28 2026] 127.0.0.1:59591 Closing
+[Tue Oct 20 19:53:28 2026] 127.0.0.1:62223 Closing
+[Tue Oct 20 19:53:28 2026] 127.0.0.1:56077 Accepted
+[Tue Oct 20 19:53:28 2026] 127.0.0.1:56077 [200]: GET /images/nilambara-electrical-logo.png
+[Tue Oct 20 19:53:28 2026] 127.0.0.1:56077 Closing
+[Tue Oct 20 19:53:28 2026] 127.0.0.1:61861 Accepted
+[Tue Oct 20 19:53:28 2026] 127.0.0.1:61861 [GET] URI: /customers/1/statement
+[Tue Oct 20 19:53:28 2026] 127.0.0.1:61861 Closing
+[Tue Oct 20 19:53:28 2026] 127.0.0.1:64095 Accepted
+[Tue Oct 20 19:53:28 2026] 127.0.0.1:64095 [200]: GET /build/assets/app-CDRURyWK.css
+[Tue Oct 20 19:53:28 2026] 127.0.0.1:52133 Accepted
+[Tue Oct 20 19:53:28 2026] 127.0.0.1:52133 [200]: GET /build/assets/app-BvRk9kiK.js
+[Tue Oct 20 19:53:28 2026] 127.0.0.1:64095 Closing
+[Tue Oct 20 19:53:28 2026] 127.0.0.1:52133 Closing
+[Tue Oct 20 19:53:28 2026] 127.0.0.1:57407 Accepted
+[Tue Oct 20 19:53:28 2026] 127.0.0.1:57407 [200]: GET /images/nilambara-electrical-logo.png
+[Tue Oct 20 19:53:29 2026] 127.0.0.1:57407 Closing
+[Tue Oct 20 19:53:29 2026] 127.0.0.1:64841 Accepted
+[Tue Oct 20 19:53:29 2026] 127.0.0.1:64841 [GET] URI: /repair-receipts/create
+[Tue Oct 20 19:53:29 2026] 127.0.0.1:64841 Closing
+[Tue Oct 20 19:53:29 2026] 127.0.0.1:64725 Accepted
+[Tue Oct 20 19:53:29 2026] 127.0.0.1:64725 [200]: GET /build/assets/app-CDRURyWK.css
+[Tue Oct 20 19:53:29 2026] 127.0.0.1:52134 Accepted
+[Tue Oct 20 19:53:29 2026] 127.0.0.1:52134 [200]: GET /build/assets/app-BvRk9kiK.js
+[Tue Oct 20 19:53:29 2026] 127.0.0.1:64725 Closing
+[Tue Oct 20 19:53:29 2026] 127.0.0.1:52134 Closing
+[Tue Oct 20 19:53:29 2026] 127.0.0.1:53470 Accepted
+[Tue Oct 20 19:53:29 2026] 127.0.0.1:53470 [200]: GET /images/nilambara-electrical-logo.png
+[Tue Oct 20 19:53:29 2026] 127.0.0.1:53470 Closing
+[Tue Oct 20 19:53:30 2026] 127.0.0.1:49740 Accepted
+[Tue Oct 20 19:53:30 2026] 127.0.0.1:49740 [GET] URI: /repair-receipts
+[Tue Oct 20 19:53:30 2026] 127.0.0.1:49740 Closing
+[Tue Oct 20 19:53:30 2026] 127.0.0.1:54445 Accepted
+[Tue Oct 20 19:53:30 2026] 127.0.0.1:54445 [200]: GET /build/assets/app-CDRURyWK.css
+[Tue Oct 20 19:53:30 2026] 127.0.0.1:64799 Accepted
+[Tue Oct 20 19:53:30 2026] 127.0.0.1:54445 Closing
+[Tue Oct 20 19:53:30 2026] 127.0.0.1:64799 [200]: GET /build/assets/app-BvRk9kiK.js
+[Tue Oct 20 19:53:30 2026] 127.0.0.1:64799 Closing
+[Tue Oct 20 19:53:30 2026] 127.0.0.1:53632 Accepted
+[Tue Oct 20 19:53:30 2026] 127.0.0.1:53632 [200]: GET /images/nilambara-electrical-logo.png
+[Tue Oct 20 19:53:30 2026] 127.0.0.1:53632 Closing
+[Tue Oct 20 19:53:30 2026] 127.0.0.1:55538 Accepted
+[Tue Oct 20 19:53:30 2026] 127.0.0.1:55538 [GET] URI: /repair-receipts/1/print
+[Tue Oct 20 19:53:31 2026] 127.0.0.1:55538 Closing
+[Tue Oct 20 19:53:31 2026] 127.0.0.1:65507 Accepted
+[Tue Oct 20 19:53:31 2026] 127.0.0.1:65507 [200]: GET /images/nilambara-electrical-logo.png
+[Tue Oct 20 19:53:31 2026] 127.0.0.1:65507 Closing
+[Tue Oct 20 19:53:31 2026] 127.0.0.1:60966 Accepted
+[Tue Oct 20 19:53:31 2026] 127.0.0.1:60966 [GET] URI: /repair-jobs
+[Tue Oct 20 19:53:31 2026] 127.0.0.1:60966 Closing
+[Tue Oct 20 19:53:31 2026] 127.0.0.1:61012 Accepted
+[Tue Oct 20 19:53:31 2026] 127.0.0.1:61012 [200]: GET /build/assets/app-CDRURyWK.css
+[Tue Oct 20 19:53:31 2026] 127.0.0.1:62294 Accepted
+[Tue Oct 20 19:53:31 2026] 127.0.0.1:62294 [200]: GET /build/assets/app-BvRk9kiK.js
+[Tue Oct 20 19:53:31 2026] 127.0.0.1:61012 Closing
+[Tue Oct 20 19:53:31 2026] 127.0.0.1:62294 Closing
+[Tue Oct 20 19:53:31 2026] 127.0.0.1:53609 Accepted
+[Tue Oct 20 19:53:31 2026] 127.0.0.1:53609 [200]: GET /images/nilambara-electrical-logo.png
+[Tue Oct 20 19:53:31 2026] 127.0.0.1:53609 Closing
+[Tue Oct 20 19:53:32 2026] 127.0.0.1:53566 Accepted
+[Tue Oct 20 19:53:32 2026] 127.0.0.1:53566 [GET] URI: /repair-jobs/3
+[Tue Oct 20 19:53:32 2026] 127.0.0.1:53566 Closing
+[Tue Oct 20 19:53:32 2026] 127.0.0.1:63542 Accepted
+[Tue Oct 20 19:53:32 2026] 127.0.0.1:63542 [200]: GET /build/assets/app-CDRURyWK.css
+[Tue Oct 20 19:53:32 2026] 127.0.0.1:65528 Accepted
+[Tue Oct 20 19:53:32 2026] 127.0.0.1:65528 [200]: GET /build/assets/app-BvRk9kiK.js
+[Tue Oct 20 19:53:32 2026] 127.0.0.1:63542 Closing
+[Tue Oct 20 19:53:32 2026] 127.0.0.1:65528 Closing
+[Tue Oct 20 19:53:32 2026] 127.0.0.1:54881 Accepted
+[Tue Oct 20 19:53:32 2026] 127.0.0.1:54881 [200]: GET /images/nilambara-electrical-logo.png
+[Tue Oct 20 19:53:32 2026] 127.0.0.1:54881 Closing
+[Tue Oct 20 19:53:32 2026] 127.0.0.1:64161 Accepted
+[Tue Oct 20 19:53:32 2026] 127.0.0.1:64161 [GET] URI: /repair-jobs/3/assign
+[Tue Oct 20 19:53:33 2026] 127.0.0.1:64161 Closing
+[Tue Oct 20 19:53:33 2026] 127.0.0.1:57256 Accepted
+[Tue Oct 20 19:53:33 2026] 127.0.0.1:57256 [200]: GET /build/assets/app-CDRURyWK.css
+[Tue Oct 20 19:53:33 2026] 127.0.0.1:63173 Accepted
+[Tue Oct 20 19:53:33 2026] 127.0.0.1:63173 [200]: GET /build/assets/app-BvRk9kiK.js
+[Tue Oct 20 19:53:33 2026] 127.0.0.1:57256 Closing
+[Tue Oct 20 19:53:33 2026] 127.0.0.1:63173 Closing
+[Tue Oct 20 19:53:33 2026] 127.0.0.1:63157 Accepted
+[Tue Oct 20 19:53:33 2026] 127.0.0.1:63157 [200]: GET /images/nilambara-electrical-logo.png
+[Tue Oct 20 19:53:33 2026] 127.0.0.1:63157 Closing
+[Tue Oct 20 19:53:33 2026] 127.0.0.1:58101 Accepted
+[Tue Oct 20 19:53:33 2026] 127.0.0.1:58101 [GET] URI: /repair-jobs/1/job-card
+[Tue Oct 20 19:53:33 2026] 127.0.0.1:58101 Closing
+[Tue Oct 20 19:53:33 2026] 127.0.0.1:49395 Accepted
+[Tue Oct 20 19:53:33 2026] 127.0.0.1:49395 [200]: GET /images/nilambara-electrical-logo.png
+[Tue Oct 20 19:53:33 2026] 127.0.0.1:49395 Closing
+[Tue Oct 20 19:53:34 2026] 127.0.0.1:52803 Accepted
+[Tue Oct 20 19:53:34 2026] 127.0.0.1:52803 [GET] URI: /repair-jobs/status
+[Tue Oct 20 19:53:34 2026] 127.0.0.1:52803 Closing
+[Tue Oct 20 19:53:34 2026] 127.0.0.1:54624 Accepted
+[Tue Oct 20 19:53:34 2026] 127.0.0.1:54624 [200]: GET /build/assets/app-CDRURyWK.css
+[Tue Oct 20 19:53:34 2026] 127.0.0.1:57756 Accepted
+[Tue Oct 20 19:53:34 2026] 127.0.0.1:57756 [200]: GET /build/assets/app-BvRk9kiK.js
+[Tue Oct 20 19:53:34 2026] 127.0.0.1:54624 Closing
+[Tue Oct 20 19:53:34 2026] 127.0.0.1:57756 Closing
+[Tue Oct 20 19:53:34 2026] 127.0.0.1:51053 Accepted
+[Tue Oct 20 19:53:34 2026] 127.0.0.1:51053 [200]: GET /images/nilambara-electrical-logo.png
+[Tue Oct 20 19:53:34 2026] 127.0.0.1:51053 Closing
+[Tue Oct 20 19:53:34 2026] 127.0.0.1:63145 Accepted
+[Tue Oct 20 19:53:34 2026] 127.0.0.1:63145 [GET] URI: /quotations/create
+[Tue Oct 20 19:53:35 2026] 127.0.0.1:63145 Closing
+[Tue Oct 20 19:53:35 2026] 127.0.0.1:65217 Accepted
+[Tue Oct 20 19:53:35 2026] 127.0.0.1:65217 [200]: GET /build/assets/app-CDRURyWK.css
+[Tue Oct 20 19:53:35 2026] 127.0.0.1:52979 Accepted
+[Tue Oct 20 19:53:35 2026] 127.0.0.1:52979 [200]: GET /build/assets/app-BvRk9kiK.js
+[Tue Oct 20 19:53:35 2026] 127.0.0.1:65217 Closing
+[Tue Oct 20 19:53:35 2026] 127.0.0.1:52979 Closing
+[Tue Oct 20 19:53:35 2026] 127.0.0.1:51629 Accepted
+[Tue Oct 20 19:53:35 2026] 127.0.0.1:51629 [200]: GET /images/nilambara-electrical-logo.png
+[Tue Oct 20 19:53:35 2026] 127.0.0.1:51629 Closing
+[Tue Oct 20 19:53:35 2026] 127.0.0.1:58054 Accepted
+[Tue Oct 20 19:53:35 2026] 127.0.0.1:58054 [GET] URI: /quotations/2/print
+[Tue Oct 20 19:53:35 2026] 127.0.0.1:58054 Closing
+[Tue Oct 20 19:53:35 2026] 127.0.0.1:64180 Accepted
+[Tue Oct 20 19:53:35 2026] 127.0.0.1:64180 [200]: GET /fonts/NotoSansSinhala-Regular.ttf
+[Tue Oct 20 19:53:35 2026] 127.0.0.1:61623 Accepted
+[Tue Oct 20 19:53:35 2026] 127.0.0.1:61623 [200]: GET /fonts/NotoSansSinhala-Bold.ttf
+[Tue Oct 20 19:53:35 2026] 127.0.0.1:64180 Closing
+[Tue Oct 20 19:53:35 2026] 127.0.0.1:61623 Closing
+[Tue Oct 20 19:53:36 2026] 127.0.0.1:50301 Accepted
+[Tue Oct 20 19:53:36 2026] 127.0.0.1:50301 [GET] URI: /quotations/2
+[Tue Oct 20 19:53:36 2026] 127.0.0.1:50301 Closing
+[Tue Oct 20 19:53:36 2026] 127.0.0.1:65301 Accepted
+[Tue Oct 20 19:53:36 2026] 127.0.0.1:65301 [200]: GET /build/assets/app-CDRURyWK.css
+[Tue Oct 20 19:53:36 2026] 127.0.0.1:58678 Accepted
+[Tue Oct 20 19:53:36 2026] 127.0.0.1:65301 Closing
+[Tue Oct 20 19:53:36 2026] 127.0.0.1:58678 [200]: GET /build/assets/app-BvRk9kiK.js
+[Tue Oct 20 19:53:36 2026] 127.0.0.1:58678 Closing
+[Tue Oct 20 19:53:36 2026] 127.0.0.1:64524 Accepted
+[Tue Oct 20 19:53:36 2026] 127.0.0.1:64524 [200]: GET /images/nilambara-electrical-logo.png
+[Tue Oct 20 19:53:36 2026] 127.0.0.1:64524 Closing
+[Tue Oct 20 19:53:36 2026] 127.0.0.1:54311 Accepted
+[Tue Oct 20 19:53:36 2026] 127.0.0.1:54311 [GET] URI: /invoices/create
+[Tue Oct 20 19:53:37 2026] 127.0.0.1:54311 Closing
+[Tue Oct 20 19:53:37 2026] 127.0.0.1:53941 Accepted
+[Tue Oct 20 19:53:37 2026] 127.0.0.1:53941 [200]: GET /build/assets/app-CDRURyWK.css
+[Tue Oct 20 19:53:37 2026] 127.0.0.1:58911 Accepted
+[Tue Oct 20 19:53:37 2026] 127.0.0.1:58911 [200]: GET /build/assets/app-BvRk9kiK.js
+[Tue Oct 20 19:53:37 2026] 127.0.0.1:53941 Closing
+[Tue Oct 20 19:53:37 2026] 127.0.0.1:58911 Closing
+[Tue Oct 20 19:53:37 2026] 127.0.0.1:50343 Accepted
+[Tue Oct 20 19:53:37 2026] 127.0.0.1:50343 [200]: GET /images/nilambara-electrical-logo.png
+[Tue Oct 20 19:53:37 2026] 127.0.0.1:50343 Closing
+[Tue Oct 20 19:53:37 2026] 127.0.0.1:56981 Accepted
+[Tue Oct 20 19:53:37 2026] 127.0.0.1:56981 [GET] URI: /customers/search
+[Tue Oct 20 19:53:37 2026] 127.0.0.1:56981 Closing
+[Tue Oct 20 19:53:37 2026] 127.0.0.1:50686 Accepted
+[Tue Oct 20 19:53:37 2026] 127.0.0.1:50686 [GET] URI: /invoices/customers/1/jobs
+[Tue Oct 20 19:53:37 2026] 127.0.0.1:50686 Closing
+[Tue Oct 20 19:53:38 2026] 127.0.0.1:51455 Accepted
+[Tue Oct 20 19:53:38 2026] 127.0.0.1:51455 [GET] URI: /invoices/1/print
+[Tue Oct 20 19:53:38 2026] 127.0.0.1:51455 Closing
+[Tue Oct 20 19:53:38 2026] 127.0.0.1:52556 Accepted
+[Tue Oct 20 19:53:38 2026] 127.0.0.1:52556 [200]: GET /fonts/NotoSansSinhala-Regular.ttf
+[Tue Oct 20 19:53:38 2026] 127.0.0.1:50550 Accepted
+[Tue Oct 20 19:53:38 2026] 127.0.0.1:50550 [200]: GET /fonts/NotoSansSinhala-Bold.ttf
+[Tue Oct 20 19:53:38 2026] 127.0.0.1:52556 Closing
+[Tue Oct 20 19:53:38 2026] 127.0.0.1:50550 Closing
+[Tue Oct 20 19:53:38 2026] 127.0.0.1:63988 Accepted
+[Tue Oct 20 19:53:38 2026] 127.0.0.1:63988 [GET] URI: /payments/create
+[Tue Oct 20 19:53:39 2026] 127.0.0.1:63988 Closing
+[Tue Oct 20 19:53:39 2026] 127.0.0.1:65172 Accepted
+[Tue Oct 20 19:53:39 2026] 127.0.0.1:65172 [200]: GET /build/assets/app-CDRURyWK.css
+[Tue Oct 20 19:53:39 2026] 127.0.0.1:65172 Closing
+[Tue Oct 20 19:53:39 2026] 127.0.0.1:63907 Accepted
+[Tue Oct 20 19:53:39 2026] 127.0.0.1:63907 [200]: GET /build/assets/app-BvRk9kiK.js
+[Tue Oct 20 19:53:39 2026] 127.0.0.1:63907 Closing
+[Tue Oct 20 19:53:39 2026] 127.0.0.1:50398 Accepted
+[Tue Oct 20 19:53:39 2026] 127.0.0.1:50398 [200]: GET /images/nilambara-electrical-logo.png
+[Tue Oct 20 19:53:39 2026] 127.0.0.1:50398 Closing
+[Tue Oct 20 19:53:39 2026] 127.0.0.1:51001 Accepted
+[Tue Oct 20 19:53:39 2026] 127.0.0.1:51001 [GET] URI: /payments/2
+[Tue Oct 20 19:53:39 2026] 127.0.0.1:51001 Closing
+[Tue Oct 20 19:53:39 2026] 127.0.0.1:57437 Accepted
+[Tue Oct 20 19:53:39 2026] 127.0.0.1:57437 [200]: GET /build/assets/app-CDRURyWK.css
+[Tue Oct 20 19:53:39 2026] 127.0.0.1:62753 Accepted
+[Tue Oct 20 19:53:39 2026] 127.0.0.1:62753 [200]: GET /build/assets/app-BvRk9kiK.js
+[Tue Oct 20 19:53:39 2026] 127.0.0.1:57437 Closing
+[Tue Oct 20 19:53:39 2026] 127.0.0.1:62753 Closing
+[Tue Oct 20 19:53:39 2026] 127.0.0.1:63088 Accepted
+[Tue Oct 20 19:53:39 2026] 127.0.0.1:63088 [200]: GET /images/nilambara-electrical-logo.png
+[Tue Oct 20 19:53:39 2026] 127.0.0.1:63088 Closing
+[Tue Oct 20 19:53:40 2026] 127.0.0.1:59584 Accepted
+[Tue Oct 20 19:53:40 2026] 127.0.0.1:59584 [GET] URI: /credit-invoices
+[Tue Oct 20 19:53:40 2026] 127.0.0.1:59584 Closing
+[Tue Oct 20 19:53:40 2026] 127.0.0.1:51561 Accepted
+[Tue Oct 20 19:53:40 2026] 127.0.0.1:51561 [200]: GET /build/assets/app-CDRURyWK.css
+[Tue Oct 20 19:53:40 2026] 127.0.0.1:61104 Accepted
+[Tue Oct 20 19:53:40 2026] 127.0.0.1:61104 [200]: GET /build/assets/app-BvRk9kiK.js
+[Tue Oct 20 19:53:40 2026] 127.0.0.1:51561 Closing
+[Tue Oct 20 19:53:40 2026] 127.0.0.1:61104 Closing
+[Tue Oct 20 19:53:40 2026] 127.0.0.1:55308 Accepted
+[Tue Oct 20 19:53:40 2026] 127.0.0.1:55308 [200]: GET /images/nilambara-electrical-logo.png
+[Tue Oct 20 19:53:40 2026] 127.0.0.1:55308 Closing
+[Tue Oct 20 19:53:40 2026] 127.0.0.1:59387 Accepted
+[Tue Oct 20 19:53:40 2026] 127.0.0.1:59387 [GET] URI: /inventory
+[Tue Oct 20 19:53:41 2026] 127.0.0.1:59387 Closing
+[Tue Oct 20 19:53:41 2026] 127.0.0.1:50162 Accepted
+[Tue Oct 20 19:53:41 2026] 127.0.0.1:50162 [200]: GET /build/assets/app-CDRURyWK.css
+[Tue Oct 20 19:53:41 2026] 127.0.0.1:63608 Accepted
+[Tue Oct 20 19:53:41 2026] 127.0.0.1:63608 [200]: GET /build/assets/app-BvRk9kiK.js
+[Tue Oct 20 19:53:41 2026] 127.0.0.1:50162 Closing
+[Tue Oct 20 19:53:41 2026] 127.0.0.1:63608 Closing
+[Tue Oct 20 19:53:41 2026] 127.0.0.1:63090 Accepted
+[Tue Oct 20 19:53:41 2026] 127.0.0.1:63090 [200]: GET /images/nilambara-electrical-logo.png
+[Tue Oct 20 19:53:41 2026] 127.0.0.1:63090 Closing
+[Tue Oct 20 19:53:41 2026] 127.0.0.1:51826 Accepted
+[Tue Oct 20 19:53:41 2026] 127.0.0.1:51826 [GET] URI: /inventory/create
+[Tue Oct 20 19:53:41 2026] 127.0.0.1:51826 Closing
+[Tue Oct 20 19:53:41 2026] 127.0.0.1:52849 Accepted
+[Tue Oct 20 19:53:41 2026] 127.0.0.1:52849 [200]: GET /build/assets/app-CDRURyWK.css
+[Tue Oct 20 19:53:41 2026] 127.0.0.1:56831 Accepted
+[Tue Oct 20 19:53:41 2026] 127.0.0.1:56831 [200]: GET /build/assets/app-BvRk9kiK.js
+[Tue Oct 20 19:53:41 2026] 127.0.0.1:52849 Closing
+[Tue Oct 20 19:53:41 2026] 127.0.0.1:56831 Closing
+[Tue Oct 20 19:53:41 2026] 127.0.0.1:49285 Accepted
+[Tue Oct 20 19:53:41 2026] 127.0.0.1:49285 [200]: GET /images/nilambara-electrical-logo.png
+[Tue Oct 20 19:53:41 2026] 127.0.0.1:49285 Closing
+[Tue Oct 20 19:53:42 2026] 127.0.0.1:62041 Accepted
+[Tue Oct 20 19:53:42 2026] 127.0.0.1:62041 [GET] URI: /inventory/1
+[Tue Oct 20 19:53:42 2026] 127.0.0.1:62041 Closing
+[Tue Oct 20 19:53:42 2026] 127.0.0.1:64234 Accepted
+[Tue Oct 20 19:53:42 2026] 127.0.0.1:64234 [200]: GET /build/assets/app-CDRURyWK.css
+[Tue Oct 20 19:53:42 2026] 127.0.0.1:61023 Accepted
+[Tue Oct 20 19:53:42 2026] 127.0.0.1:61023 [200]: GET /build/assets/app-BvRk9kiK.js
+[Tue Oct 20 19:53:42 2026] 127.0.0.1:64234 Closing
+[Tue Oct 20 19:53:42 2026] 127.0.0.1:61023 Closing
+[Tue Oct 20 19:53:42 2026] 127.0.0.1:50725 Accepted
+[Tue Oct 20 19:53:42 2026] 127.0.0.1:50725 [200]: GET /images/nilambara-electrical-logo.png
+[Tue Oct 20 19:53:42 2026] 127.0.0.1:50725 Closing
+[Tue Oct 20 19:53:42 2026] 127.0.0.1:64467 Accepted
+[Tue Oct 20 19:53:42 2026] 127.0.0.1:64467 [GET] URI: /stock-issues
+[Tue Oct 20 19:53:43 2026] 127.0.0.1:64467 Closing
+[Tue Oct 20 19:53:43 2026] 127.0.0.1:50748 Accepted
+[Tue Oct 20 19:53:43 2026] 127.0.0.1:50748 [200]: GET /build/assets/app-CDRURyWK.css
+[Tue Oct 20 19:53:43 2026] 127.0.0.1:51848 Accepted
+[Tue Oct 20 19:53:43 2026] 127.0.0.1:51848 [200]: GET /build/assets/app-BvRk9kiK.js
+[Tue Oct 20 19:53:43 2026] 127.0.0.1:50748 Closing
+[Tue Oct 20 19:53:43 2026] 127.0.0.1:51848 Closing
+[Tue Oct 20 19:53:43 2026] 127.0.0.1:58939 Accepted
+[Tue Oct 20 19:53:43 2026] 127.0.0.1:58939 [200]: GET /images/nilambara-electrical-logo.png
+[Tue Oct 20 19:53:43 2026] 127.0.0.1:58939 Closing
+[Tue Oct 20 19:53:43 2026] 127.0.0.1:57309 Accepted
+[Tue Oct 20 19:53:43 2026] 127.0.0.1:57309 [GET] URI: /suppliers/create
+[Tue Oct 20 19:53:43 2026] 127.0.0.1:57309 Closing
+[Tue Oct 20 19:53:43 2026] 127.0.0.1:60571 Accepted
+[Tue Oct 20 19:53:43 2026] 127.0.0.1:60571 [200]: GET /build/assets/app-CDRURyWK.css
+[Tue Oct 20 19:53:43 2026] 127.0.0.1:65181 Accepted
+[Tue Oct 20 19:53:43 2026] 127.0.0.1:65181 [200]: GET /build/assets/app-BvRk9kiK.js
+[Tue Oct 20 19:53:43 2026] 127.0.0.1:60571 Closing
+[Tue Oct 20 19:53:43 2026] 127.0.0.1:65181 Closing
+[Tue Oct 20 19:53:43 2026] 127.0.0.1:57723 Accepted
+[Tue Oct 20 19:53:43 2026] 127.0.0.1:57723 [200]: GET /images/nilambara-electrical-logo.png
+[Tue Oct 20 19:53:43 2026] 127.0.0.1:57723 Closing
+[Tue Oct 20 19:53:44 2026] 127.0.0.1:59315 Accepted
+[Tue Oct 20 19:53:44 2026] 127.0.0.1:59315 [GET] URI: /suppliers/1
+[Tue Oct 20 19:53:44 2026] 127.0.0.1:59315 Closing
+[Tue Oct 20 19:53:44 2026] 127.0.0.1:51987 Accepted
+[Tue Oct 20 19:53:44 2026] 127.0.0.1:51987 [200]: GET /build/assets/app-CDRURyWK.css
+[Tue Oct 20 19:53:44 2026] 127.0.0.1:56892 Accepted
+[Tue Oct 20 19:53:44 2026] 127.0.0.1:56892 [200]: GET /build/assets/app-BvRk9kiK.js
+[Tue Oct 20 19:53:44 2026] 127.0.0.1:51987 Closing
+[Tue Oct 20 19:53:44 2026] 127.0.0.1:56892 Closing
+[Tue Oct 20 19:53:44 2026] 127.0.0.1:55713 Accepted
+[Tue Oct 20 19:53:44 2026] 127.0.0.1:55713 [200]: GET /images/nilambara-electrical-logo.png
+[Tue Oct 20 19:53:44 2026] 127.0.0.1:55713 Closing
+[Tue Oct 20 19:53:44 2026] 127.0.0.1:62689 Accepted
+[Tue Oct 20 19:53:44 2026] 127.0.0.1:62689 [GET] URI: /purchases
+[Tue Oct 20 19:53:45 2026] 127.0.0.1:62689 Closing
+[Tue Oct 20 19:53:45 2026] 127.0.0.1:52804 Accepted
+[Tue Oct 20 19:53:45 2026] 127.0.0.1:52804 [200]: GET /build/assets/app-CDRURyWK.css
+[Tue Oct 20 19:53:45 2026] 127.0.0.1:53393 Accepted
+[Tue Oct 20 19:53:45 2026] 127.0.0.1:53393 [200]: GET /build/assets/app-BvRk9kiK.js
+[Tue Oct 20 19:53:45 2026] 127.0.0.1:52804 Closing
+[Tue Oct 20 19:53:45 2026] 127.0.0.1:53393 Closing
+[Tue Oct 20 19:53:45 2026] 127.0.0.1:54955 Accepted
+[Tue Oct 20 19:53:45 2026] 127.0.0.1:54955 [200]: GET /images/nilambara-electrical-logo.png
+[Tue Oct 20 19:53:45 2026] 127.0.0.1:54955 Closing
+[Tue Oct 20 19:53:45 2026] 127.0.0.1:64662 Accepted
+[Tue Oct 20 19:53:45 2026] 127.0.0.1:64662 [GET] URI: /purchases/create
+[Tue Oct 20 19:53:45 2026] 127.0.0.1:64662 Closing
+[Tue Oct 20 19:53:45 2026] 127.0.0.1:65391 Accepted
+[Tue Oct 20 19:53:45 2026] 127.0.0.1:65391 [200]: GET /build/assets/app-CDRURyWK.css
+[Tue Oct 20 19:53:45 2026] 127.0.0.1:58726 Accepted
+[Tue Oct 20 19:53:45 2026] 127.0.0.1:58726 [200]: GET /build/assets/app-BvRk9kiK.js
+[Tue Oct 20 19:53:45 2026] 127.0.0.1:65391 Closing
+[Tue Oct 20 19:53:45 2026] 127.0.0.1:58726 Closing
+[Tue Oct 20 19:53:45 2026] 127.0.0.1:62734 Accepted
+[Tue Oct 20 19:53:45 2026] 127.0.0.1:62734 [200]: GET /images/nilambara-electrical-logo.png
+[Tue Oct 20 19:53:45 2026] 127.0.0.1:62734 Closing
+[Tue Oct 20 19:53:46 2026] 127.0.0.1:59576 Accepted
+[Tue Oct 20 19:53:46 2026] 127.0.0.1:59576 [GET] URI: /purchases/1
+[Tue Oct 20 19:53:46 2026] 127.0.0.1:59576 Closing
+[Tue Oct 20 19:53:46 2026] 127.0.0.1:60713 Accepted
+[Tue Oct 20 19:53:46 2026] 127.0.0.1:60713 [200]: GET /build/assets/app-CDRURyWK.css
+[Tue Oct 20 19:53:46 2026] 127.0.0.1:63655 Accepted
+[Tue Oct 20 19:53:46 2026] 127.0.0.1:63655 [200]: GET /build/assets/app-BvRk9kiK.js
+[Tue Oct 20 19:53:46 2026] 127.0.0.1:60713 Closing
+[Tue Oct 20 19:53:46 2026] 127.0.0.1:63655 Closing
+[Tue Oct 20 19:53:46 2026] 127.0.0.1:60917 Accepted
+[Tue Oct 20 19:53:46 2026] 127.0.0.1:60917 [200]: GET /images/nilambara-electrical-logo.png
+[Tue Oct 20 19:53:46 2026] 127.0.0.1:60917 Closing
+[Tue Oct 20 19:53:46 2026] 127.0.0.1:52300 Accepted
+[Tue Oct 20 19:53:46 2026] 127.0.0.1:52300 [GET] URI: /goods-received-notes/1/document/html
+[Tue Oct 20 19:53:46 2026] 127.0.0.1:52300 Closing
+[Tue Oct 20 19:53:46 2026] 127.0.0.1:64721 Accepted
+[Tue Oct 20 19:53:46 2026] 127.0.0.1:64721 [200]: GET /images/nilambara-electrical-logo.png
+[Tue Oct 20 19:53:46 2026] 127.0.0.1:64721 Closing
+[Tue Oct 20 19:53:47 2026] 127.0.0.1:57920 Accepted
+[Tue Oct 20 19:53:47 2026] 127.0.0.1:57920 [GET] URI: /pos
+[Tue Oct 20 19:53:47 2026] 127.0.0.1:57920 Closing
+[Tue Oct 20 19:53:47 2026] 127.0.0.1:55102 Accepted
+[Tue Oct 20 19:53:47 2026] 127.0.0.1:55102 [200]: GET /build/assets/app-CDRURyWK.css
+[Tue Oct 20 19:53:47 2026] 127.0.0.1:60117 Accepted
+[Tue Oct 20 19:53:47 2026] 127.0.0.1:60117 [200]: GET /build/assets/app-BvRk9kiK.js
+[Tue Oct 20 19:53:47 2026] 127.0.0.1:55102 Closing
+[Tue Oct 20 19:53:47 2026] 127.0.0.1:60117 Closing
+[Tue Oct 20 19:53:47 2026] 127.0.0.1:61582 Accepted
+[Tue Oct 20 19:53:47 2026] 127.0.0.1:61582 [200]: GET /images/nilambara-electrical-logo.png
+[Tue Oct 20 19:53:47 2026] 127.0.0.1:61582 Closing
+[Tue Oct 20 19:53:48 2026] 127.0.0.1:62440 Accepted
+[Tue Oct 20 19:53:48 2026] 127.0.0.1:62440 [GET] URI: /pos/sales/1/print
+[Tue Oct 20 19:53:48 2026] 127.0.0.1:62440 Closing
+[Tue Oct 20 19:53:48 2026] 127.0.0.1:57971 Accepted
+[Tue Oct 20 19:53:48 2026] 127.0.0.1:57971 [200]: GET /fonts/NotoSansSinhala-Bold.ttf
+[Tue Oct 20 19:53:48 2026] 127.0.0.1:61586 Accepted
+[Tue Oct 20 19:53:48 2026] 127.0.0.1:61586 [200]: GET /fonts/NotoSansSinhala-Regular.ttf
+[Tue Oct 20 19:53:48 2026] 127.0.0.1:57971 Closing
+[Tue Oct 20 19:53:48 2026] 127.0.0.1:61586 Closing
+[Tue Oct 20 19:53:48 2026] 127.0.0.1:57289 Accepted
+[Tue Oct 20 19:53:48 2026] 127.0.0.1:57289 [GET] URI: /pos/sales
+[Tue Oct 20 19:53:48 2026] 127.0.0.1:57289 Closing
+[Tue Oct 20 19:53:48 2026] 127.0.0.1:56905 Accepted
+[Tue Oct 20 19:53:49 2026] 127.0.0.1:56905 [200]: GET /build/assets/app-CDRURyWK.css
+[Tue Oct 20 19:53:49 2026] 127.0.0.1:50308 Accepted
+[Tue Oct 20 19:53:49 2026] 127.0.0.1:50308 [200]: GET /build/assets/app-BvRk9kiK.js
+[Tue Oct 20 19:53:49 2026] 127.0.0.1:56905 Closing
+[Tue Oct 20 19:53:49 2026] 127.0.0.1:50308 Closing
+[Tue Oct 20 19:53:49 2026] 127.0.0.1:58027 Accepted
+[Tue Oct 20 19:53:49 2026] 127.0.0.1:58027 [200]: GET /images/nilambara-electrical-logo.png
+[Tue Oct 20 19:53:49 2026] 127.0.0.1:58027 Closing
+[Tue Oct 20 19:53:49 2026] 127.0.0.1:59476 Accepted
+[Tue Oct 20 19:53:49 2026] 127.0.0.1:59476 [GET] URI: /reports
+[Tue Oct 20 19:53:49 2026] 127.0.0.1:59476 Closing
+[Tue Oct 20 19:53:49 2026] 127.0.0.1:56902 Accepted
+[Tue Oct 20 19:53:49 2026] 127.0.0.1:56902 [200]: GET /build/assets/app-CDRURyWK.css
+[Tue Oct 20 19:53:49 2026] 127.0.0.1:60677 Accepted
+[Tue Oct 20 19:53:49 2026] 127.0.0.1:60677 [200]: GET /build/assets/app-BvRk9kiK.js
+[Tue Oct 20 19:53:49 2026] 127.0.0.1:56902 Closing
+[Tue Oct 20 19:53:49 2026] 127.0.0.1:60677 Closing
+[Tue Oct 20 19:53:49 2026] 127.0.0.1:52768 Accepted
+[Tue Oct 20 19:53:49 2026] 127.0.0.1:52768 [200]: GET /images/nilambara-electrical-logo.png
+[Tue Oct 20 19:53:49 2026] 127.0.0.1:52768 Closing
+[Tue Oct 20 19:53:50 2026] 127.0.0.1:60199 Accepted
+[Tue Oct 20 19:53:50 2026] 127.0.0.1:60199 [GET] URI: /reports/stock
+[Tue Oct 20 19:53:50 2026] 127.0.0.1:60199 Closing
+[Tue Oct 20 19:53:50 2026] 127.0.0.1:57318 Accepted
+[Tue Oct 20 19:53:50 2026] 127.0.0.1:57318 [200]: GET /build/assets/app-CDRURyWK.css
+[Tue Oct 20 19:53:50 2026] 127.0.0.1:64261 Accepted
+[Tue Oct 20 19:53:50 2026] 127.0.0.1:64261 [200]: GET /build/assets/app-BvRk9kiK.js
+[Tue Oct 20 19:53:50 2026] 127.0.0.1:57318 Closing
+[Tue Oct 20 19:53:50 2026] 127.0.0.1:64261 Closing
+[Tue Oct 20 19:53:50 2026] 127.0.0.1:61664 Accepted
+[Tue Oct 20 19:53:50 2026] 127.0.0.1:61664 [200]: GET /images/nilambara-electrical-logo.png
+[Tue Oct 20 19:53:50 2026] 127.0.0.1:61664 Closing
+[Tue Oct 20 19:53:50 2026] 127.0.0.1:49692 Accepted
+[Tue Oct 20 19:53:50 2026] 127.0.0.1:49692 [GET] URI: /employees
+[Tue Oct 20 19:53:51 2026] 127.0.0.1:49692 Closing
+[Tue Oct 20 19:53:51 2026] 127.0.0.1:64538 Accepted
+[Tue Oct 20 19:53:51 2026] 127.0.0.1:64538 [200]: GET /build/assets/app-CDRURyWK.css
+[Tue Oct 20 19:53:51 2026] 127.0.0.1:52269 Accepted
+[Tue Oct 20 19:53:51 2026] 127.0.0.1:64538 Closing
+[Tue Oct 20 19:53:51 2026] 127.0.0.1:52269 [200]: GET /build/assets/app-BvRk9kiK.js
+[Tue Oct 20 19:53:51 2026] 127.0.0.1:52269 Closing
+[Tue Oct 20 19:53:51 2026] 127.0.0.1:60828 Accepted
+[Tue Oct 20 19:53:51 2026] 127.0.0.1:60828 [200]: GET /images/nilambara-electrical-logo.png
+[Tue Oct 20 19:53:51 2026] 127.0.0.1:60828 Closing
+[Tue Oct 20 19:53:51 2026] 127.0.0.1:56260 Accepted
+[Tue Oct 20 19:53:51 2026] 127.0.0.1:56260 [GET] URI: /employees/create
+[Tue Oct 20 19:53:51 2026] 127.0.0.1:56260 Closing
+[Tue Oct 20 19:53:51 2026] 127.0.0.1:60454 Accepted
+[Tue Oct 20 19:53:51 2026] 127.0.0.1:60454 [200]: GET /build/assets/app-CDRURyWK.css
+[Tue Oct 20 19:53:51 2026] 127.0.0.1:59273 Accepted
+[Tue Oct 20 19:53:51 2026] 127.0.0.1:59273 [200]: GET /build/assets/app-BvRk9kiK.js
+[Tue Oct 20 19:53:51 2026] 127.0.0.1:60454 Closing
+[Tue Oct 20 19:53:51 2026] 127.0.0.1:59273 Closing
+[Tue Oct 20 19:53:51 2026] 127.0.0.1:61257 Accepted
+[Tue Oct 20 19:53:51 2026] 127.0.0.1:61257 [200]: GET /images/nilambara-electrical-logo.png
+[Tue Oct 20 19:53:51 2026] 127.0.0.1:61257 Closing
+[Tue Oct 20 19:53:52 2026] 127.0.0.1:58888 Accepted
+[Tue Oct 20 19:53:52 2026] 127.0.0.1:58888 [GET] URI: /admin/roles
+[Tue Oct 20 19:53:52 2026] 127.0.0.1:58888 Closing
+[Tue Oct 20 19:53:52 2026] 127.0.0.1:49977 Accepted
+[Tue Oct 20 19:53:52 2026] 127.0.0.1:49977 [200]: GET /build/assets/app-CDRURyWK.css
+[Tue Oct 20 19:53:52 2026] 127.0.0.1:49660 Accepted
+[Tue Oct 20 19:53:52 2026] 127.0.0.1:49660 [200]: GET /build/assets/app-BvRk9kiK.js
+[Tue Oct 20 19:53:52 2026] 127.0.0.1:49977 Closing
+[Tue Oct 20 19:53:52 2026] 127.0.0.1:49660 Closing
+[Tue Oct 20 19:53:52 2026] 127.0.0.1:54774 Accepted
+[Tue Oct 20 19:53:52 2026] 127.0.0.1:54774 [200]: GET /images/nilambara-electrical-logo.png
+[Tue Oct 20 19:53:52 2026] 127.0.0.1:54774 Closing
+[Tue Oct 20 19:53:52 2026] 127.0.0.1:53340 Accepted
+[Tue Oct 20 19:53:53 2026] 127.0.0.1:53340 [GET] URI: /settings
+[Tue Oct 20 19:53:53 2026] 127.0.0.1:53340 Closing
+[Tue Oct 20 19:53:53 2026] 127.0.0.1:59155 Accepted
+[Tue Oct 20 19:53:53 2026] 127.0.0.1:59155 [200]: GET /build/assets/app-CDRURyWK.css
+[Tue Oct 20 19:53:53 2026] 127.0.0.1:54116 Accepted
+[Tue Oct 20 19:53:53 2026] 127.0.0.1:54116 [200]: GET /build/assets/app-BvRk9kiK.js
+[Tue Oct 20 19:53:53 2026] 127.0.0.1:59155 Closing
+[Tue Oct 20 19:53:53 2026] 127.0.0.1:54116 Closing
+[Tue Oct 20 19:53:53 2026] 127.0.0.1:59386 Accepted
+[Tue Oct 20 19:53:53 2026] 127.0.0.1:59386 [200]: GET /images/nilambara-electrical-logo.png
+[Tue Oct 20 19:53:53 2026] 127.0.0.1:59386 Closing
+[Tue Oct 20 19:53:53 2026] 127.0.0.1:59946 Accepted
+[Tue Oct 20 19:53:53 2026] 127.0.0.1:59946 [GET] URI: /print-templates
+[Tue Oct 20 19:53:53 2026] 127.0.0.1:59946 Closing
+[Tue Oct 20 19:53:53 2026] 127.0.0.1:53251 Accepted
+[Tue Oct 20 19:53:53 2026] 127.0.0.1:53251 [200]: GET /build/assets/app-CDRURyWK.css
+[Tue Oct 20 19:53:53 2026] 127.0.0.1:63525 Accepted
+[Tue Oct 20 19:53:53 2026] 127.0.0.1:63525 [200]: GET /build/assets/app-BvRk9kiK.js
+[Tue Oct 20 19:53:53 2026] 127.0.0.1:53251 Closing
+[Tue Oct 20 19:53:53 2026] 127.0.0.1:63525 Closing
+[Tue Oct 20 19:53:53 2026] 127.0.0.1:56825 Accepted
+[Tue Oct 20 19:53:53 2026] 127.0.0.1:56825 [200]: GET /images/nilambara-electrical-logo.png
+[Tue Oct 20 19:53:53 2026] 127.0.0.1:56825 Closing
+[Tue Oct 20 19:53:54 2026] 127.0.0.1:57206 Accepted
+[Tue Oct 20 19:53:54 2026] 127.0.0.1:57206 [GET] URI: /admin/backups
+[Tue Oct 20 19:53:54 2026] 127.0.0.1:57206 Closing
+[Tue Oct 20 19:53:54 2026] 127.0.0.1:50081 Accepted
+[Tue Oct 20 19:53:54 2026] 127.0.0.1:50081 [200]: GET /build/assets/app-CDRURyWK.css
+[Tue Oct 20 19:53:54 2026] 127.0.0.1:60540 Accepted
+[Tue Oct 20 19:53:54 2026] 127.0.0.1:60540 [200]: GET /build/assets/app-BvRk9kiK.js
+[Tue Oct 20 19:53:54 2026] 127.0.0.1:50081 Closing
+[Tue Oct 20 19:53:54 2026] 127.0.0.1:60540 Closing
+[Tue Oct 20 19:53:54 2026] 127.0.0.1:52180 Accepted
+[Tue Oct 20 19:53:54 2026] 127.0.0.1:52180 [200]: GET /images/nilambara-electrical-logo.png
+[Tue Oct 20 19:53:54 2026] 127.0.0.1:52180 Closing
+[Tue Oct 20 19:53:54 2026] 127.0.0.1:58421 Accepted
+[Tue Oct 20 19:53:54 2026] 127.0.0.1:58421 [GET] URI: /audit-logs
+[Tue Oct 20 19:53:55 2026] 127.0.0.1:58421 Closing
+[Tue Oct 20 19:53:55 2026] 127.0.0.1:51333 Accepted
+[Tue Oct 20 19:53:55 2026] 127.0.0.1:51333 [200]: GET /build/assets/app-CDRURyWK.css
+[Tue Oct 20 19:53:55 2026] 127.0.0.1:51896 Accepted
+[Tue Oct 20 19:53:55 2026] 127.0.0.1:51896 [200]: GET /build/assets/app-BvRk9kiK.js
+[Tue Oct 20 19:53:55 2026] 127.0.0.1:51333 Closing
+[Tue Oct 20 19:53:55 2026] 127.0.0.1:51896 Closing
+[Tue Oct 20 19:53:55 2026] 127.0.0.1:57295 Accepted
+[Tue Oct 20 19:53:55 2026] 127.0.0.1:57295 [200]: GET /images/nilambara-electrical-logo.png
+[Tue Oct 20 19:53:55 2026] 127.0.0.1:57295 Closing

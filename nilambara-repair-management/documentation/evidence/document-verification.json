@@ -1,0 +1,63 @@
+[
+  {
+    "file": "D:\\xampp\\htdocs\\Nilambara_Electricals\\nilambara-repair-management\\documentation\\final-pdfs\\Nilambara_Electricals_Complete_Feature_Guidance.pdf",
+    "pages": 114,
+    "portrait": 114,
+    "landscape": 0,
+    "bytes": 4404521,
+    "sha256": "17b3702b9f96c83c0513f8418f4e9c0fa5f64b783e37e09fdf22cfff0b23f621",
+    "internal_or_external_links": 26,
+    "outline_entries": 171,
+    "fonts": [
+      "Arial-BoldMT",
+      "ArialMT",
+      "NotoSansSinhala-Regular"
+    ],
+    "warnings": [],
+    "rendered_pages": 114,
+    "visual_review": "Rendered-page contact sheets inspected; full-size samples checked for body, tables, diagrams, screenshots and Sinhala.",
+    "review_date": "2026-10-21",
+    "private_environment_value_scan": "No nonempty inspected secret value found in extracted PDF text."
+  },
+  {
+    "file": "D:\\xampp\\htdocs\\Nilambara_Electricals\\nilambara-repair-management\\documentation\\final-pdfs\\Nilambara_Electricals_Complete_User_Manual.pdf",
+    "pages": 84,
+    "portrait": 27,
+    "landscape": 57,
+    "bytes": 5076122,
+    "sha256": "cfddc4d7af7f0fb65387686b34c1942e790b4b6b33b2c06f2bd9865d26bda43a",
+    "internal_or_external_links": 24,
+    "outline_entries": 112,
+    "fonts": [
+      "Arial-BoldMT",
+      "ArialMT",
+      "Consolas",
+      "NotoSansSinhala-Regular"
+    ],
+    "warnings": [],
+    "rendered_pages": 84,
+    "visual_review": "Rendered-page contact sheets inspected; full-size samples checked for body, tables, diagrams, screenshots and Sinhala.",
+    "review_date": "2026-10-21",
+    "private_environment_value_scan": "No nonempty inspected secret value found in extracted PDF text."
+  },
+  {
+    "file": "D:\\xampp\\htdocs\\Nilambara_Electricals\\nilambara-repair-management\\documentation\\final-pdfs\\Nilambara_Electricals_System_Testing_and_Results.pdf",
+    "pages": 149,
+    "portrait": 97,
+    "landscape": 52,
+    "bytes": 2480170,
+    "sha256": "22c23b1151522c10c140ab485f2d501d1f6cdd094bb3ff16f59ad3cd0d3ecbd0",
+    "internal_or_external_links": 25,
+    "outline_entries": 307,
+    "fonts": [
+      "Arial-BoldMT",
+      "ArialMT",
+      "NotoSansSinhala-Regular"
+    ],
+    "warnings": [],
+    "rendered_pages": 149,
+    "visual_review": "Rendered-page contact sheets inspected; full-size samples checked for body, tables, diagrams, screenshots and Sinhala.",
+    "review_date": "2026-10-21",
+    "private_environment_value_scan": "No nonempty inspected secret value found in extracted PDF text."
+  }
+]

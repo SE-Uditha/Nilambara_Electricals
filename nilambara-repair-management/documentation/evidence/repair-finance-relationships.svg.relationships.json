@@ -1,0 +1,34 @@
+[
+  [
+    "customers",
+    "repair_jobs"
+  ],
+  [
+    "repair_jobs",
+    "repair_receipts"
+  ],
+  [
+    "repair_jobs",
+    "quotations"
+  ],
+  [
+    "quotations",
+    "quotation_items"
+  ],
+  [
+    "invoices",
+    "invoice_jobs"
+  ],
+  [
+    "repair_jobs",
+    "invoice_jobs"
+  ],
+  [
+    "invoices",
+    "payment_allocations"
+  ],
+  [
+    "payments",
+    "payment_allocations"
+  ]
+]
