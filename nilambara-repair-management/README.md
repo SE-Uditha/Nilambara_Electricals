@@ -1,5 +1,7 @@
 # Nilambara Repair Management
 
+**Role update (21 October 2026):** Receptionist and Cashier are consolidated as **Cashier**, combining repair intake with billing/POS. Existing accounts keep their credentials. See [current permissions](docs/modules/role-permissions.md). Step 13 PDFs describe the earlier dated snapshot.
+
 Laravel application for Nilambara Electricals' repair shop management system, covering electrical-appliance and motor repair, customer/company records, quotations, billing, credit, spare parts, purchasing, POS, staff, reports, and operational controls.
 
 **Current delivery: Step 12 and its pending-work follow-up.** Inventory, supplier and purchase/GRN workflows now integrate with repair billing, POS, reports and print/PDF history. The final disposable MySQL run passed 218 tests, plus native concurrency and recovery checks. See the [completion report](docs/testing/pending-completion-report.md), [workflow guide](docs/modules/stock-supplier-purchase-workflows.md) and [BRD matrix](docs/testing/brd-compliance-matrix.md). Live backup storage awaits an approved folder; Google Drive credentials remain blank. Physical hardware/UAT and purchase-wide cost allocation remain outstanding. No production build or deployment was performed.
@@ -78,7 +80,7 @@ php artisan db:seed --class=RoleSeeder
 npm run build
 ```
 
-Inspect the pending migration output before applying it to an existing database. Do not run `migrate:fresh`, rollback, or manually recreate tables. `RoleSeeder` idempotently adds the six BRD roles and permission catalog; it creates no demo accounts. If no active administrator exists, create the initial linked Administrator account:
+Inspect the pending migration output before applying it to an existing database. Do not run `migrate:fresh`, rollback, or manually recreate tables. `RoleSeeder` idempotently adds the five current roles and permission catalog; it creates no demo accounts. If no active administrator exists, create the initial linked Administrator account:
 
 ```powershell
 php artisan app:create-user

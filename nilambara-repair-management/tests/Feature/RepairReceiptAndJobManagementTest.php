@@ -31,9 +31,9 @@ class RepairReceiptAndJobManagementTest extends TestCase
         $this->seed(RoleSeeder::class);
     }
 
-    public function test_receptionist_saves_receipt_and_creates_linked_job_history_and_a6_card(): void
+    public function test_cashier_saves_receipt_and_creates_linked_job_history_and_a6_card(): void
     {
-        $receptionist = $this->userWithRole('receptionist');
+        $cashier = $this->userWithRole('cashier');
         $customer = $this->customer($this->customerAttributes([
             'customer_name' => 'Nadeesha Silva',
             'mobile_number' => '0771234567',
@@ -41,7 +41,7 @@ class RepairReceiptAndJobManagementTest extends TestCase
         ]));
         $receiver = $this->employee();
 
-        $this->actingAs($receptionist)
+        $this->actingAs($cashier)
             ->post(route('repair-receipts.store'), $this->receiptData($customer, $receiver))
             ->assertRedirect()
             ->assertSessionHasNoErrors();
@@ -60,7 +60,7 @@ class RepairReceiptAndJobManagementTest extends TestCase
             'repair_job_id' => $job->id,
             'previous_status' => null,
             'new_status' => JobStatus::Received->value,
-            'changed_by_user_id' => $receptionist->id,
+            'changed_by_user_id' => $cashier->id,
         ]);
         $this->assertDatabaseHas('job_cards', ['repair_job_id' => $job->id, 'paper_size' => 'A6']);
         $this->assertSame('Nadeesha Silva', data_get($receipt->document_snapshot, 'customer.name'));
@@ -104,11 +104,11 @@ class RepairReceiptAndJobManagementTest extends TestCase
 
     public function test_receipt_validation_rejects_inactive_customers_and_missing_required_fields(): void
     {
-        $receptionist = $this->userWithRole('receptionist');
+        $cashier = $this->userWithRole('cashier');
         $inactiveCustomer = $this->customer(['is_active' => false]);
         $receiver = $this->employee();
 
-        $this->actingAs($receptionist)
+        $this->actingAs($cashier)
             ->from(route('repair-receipts.create'))
             ->post(route('repair-receipts.store'), $this->receiptData($inactiveCustomer, $receiver, [
                 'item_name' => '',
@@ -252,17 +252,17 @@ class RepairReceiptAndJobManagementTest extends TestCase
         $this->actingAs($technician)->get(route('repair-jobs.index'))->assertOk()->assertDontSee($otherJob->automatic_number);
     }
 
-    public function test_receptionist_can_register_and_print_but_cannot_assign_or_change_status(): void
+    public function test_cashier_can_register_and_print_but_cannot_assign_or_change_status(): void
     {
-        $receptionist = $this->userWithRole('receptionist');
+        $cashier = $this->userWithRole('cashier');
         $job = $this->job();
 
-        $this->actingAs($receptionist)->get(route('repair-receipts.index'))->assertOk();
-        $this->actingAs($receptionist)->get(route('repair-jobs.status-search'))->assertOk();
-        $this->actingAs($receptionist)->post(route('repair-jobs.update-status', $job), [
+        $this->actingAs($cashier)->get(route('repair-receipts.index'))->assertOk();
+        $this->actingAs($cashier)->get(route('repair-jobs.status-search'))->assertOk();
+        $this->actingAs($cashier)->post(route('repair-jobs.update-status', $job), [
             'status' => JobStatus::UnderRepair->value,
         ])->assertForbidden();
-        $this->actingAs($receptionist)->post(route('repair-jobs.assign', $job), [
+        $this->actingAs($cashier)->post(route('repair-jobs.assign', $job), [
             'technician_id' => $this->employee()->id,
         ])->assertForbidden();
     }

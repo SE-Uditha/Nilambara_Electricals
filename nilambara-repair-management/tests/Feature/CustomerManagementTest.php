@@ -19,9 +19,9 @@ class CustomerManagementTest extends TestCase
         $this->seed(RoleSeeder::class);
     }
 
-    public function test_receptionist_can_register_individual_and_company_customers(): void
+    public function test_cashier_can_register_individual_and_company_customers(): void
     {
-        $user = $this->userWithRole('receptionist');
+        $user = $this->userWithRole('cashier');
 
         $this->actingAs($user)->post(route('customers.store'), $this->validIndividual())
             ->assertRedirect();
@@ -63,7 +63,7 @@ class CustomerManagementTest extends TestCase
 
     public function test_zero_opening_balance_does_not_create_a_ledger_entry(): void
     {
-        $user = $this->userWithRole('receptionist');
+        $user = $this->userWithRole('cashier');
 
         $this->actingAs($user)->post(route('customers.store'), $this->validIndividual())
             ->assertRedirect();
@@ -73,8 +73,8 @@ class CustomerManagementTest extends TestCase
 
     public function test_customer_forms_show_only_fields_allowed_by_the_users_permissions(): void
     {
-        $receptionist = $this->userWithRole('receptionist');
-        $this->actingAs($receptionist)->get(route('customers.create'))
+        $cashier = $this->userWithRole('cashier');
+        $this->actingAs($cashier)->get(route('customers.create'))
             ->assertOk()
             ->assertDontSee('name="opening_balance"', false)
             ->assertDontSee('name="is_active"', false);
@@ -86,9 +86,9 @@ class CustomerManagementTest extends TestCase
             ->assertSee('name="is_active"', false);
     }
 
-    public function test_receptionist_cannot_submit_financial_balance_or_inactive_status(): void
+    public function test_cashier_cannot_submit_financial_balance_or_inactive_status(): void
     {
-        $user = $this->userWithRole('receptionist');
+        $user = $this->userWithRole('cashier');
 
         $this->actingAs($user)->post(route('customers.store'), $this->validIndividual([
             'opening_balance' => '25.00',
@@ -100,7 +100,7 @@ class CustomerManagementTest extends TestCase
 
     public function test_customer_validation_requires_type_name_address_and_valid_contact_data(): void
     {
-        $user = $this->userWithRole('receptionist');
+        $user = $this->userWithRole('cashier');
         $invalid = $this->validIndividual([
             'customer_type' => 'individual',
             'customer_name' => '',
@@ -126,7 +126,7 @@ class CustomerManagementTest extends TestCase
 
     public function test_company_type_requires_company_name_but_email_and_contact_person_are_optional(): void
     {
-        $user = $this->userWithRole('receptionist');
+        $user = $this->userWithRole('cashier');
         $invalid = $this->validCompany(['company_name' => '']);
 
         $this->actingAs($user)->post(route('customers.store'), $invalid)
@@ -144,7 +144,7 @@ class CustomerManagementTest extends TestCase
 
     public function test_customer_search_matches_customer_code_name_and_mobile_and_excludes_inactive(): void
     {
-        $user = $this->userWithRole('receptionist');
+        $user = $this->userWithRole('cashier');
         $customer = $this->registerCustomer($user, $this->validIndividual());
 
         $this->actingAs($user)->getJson(route('customers.search', ['q' => substr($customer->customer_code, 0, 8)]))
@@ -187,7 +187,7 @@ class CustomerManagementTest extends TestCase
 
     public function test_customer_can_be_updated_without_changing_id_or_opening_balance(): void
     {
-        $user = $this->userWithRole('receptionist');
+        $user = $this->userWithRole('cashier');
         $customer = $this->registerCustomer($this->userWithRole('administrator'), $this->validIndividual([
             'opening_balance' => '75.00',
             'is_active' => '1',
@@ -226,10 +226,10 @@ class CustomerManagementTest extends TestCase
 
     public function test_deactivation_requires_permission_preserves_history_and_activation_uses_update_permission(): void
     {
-        $receptionist = $this->userWithRole('receptionist');
-        $customer = $this->registerCustomer($receptionist, $this->validIndividual());
+        $cashier = $this->userWithRole('cashier');
+        $customer = $this->registerCustomer($cashier, $this->validIndividual());
 
-        $this->actingAs($receptionist)->post(route('customers.deactivate', $customer))
+        $this->actingAs($cashier)->post(route('customers.deactivate', $customer))
             ->assertForbidden();
         $this->assertTrue($customer->fresh()->is_active);
 
@@ -248,16 +248,16 @@ class CustomerManagementTest extends TestCase
 
     public function test_customer_statement_and_financial_fields_require_statement_permission(): void
     {
-        $receptionist = $this->userWithRole('receptionist');
+        $cashier = $this->userWithRole('cashier');
         $customer = $this->registerCustomer($this->userWithRole('administrator'), $this->validIndividual([
             'opening_balance' => '42.00',
             'is_active' => '1',
         ]));
 
-        $this->actingAs($receptionist)->get(route('customers.show', $customer))
+        $this->actingAs($cashier)->get(route('customers.show', $customer))
             ->assertOk()
             ->assertDontSee('42.00');
-        $this->actingAs($receptionist)->get(route('customers.statement', $customer))
+        $this->actingAs($cashier)->get(route('customers.statement', $customer))
             ->assertForbidden();
 
         $manager = $this->userWithRole('manager');

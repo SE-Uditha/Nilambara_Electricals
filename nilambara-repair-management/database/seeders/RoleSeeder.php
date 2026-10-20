@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Modules\RolesPermissions\Models\Permission;
 use App\Modules\RolesPermissions\Models\Role;
+use App\Modules\RolesPermissions\Services\MergeReceptionistIntoCashier;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
@@ -11,9 +12,10 @@ class RoleSeeder extends Seeder
 {
     public function run(): void
     {
+        app(MergeReceptionistIntoCashier::class)->run();
+
         $roles = [
             'administrator' => 'Administrator',
-            'receptionist' => 'Receptionist',
             'technician' => 'Technician',
             'cashier' => 'Cashier',
             'storekeeper' => 'Storekeeper',
@@ -75,16 +77,13 @@ class RoleSeeder extends Seeder
         }
 
         $rolePermissions = [
-            'receptionist' => [
-                'dashboard.view', 'customers.view', 'customers.create', 'customers.update',
-                'receipts.view', 'receipts.create', 'receipts.print', 'jobs.view', 'jobs.create',
-                'job-cards.view', 'job-cards.print', 'invoices.view',
-            ],
             'technician' => [
                 'dashboard.view', 'jobs.view', 'jobs.inspect', 'jobs.repair', 'jobs.update-status',
                 'jobs.complete', 'job-cards.view',
             ],
             'cashier' => [
+                'customers.create', 'customers.update', 'receipts.view', 'receipts.create', 'receipts.print',
+                'jobs.view', 'jobs.create', 'job-cards.view', 'job-cards.print',
                 'dashboard.view', 'invoices.view', 'invoices.create', 'invoices.print',
                 'payments.view', 'payments.create', 'payments.receive', 'payments.print', 'payments.export',
                 'credit.view', 'credit.collect', 'pos.view', 'pos.sale', 'pos.sales.view', 'pos.receipt.print',
@@ -118,9 +117,8 @@ class RoleSeeder extends Seeder
         }
 
         $reportGrants = [
-            'receptionist' => ['reports.view', 'reports.repair'],
             'technician' => ['reports.view', 'reports.repair'],
-            'cashier' => ['reports.sales'],
+            'cashier' => ['reports.sales', 'reports.repair'],
             'storekeeper' => ['reports.view', 'reports.inventory', 'reports.export'],
             'manager' => ['reports.repair', 'reports.sales', 'reports.inventory', 'reports.credit'],
         ];
@@ -129,9 +127,8 @@ class RoleSeeder extends Seeder
         }
 
         $quotationGrants = [
-            'receptionist' => ['quotations.view', 'quotations.create', 'quotations.update', 'quotations.issue', 'quotations.print'],
             'technician' => ['quotations.view'],
-            'cashier' => ['quotations.view', 'quotations.print'],
+            'cashier' => ['quotations.view', 'quotations.create', 'quotations.update', 'quotations.issue', 'quotations.print'],
             'manager' => [
                 'quotations.view', 'quotations.create', 'quotations.update', 'quotations.issue',
                 'quotations.approve', 'quotations.revise', 'quotations.cancel', 'quotations.print',
@@ -142,7 +139,6 @@ class RoleSeeder extends Seeder
         }
 
         $invoiceGrants = [
-            'receptionist' => ['invoices.view'],
             'cashier' => ['invoices.view', 'invoices.create', 'invoices.update-draft', 'invoices.issue', 'invoices.print', 'invoices.export'],
             'manager' => ['invoices.view', 'invoices.create', 'invoices.update-draft', 'invoices.issue', 'invoices.print', 'invoices.cancel', 'invoices.export'],
         ];

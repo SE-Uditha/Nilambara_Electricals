@@ -28,6 +28,32 @@
                 </div>
             @endforeach
         </nav>
+        <script>
+            (() => {
+                const navigation = document.currentScript.previousElementSibling;
+                const storageKey = 'nilambara.sidebar-scroll.' + @js((string) auth()->id());
+                const restore = () => {
+                    try {
+                        const position = Number(sessionStorage.getItem(storageKey));
+                        if (Number.isFinite(position) && position >= 0) navigation.scrollTop = position;
+                    } catch {
+                        // Navigation remains usable when browser storage is unavailable.
+                    }
+                };
+                const remember = () => {
+                    try {
+                        sessionStorage.setItem(storageKey, String(navigation.scrollTop));
+                    } catch {
+                        // Browser privacy settings must not interrupt navigation.
+                    }
+                };
+
+                restore();
+                requestAnimationFrame(restore);
+                navigation.addEventListener('scroll', remember, { passive: true });
+                window.addEventListener('pagehide', remember);
+            })();
+        </script>
         @php($user = auth()->user())
         <div class="shrink-0 border-t border-white/8 bg-black/10 p-4">
             <div class="flex items-center gap-3 px-1">

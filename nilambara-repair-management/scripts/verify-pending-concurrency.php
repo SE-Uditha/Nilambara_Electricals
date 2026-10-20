@@ -136,13 +136,13 @@ $race = static function (string $label, array $inputs, int $expected): array {
     return $results;
 };
 $customer = $fixtures->customerRecord();
-$receivers = [$fixtures->actor('receptionist'), $fixtures->actor('receptionist')];
+$receivers = [$fixtures->actor('cashier'), $fixtures->actor('cashier')];
 $before = DB::table('repair_receipts')->count();
 $inputs = [];
 foreach ($receivers as $index => $actor) {
     $inputs[] = ['operation' => 'intake', 'actor' => $actor->id, 'data' => ['customer_id' => $customer->id, 'job_number' => 'RACE-'.Str::uuid(), 'item_name' => 'Motor', 'brand' => 'Test', 'job_type' => 'normal', 'received_by_employee_id' => $actor->employee->id, 'labor_cost' => '0.00', 'advance_payment' => '0.00']];
 }
-$race('two receptionists create atomic receipts and unique jobs', $inputs, 2);
+$race('two cashiers create atomic receipts and unique jobs', $inputs, 2);
 if (DB::table('repair_receipts')->count() !== $before + 2) {
     throw new RuntimeException('Receipt race count mismatch.');
 }

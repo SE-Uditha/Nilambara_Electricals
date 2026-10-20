@@ -60,10 +60,10 @@ class EmployeeManagementTest extends TestCase
         $this->assertDatabaseHas('audit_logs', ['action' => 'employee.created', 'entity_id' => $employee->id]);
     }
 
-    public function test_receptionist_cannot_register_employees_or_create_accounts(): void
+    public function test_cashier_cannot_register_employees_or_create_accounts(): void
     {
         $user = User::factory()->create();
-        $user->assignRole('receptionist');
+        $user->assignRole('cashier');
 
         $this->actingAs($user)->get(route('employees.create'))->assertForbidden();
         $this->actingAs($user)->post(route('employees.store'), [
@@ -194,7 +194,7 @@ class EmployeeManagementTest extends TestCase
 
         $this->seed(RoleSeeder::class);
 
-        $this->assertSame(6, $roleCount);
+        $this->assertSame(5, $roleCount);
         $this->assertSame($roleCount, Role::query()->count());
         $this->assertSame($permissionCount, Permission::query()->count());
         $this->assertSame($permissionCount, $administrator->fresh()->permissions()->count());
@@ -203,18 +203,15 @@ class EmployeeManagementTest extends TestCase
     public function test_default_role_permissions_follow_the_restricted_matrix(): void
     {
         $checks = [
-            'receptionist' => [
-                'customers.create' => true,
-                'receipts.create' => true,
-                'employees.create' => false,
-                'payments.reverse' => false,
-            ],
             'technician' => [
                 'jobs.inspect' => true,
                 'jobs.complete' => true,
                 'settings.update' => false,
             ],
             'cashier' => [
+                'customers.create' => true,
+                'receipts.create' => true,
+                'employees.create' => false,
                 'invoices.create' => true,
                 'payments.receive' => true,
                 'invoices.cancel' => false,
