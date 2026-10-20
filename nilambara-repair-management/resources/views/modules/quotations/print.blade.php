@@ -143,5 +143,6 @@
         </div>
         <footer>{{ $footerText ?: __('ui.quotation_print_footer') }} · {{ __('ui.print_date') }}: {{ $printedAt->format(config('business.date_format').' '.config('business.time_format')) }}</footer>
     </main>
+@include('components.document-layout-settings')
 </body>
 </html>

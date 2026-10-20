@@ -91,5 +91,6 @@
         <div class="signatures"><div class="signature">{{ __('invoices.customer_signature') }}</div><div class="signature">{{ __('invoices.authorized_signature') }}</div></div>
         <footer class="footer">{{ $footer ?: __('invoices.'.$payments['payment_status']) }} · {{ $printedAt->format(config('business.date_format').' '.config('business.time_format')) }}</footer>
     </main>
+@include('components.document-layout-settings')
 </body>
 </html>

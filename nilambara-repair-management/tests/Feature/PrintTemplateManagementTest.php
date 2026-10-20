@@ -41,7 +41,7 @@ class PrintTemplateManagementTest extends TestCase
             'business_address' => '',
             'telephone_number' => '',
             'document_title' => 'Invoice',
-            'paper_size' => 'A4',
+            'paper_size' => 'A5',
             'orientation' => 'landscape',
             'thermal_width_mm' => '',
             'font_size_pt' => 11,

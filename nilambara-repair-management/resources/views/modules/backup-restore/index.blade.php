@@ -8,6 +8,21 @@
         <p class="mt-1 text-sm text-slate-500">{{ __('backups.description') }}</p>
     </div>
     @if (session('status'))<p class="mb-4 rounded-lg bg-emerald-50 p-3 text-sm text-emerald-800">{{ session('status') }}</p>@endif
+    @if ($missedBackup)<p role="alert" class="mb-4 rounded-lg bg-amber-50 p-3 text-sm">No recent completed scheduled backup was recorded. Check scheduler execution and backup failures.</p>@endif
+    @if ($cleanupFailed)<p role="alert" class="mb-4 rounded-lg bg-amber-50 p-3 text-sm">A retention cleanup failure was recorded in the last seven days. Review the audit history.</p>@endif
+    <p class="mb-4 text-sm">Google Drive: {{ $cloudConfigured ? 'Configured' : 'Not configured — account and folder details can be added later.' }}</p>
+    @can('backups.configure')
+    <form method="POST" action="{{ route('backups.configure') }}" class="mb-6 grid gap-3 rounded-xl border bg-white p-4 sm:grid-cols-2">
+        @csrf
+        <label>Private backup directory<input class="form-input" name="root" placeholder="Leave empty to retain current destination" maxlength="1000" disabled id="backup-destination"></label>
+        <label><input type="checkbox" onchange="document.getElementById('backup-destination').disabled=!this.checked"> Change private destination</label>
+        <label>Daily time (Asia/Colombo)<input class="form-input" type="time" name="schedule_time" value="{{ config('backup.schedule_time') }}" required></label>
+        <label>Retention days<input class="form-input" type="number" name="retention_days" min="1" max="3650" value="{{ config('backup.retention_days') }}" required></label>
+        <label>Maximum scheduled versions<input class="form-input" type="number" name="maximum_backups" min="1" max="1000" value="{{ config('backup.maximum_backups') }}" required></label>
+        <button class="rounded bg-teal-700 px-4 py-2 text-white">Save backup policy</button>
+    </form>
+    <p class="mb-4 text-xs">Restore uses the protected <code>php artisan backup:restore ID</code> command with administrator password, exact database confirmation and a safety backup. Selecting a history row never starts a restore. Manual backups are protected from automatic retention cleanup.</p>
+    @endcan
     @error('backup')<p class="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-800">{{ $message }}</p>@enderror
     <div class="mb-6 rounded-xl border {{ $destinationConfigured ? 'border-emerald-200 bg-emerald-50' : 'border-amber-200 bg-amber-50' }} p-4 text-sm">
         <p class="font-semibold">{{ $destinationConfigured ? __('backups.destination_ready') : __('backups.destination_unavailable') }}</p>
@@ -32,4 +47,8 @@
         </table>
     </div>
     <div class="mt-4">{{ $history->links() }}</div>
+    <section class="mt-6 space-y-3">@foreach ($history as $backup)<div class="flex flex-wrap items-center gap-3 rounded border bg-white p-3 text-xs">
+        <span>Backup #{{ $backup->id }} · {{ $backup->file_size ?? '—' }} bytes · {{ $backup->verification_status }} · Google Drive: {{ $backup->cloud_status }} · {{ $backup->is_protected ? 'Protected manual copy' : 'Scheduled retention' }}</span>
+        @if (! $backup->deleted_at)<form method="POST" action="{{ route('backups.verify', $backup) }}">@csrf<button class="text-teal-700 underline">Verify file</button></form>@else<span>File removed by retention; history preserved.</span>@endif
+    </div>@endforeach</section>
 @endsection

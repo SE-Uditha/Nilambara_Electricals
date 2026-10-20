@@ -21,6 +21,9 @@ class ReportController
         'overdue-credit', 'supplier-outstanding', 'purchases', 'expenses', 'stock',
         'stock-movements', 'repair-parts', 'pos-parts', 'adjustments', 'purchase-history',
         'supplier-purchases', 'valuation', 'profit-estimate',
+        'daily-sales', 'monthly-sales', 'yearly-sales', 'repair-income', 'invoice-sales',
+        'cash-credit-sales', 'cashier-sales', 'discounts', 'refunds', 'cash-summary', 'cash-collections',
+        'customer-statement', 'supplier-statement',
     ];
 
     public function index(Request $request): View
@@ -43,6 +46,10 @@ class ReportController
             'employee_id' => ['nullable', 'integer', 'min:1'],
             'supplier_id' => ['nullable', 'integer', 'min:1'],
             'category_id' => ['nullable', 'integer', 'min:1'],
+            'item_id' => ['nullable', 'integer', 'exists:spare_parts,id'],
+            'payment_terms' => ['nullable', 'in:cash,credit'],
+            'sort' => ['nullable', 'string', 'max:64'],
+            'direction' => ['nullable', 'in:asc,desc'],
             'stock_state' => ['nullable', 'in:low,out'],
             'method' => ['nullable', 'in:cash,bank_transfer,cheque'],
             'q' => ['nullable', 'string', 'max:100'],
@@ -52,6 +59,7 @@ class ReportController
         }
 
         $data = $reports->build($report, $filters, $request->user());
+        $data = $this->sort($data, $filters);
         $rows = $data['query']->paginate(50)->withQueryString();
 
         return view('modules.reports.show', compact('report', 'filters', 'data', 'rows'));
@@ -71,6 +79,10 @@ class ReportController
             'employee_id' => ['nullable', 'integer', 'min:1'],
             'supplier_id' => ['nullable', 'integer', 'min:1'],
             'category_id' => ['nullable', 'integer', 'min:1'],
+            'item_id' => ['nullable', 'integer', 'exists:spare_parts,id'],
+            'payment_terms' => ['nullable', 'in:cash,credit'],
+            'sort' => ['nullable', 'string', 'max:64'],
+            'direction' => ['nullable', 'in:asc,desc'],
             'stock_state' => ['nullable', 'in:low,out'],
             'method' => ['nullable', 'in:cash,bank_transfer,cheque'],
             'q' => ['nullable', 'string', 'max:100'],
@@ -80,6 +92,7 @@ class ReportController
         }
 
         $data = $reports->build($report, $filters, $request->user());
+        $data = $this->sort($data, $filters);
         /** @var Builder $query */
         $query = $data['query'];
         $rowCount = DB::query()->fromSub((clone $query)->reorder(), 'report_rows')->count();
@@ -95,9 +108,11 @@ class ReportController
         }
 
         if ($format === 'pdf') {
-            return Pdf::loadView('modules.reports.pdf', compact('data'))
-                ->setPaper('a4', 'landscape')
-                ->download($filename.'.pdf');
+            $pdf = Pdf::loadView('modules.reports.pdf', compact('data', 'filters'))->setPaper('a4', 'landscape');
+            $pdf->render();
+            $pdf->getDomPDF()->getCanvas()->page_text(740, 570, '{PAGE_NUM} / {PAGE_COUNT}', null, 8);
+
+            return $pdf->download($filename.'.pdf');
         }
 
         return response()->streamDownload(function () use ($query, $data): void {
@@ -125,6 +140,10 @@ class ReportController
 
     private function authorized(string $report, User $actor): bool
     {
+        if (in_array($report, ['cashier-sales', 'collections', 'cash-collections', 'cash-summary'], true)
+            && $actor->can('reports.sales')) {
+            return true;
+        }
         if (in_array($report, ['repair', 'technicians'], true)) {
             return $actor->can('reports.view') && $actor->can('jobs.view');
         }
@@ -142,5 +161,16 @@ class ReportController
         }
 
         return $value;
+    }
+
+    private function sort(array $data, array $filters): array
+    {
+        if (! empty($filters['sort'])) {
+            abort_unless(in_array($filters['sort'], array_column($data['columns'], 'field'), true), 422);
+            $data['query'] = DB::query()->fromSub($data['query']->reorder(), 'sorted_report')
+                ->orderBy($filters['sort'], $filters['direction'] ?? 'asc');
+        }
+
+        return $data;
     }
 }

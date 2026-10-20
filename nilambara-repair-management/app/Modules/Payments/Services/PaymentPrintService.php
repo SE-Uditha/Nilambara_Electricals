@@ -75,7 +75,7 @@ class PaymentPrintService
             'printedAt' => $printedAt,
             'paperSize' => $paperSize,
             'orientation' => $orientation,
-            'footer' => $template?->footer,
+            'footer' => $template?->footer ?: config('business.document_footer'),
             'documentTitle' => $template?->document_title ?: __('payments.receipt_title'),
             'fontSize' => is_numeric($template?->font_size_pt) ? max(7, min(16, (float) $template->font_size_pt)) : 10,
             'margins' => [

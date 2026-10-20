@@ -6,6 +6,7 @@ use App\Modules\Settings\Services\SystemSettingService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\File;
 
@@ -26,7 +27,10 @@ class SystemSettingController
             'timezone' => ['required', 'string', Rule::in(timezone_identifiers_list())],
             'date_format' => ['required', Rule::in(['d M Y', 'Y-m-d', 'd/m/Y', 'm/d/Y'])],
             'time_format' => ['required', Rule::in(['h:i A', 'H:i'])],
-            'logo' => ['nullable', File::image()->types(['jpg', 'jpeg', 'png', 'webp'])->max(2048)],
+            'default_language' => ['sometimes', Rule::in(['en', 'si'])],
+            'document_footer' => ['nullable', 'string', 'max:2000'],
+            'print_paper' => ['sometimes', Rule::in(['A4', 'A5'])],
+            'logo' => ['nullable', File::image()->types(['jpg', 'jpeg', 'png'])->max(2048)],
         ]);
 
         $logo = $request->file('logo');

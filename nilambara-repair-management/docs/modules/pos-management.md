@@ -1,5 +1,7 @@
 # POS management
 
+See [POS report definitions](pos-reports.md) and [Step 10 verification](../development/step-10-summary.md). Record actions use the registered `PosSalePolicy`. Managers approve discounts/non-cash tenders/returns/refunds; performing checkout additionally needs the cashier permission. Storekeepers can inspect POS but cannot sell/refund.
+
 The POS module supports cashier checkout, manager verification of non-cash tenders, sale history, receipts, returns, and operational summaries. It uses the existing spare-parts catalog, `stock_movements` ledger, `payments` and `payment_allocations` ledgers, and `stock_returns`; it does not create duplicate stock or payment balances.
 
 ## Main routes and permissions

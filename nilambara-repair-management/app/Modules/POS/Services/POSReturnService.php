@@ -16,6 +16,7 @@ use App\Support\BusinessAudit;
 use Brick\Math\BigDecimal;
 use Brick\Math\RoundingMode;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 
 class POSReturnService
@@ -33,26 +34,27 @@ class POSReturnService
         return DB::transaction(function () use ($data, $actor, $idempotencyHash): StockReturn {
             $existing = StockReturn::query()->where('idempotency_key', $data['idempotency_key'])->first();
             if ($existing !== null) {
-                $this->assertIdempotentReplay($existing, $idempotencyHash);
+                $this->assertIdempotentReplay($existing, $idempotencyHash, $actor);
 
                 return $existing;
             }
 
             $saleItem = PosSaleItem::query()->whereKey($data['pos_sale_item_id'])->lockForUpdate()->firstOrFail();
-            $existing = StockReturn::query()->where('idempotency_key', $data['idempotency_key'])->first();
+            $existing = StockReturn::query()->where('idempotency_key', $data['idempotency_key'])->lockForUpdate()->first();
             if ($existing !== null) {
-                $this->assertIdempotentReplay($existing, $idempotencyHash);
+                $this->assertIdempotentReplay($existing, $idempotencyHash, $actor);
 
                 return $existing;
             }
             $sale = PosSale::query()->whereKey($saleItem->pos_sale_id)->lockForUpdate()->firstOrFail();
+            Gate::forUser($actor)->authorize('returnItems', $sale);
             if ($sale->status !== DocumentStatus::Finalized) {
                 throw ValidationException::withMessages(['pos_sale_item_id' => __('pos.return_requires_finalized_sale')]);
             }
             $part = $saleItem->sparePart()->lockForUpdate()->firstOrFail();
             $location = StockLocation::query()->whereKey($saleItem->location_id)->lockForUpdate()->firstOrFail();
             $quantity = BigDecimal::of((string) $data['quantity'])->toScale(3, RoundingMode::Unnecessary);
-            if ($quantity->compareTo($quantity->toScale((int) $part->unit->quantity_scale, RoundingMode::Unnecessary)) !== 0) {
+            if ($quantity->compareTo($quantity->toScale((int) $part->unit->quantity_scale, RoundingMode::Down)) !== 0) {
                 throw ValidationException::withMessages(['quantity' => __('pos.quantity_precision', [
                     'product' => $part->name,
                     'scale' => $part->unit->quantity_scale,
@@ -63,7 +65,8 @@ class POSReturnService
                 ->join('stock_returns', 'stock_return_items.stock_return_id', '=', 'stock_returns.id')
                 ->where('stock_return_items.pos_sale_item_id', $saleItem->getKey())
                 ->where('stock_returns.status', DocumentStatus::Finalized->value)
-                ->sum('stock_return_items.quantity');
+                ->lockForUpdate()->pluck('stock_return_items.quantity')
+                ->reduce(fn (BigDecimal $sum, $value) => $sum->plus((string) $value), BigDecimal::zero());
             $remaining = BigDecimal::of((string) $saleItem->quantity)->minus((string) $alreadyReturned)->toScale(3);
             if (! $quantity->isGreaterThan(0) || $quantity->isGreaterThan($remaining)) {
                 throw ValidationException::withMessages(['quantity' => __('pos.return_quantity_exceeded', [
@@ -72,10 +75,19 @@ class POSReturnService
             }
 
             $refund = BigDecimal::of((string) ($data['refund_amount'] ?? '0.00'))->toScale(2);
-            $refundable = BigDecimal::of((string) $saleItem->line_total)
-                ->multipliedBy($quantity)
-                ->dividedBy((string) $saleItem->quantity, 2, RoundingMode::HalfUp)
-                ->toScale(2);
+            // Allocate rounding by cumulative returned quantity. Rounding each
+            // individual return down can leave the last cent impossible to refund.
+            $precedingLines = BigDecimal::of((string) $sale->items()
+                ->where('id', '<', $saleItem->getKey())->sum('line_total'));
+            $saleEntitlement = fn (BigDecimal $subtotal): BigDecimal => $subtotal
+                ->multipliedBy((string) $sale->total)
+                ->dividedBy((string) $sale->subtotal, 2, RoundingMode::Down);
+            $lineShare = $saleEntitlement($precedingLines->plus((string) $saleItem->line_total))
+                ->minus($saleEntitlement($precedingLines));
+            $entitlement = fn (BigDecimal $returned): BigDecimal => $lineShare
+                ->multipliedBy($returned)
+                ->dividedBy((string) $saleItem->quantity, 2, RoundingMode::Down);
+            $refundable = $entitlement($alreadyReturned->plus($quantity))->minus($entitlement($alreadyReturned));
             if ($refund->isGreaterThan(0)) {
                 abort_unless($actor->can('pos.refund') && $actor->can('payments.reverse'), 403);
                 if ($refund->isGreaterThan($refundable)) {
@@ -177,8 +189,9 @@ class POSReturnService
         ], JSON_THROW_ON_ERROR));
     }
 
-    private function assertIdempotentReplay(StockReturn $return, string $idempotencyHash): void
+    private function assertIdempotentReplay(StockReturn $return, string $idempotencyHash, User $actor): void
     {
+        abort_unless((int) $return->recorded_by_user_id === (int) $actor->getKey(), 403);
         if (! is_string($return->idempotency_hash) || ! hash_equals($return->idempotency_hash, $idempotencyHash)) {
             throw ValidationException::withMessages(['idempotency_key' => __('pos.idempotency_conflict')]);
         }

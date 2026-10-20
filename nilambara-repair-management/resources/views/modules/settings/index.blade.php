@@ -14,6 +14,9 @@
         @csrf
         @method('PUT')
         <div class="grid gap-4 sm:grid-cols-2">
+            <label class="form-label">Default language<select class="form-input" name="default_language">@foreach (config('business.locales') as $code => $label)<option value="{{ $code }}" @selected(config('business.default_language', 'en') === $code)>{{ $label }}</option>@endforeach</select></label>
+            <label class="form-label">Default document paper<select class="form-input" name="print_paper">@foreach (['A4','A5'] as $paper)<option @selected(config('business.printing.paper') === $paper)>{{ $paper }}</option>@endforeach</select></label>
+            <label class="form-label sm:col-span-2">Default document footer<textarea class="form-input" name="document_footer" maxlength="2000">{{ old('document_footer', config('business.document_footer')) }}</textarea></label>
             <label class="form-label">{{ __('settings.business_name') }}<input class="form-input mt-1" name="name" value="{{ old('name', config('business.name')) }}" required maxlength="255"></label>
             <label class="form-label">{{ __('settings.contact_number') }}<input class="form-input mt-1" name="contact_number" value="{{ old('contact_number', config('business.contact_number')) }}" maxlength="40"></label>
             <label class="form-label sm:col-span-2">{{ __('settings.address') }}<textarea class="form-input mt-1" name="address" rows="3" maxlength="2000">{{ old('address', config('business.address')) }}</textarea></label>

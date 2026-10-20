@@ -9,12 +9,14 @@ use App\Modules\PrintTemplates\Models\DocumentPrintHistory;
 use App\Modules\PrintTemplates\Models\PrintTemplate;
 use App\Support\BusinessAudit;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
 class POSReceiptService
 {
     public function prepare(PosSale $sale, bool $duplicate, bool $pdf, User $user, ?string $paper = null): array
     {
+        Gate::forUser($user)->authorize('print', $sale);
         abort_unless($sale->status === DocumentStatus::Finalized, 404);
         $sale->load(['customer', 'cashierEmployee', 'items.sparePart', 'paymentAllocations.payment']);
         $duplicate = $duplicate || DocumentPrintHistory::query()->where('pos_sale_id', $sale->getKey())->exists();
@@ -38,7 +40,7 @@ class POSReceiptService
             'businessAddress' => $template?->business_address ?: config('business.address'),
             'businessTelephone' => $template?->telephone_number ?: config('business.contact_number'),
             'logoDataUri' => $this->logoDataUri($template?->logo_path ?: config('business.logo')),
-            'footer' => $template?->footer,
+            'footer' => $template?->footer ?: config('business.document_footer'),
             'paperSize' => $paper,
             'orientation' => in_array($template?->orientation, ['portrait', 'landscape'], true) ? $template->orientation : 'portrait',
             'documentTitle' => $template?->document_title ?: __('pos.receipt_title'),

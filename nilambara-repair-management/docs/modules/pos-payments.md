@@ -1,5 +1,7 @@
 # POS payments
 
+POS reports distinguish sale totals from net collections using the shared payment and reversal ledgers. Cash tender and change never inflate revenue. Refunds on later dates are reported on their reversal date; see [report definitions](pos-reports.md).
+
 POS payments are recorded in the existing `payments` table with `payment_type = pos`; `payment_allocations.target_type = pos_sale` links each payment to its sale. Payment history, search, details, and payment receipts include POS allocations.
 
 Cash payment is posted for the sale total, not cash tendered. Cash tender and change are retained on the POS sale. Bank-transfer and cheque checkout records remain pending; no payment/allocation is posted until an authorized manager confirms receipt. This workflow records receipt, not bank settlement or cheque clearing.

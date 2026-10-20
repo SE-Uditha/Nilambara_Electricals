@@ -63,6 +63,7 @@ class DashboardTest extends TestCase
         $user = User::factory()->create();
         $user->assignRole('receptionist');
 
-        $this->actingAs($user)->get('/reports')->assertForbidden();
+        $this->actingAs($user)->get('/reports')->assertOk();
+        $this->get(route('reports.show', 'sales'))->assertForbidden();
     }
 }

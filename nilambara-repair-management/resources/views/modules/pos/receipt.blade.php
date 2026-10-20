@@ -36,13 +36,15 @@
         @if ($duplicate)<p class="duplicate">{{ $duplicateLabel }}</p>@endif
         <div class="meta"><div><span>{{ __('pos.sale_number') }}</span><strong>{{ $sale->sale_number }}</strong></div><div><span>{{ __('payments.date') }}</span><span>{{ $sale->sale_at->timezone(config('business.timezone'))->format(config('business.date_format').' '.config('business.time_format')) }}</span></div><div><span>{{ __('pos.cashier') }}</span><span>{{ $snapshot['cashier'] ?? $sale->cashierEmployee?->name }}</span></div><div><span>{{ __('pos.customer') }}</span><span>{{ $snapshot['customer']['name'] ?? __('pos.walk_in') }}</span></div></div>
         <table><thead><tr><th>{{ __('pos.product') }}</th><th class="num">{{ __('pos.quantity') }}</th><th class="num">{{ __('pos.unit_price') }}</th><th class="num">{{ __('pos.line_total') }}</th></tr></thead><tbody>
-            @foreach ($sale->items as $item)<tr><td>{{ $item->description }}</td><td class="num">{{ $item->quantity }}</td><td class="num">{{ number_format((float) $item->unit_price, 2) }}</td><td class="num">{{ number_format((float) $item->line_total, 2) }}</td></tr>@endforeach
+            @foreach ($sale->items as $item)<tr><td>{{ $item->description }}</td><td class="num">{{ $item->quantity }}</td><td class="num">{{ $item->unit_price }}</td><td class="num">{{ $item->line_total }}</td></tr>@endforeach
         </tbody></table>
         <div class="total-row"><span>{{ __('pos.subtotal') }}</span><span>{{ config('business.currency') }} {{ $sale->subtotal }}</span></div><div class="total-row"><span>{{ __('pos.discount') }}</span><span>{{ config('business.currency') }} {{ $sale->discount_amount }}</span></div><div class="total-row grand"><span>{{ __('pos.total') }}</span><span>{{ config('business.currency') }} {{ $sale->total }}</span></div>
         <div class="meta"><div><span>{{ __('pos.payment_method') }}</span><span>{{ $sale->payment_method ? __('payments.method_'.$sale->payment_method) : '—' }}</span></div>@if ($payment)<div><span>{{ __('pos.payment_reference') }}</span><span>{{ $payment->payment_number }}</span></div>@endif
             @if ($sale->payment_method === 'cash')<div><span>{{ __('pos.amount_tendered') }}</span><span>{{ config('business.currency') }} {{ $sale->amount_tendered }}</span></div><div><span>{{ __('pos.change_due') }}</span><span>{{ config('business.currency') }} {{ $sale->change_due }}</span></div>@endif</div>
+        @if ($sale->payment_method === 'cheque')<p>{{ __('pos.cheque_not_cleared') }}</p>@endif
         <footer><p>{{ $footer ?: __('pos.thank_you') }}</p><p>{{ __('payments.printed_at') }} {{ $printedAt->format(config('business.date_format').' '.config('business.time_format')) }}</p></footer>
     </article>
     <div class="actions"><button type="button" onclick="window.print()">{{ __('pos.print_receipt') }}</button><a href="{{ route('pos.sales.reprint', ['sale' => $sale, 'paper' => $paperSize]) }}">{{ __('payments.print') }} · {{ __('pos.duplicate_copy') }}</a></div>
+@include('components.document-layout-settings')
 </body>
 </html>

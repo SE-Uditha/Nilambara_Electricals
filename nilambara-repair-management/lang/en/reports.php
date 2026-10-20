@@ -1,6 +1,19 @@
 <?php
 
 return [
+    'daily-sales_title' => 'Daily Sales',
+    'monthly-sales_title' => 'Monthly Sales',
+    'yearly-sales_title' => 'Yearly Sales',
+    'repair-income_title' => 'Repair Income',
+    'invoice-sales_title' => 'Invoice-wise Sales',
+    'cash-credit-sales_title' => 'Cash / Credit Sales',
+    'cashier-sales_title' => 'Cashier-wise Sales',
+    'discounts_title' => 'Discount Report',
+    'refunds_title' => 'Refund Report',
+    'customer-statement_title' => 'Customer Account Statement',
+    'supplier-statement_title' => 'Supplier Account Statement',
+    'period' => 'Period / Group',
+
     'title' => 'Reports',
     'subtitle' => 'Operational, sales, finance and inventory summaries.',
     'repair_title' => 'Repair jobs',

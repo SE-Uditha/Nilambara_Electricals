@@ -4,8 +4,8 @@
     <meta charset="utf-8">
     <title>{{ __('ui.customer_statement') }} · {{ $customer->customer_code }}</title>
     <style>
-        @page { margin: 26px; }
-        body { color: #172033; font-family: DejaVu Sans, sans-serif; font-size: 9px; }
+        @page { margin: {{ $template?->margin_top_mm ?? 8 }}mm {{ $template?->margin_right_mm ?? 8 }}mm {{ $template?->margin_bottom_mm ?? 8 }}mm {{ $template?->margin_left_mm ?? 8 }}mm; }
+        body { color: #172033; font-family: DejaVu Sans, sans-serif; font-size: {{ $template?->font_size_pt ?? 9 }}pt; }
         h1 { margin: 0; font-size: 17px; }
         p { margin: 4px 0; }
         .header { border-bottom: 2px solid #0f766e; padding-bottom: 10px; margin-bottom: 14px; }
@@ -21,8 +21,9 @@
 </head>
 <body>
     <header class="header">
-        <h1>{{ config('business.name') }}</h1>
-        <p>{{ config('business.address') }} · {{ config('business.contact_number') }}</p>
+        @if (!empty($logoDataUri))<img src="{{ $logoDataUri }}" alt="" style="max-width:48mm;max-height:20mm">@endif
+        <h1>{{ $template?->business_name ?: config('business.name') }}</h1>
+        <p>{{ $template?->business_address ?: config('business.address') }} · {{ $template?->telephone_number ?: config('business.contact_number') }}</p>
         <p><strong>{{ __('ui.customer_statement') }}</strong> · {{ $customer->customer_code }} · {{ $customer->display_name }} · {{ $customer->mobile_number }} · {{ $customer->address }}</p>
         @if (! empty($filters['date_from']) || ! empty($filters['date_to']))<p>{{ __('payments.statement_period') }}: {{ $filters['date_from'] ?? '—' }} – {{ $filters['date_to'] ?? '—' }}</p>@endif
     </header>
@@ -41,6 +42,8 @@
             @endforelse
         </tbody>
     </table>
+    <p>{{ $template?->footer ?: config('business.document_footer') }}</p>
     <p class="footer">{{ __('payments.printed_at') }} {{ $printedAt->format(config('business.date_format').' '.config('business.time_format')) }}</p>
+@include('components.document-layout-settings')
 </body>
 </html>

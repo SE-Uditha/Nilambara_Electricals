@@ -36,8 +36,8 @@ $prefix = [PHP_BINARY];
 if (php_ini_loaded_file()) {
     array_push($prefix, '-c', php_ini_loaded_file());
 }
-$run = function (array $arguments) use ($prefix, $environment): void {
-    $command = array_merge($prefix, ['artisan'], $arguments);
+$run = function (array $arguments, string $entry = 'artisan') use ($prefix, $environment): void {
+    $command = array_merge($prefix, [$entry], $arguments);
     $process = proc_open($command, [0 => ['pipe', 'r'], 1 => STDOUT, 2 => STDERR], $pipes, dirname(__DIR__), $environment);
     if (! is_resource($process)) {
         throw new RuntimeException('Could not start verification command.');
@@ -53,7 +53,13 @@ try {
     $pdo->exec('CREATE DATABASE `'.$testDatabase.'` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci');
     $created = true;
     echo 'Created disposable database: '.$testDatabase.PHP_EOL;
-    $run(['test', '--no-ansi']);
+    $testArguments = ['test', '--no-ansi', '--do-not-cache-result'];
+    if (in_array('--pos', $argv, true)) {
+        $testArguments[] = '--filter=POSManagementTest|BusinessRelationshipsTest|SchemaIntegrityTest';
+    } elseif (in_array('--step11', $argv, true)) {
+        $testArguments[] = '--filter=Step11|ReportsTest|DashboardTest|SystemSupportTest|PrintTemplateManagementTest|BackupManagementTest|BusinessRelationshipsTest|SchemaIntegrityTest';
+    }
+    $run($testArguments);
     $run(['migrate:rollback', '--force', '--no-interaction', '--no-ansi']);
     $remaining = $pdo->prepare('SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME <> ?');
     $remaining->execute([$testDatabase, 'migrations']);
@@ -62,6 +68,13 @@ try {
     }
     $run(['migrate', '--force', '--no-interaction', '--no-ansi']);
     $run(['migrate:status', '--no-ansi']);
+    $run([], 'scripts/verify-pos-concurrency.php');
+    if (in_array('--step12', $argv, true)) {
+        $run([], 'scripts/verify-step12-concurrency.php');
+    }
+    if (in_array('--step11', $argv, true) || in_array('--all-step11', $argv, true)) {
+        $run([], 'scripts/verify-step11-recovery.php');
+    }
     echo 'Disposable MySQL-compatible suite, rollback, and remigration succeeded.'.PHP_EOL;
 } catch (Throwable $exception) {
     fwrite(STDERR, $exception->getMessage().PHP_EOL);

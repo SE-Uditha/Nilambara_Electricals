@@ -14,6 +14,7 @@
         <label class="text-xs text-slate-600">{{ __('audit.entity') }}<input class="form-input mt-1" name="entity_type" value="{{ $filters['entity_type'] ?? '' }}" maxlength="150"></label>
         <label class="text-xs text-slate-600">{{ __('audit.user_id') }}<input class="form-input mt-1" type="number" min="1" name="user_id" value="{{ $filters['user_id'] ?? '' }}"></label>
         <button class="rounded-lg bg-teal-700 px-4 py-2 text-xs font-semibold text-white">{{ __('audit.filter') }}</button>
+        @foreach (['module' => 'Module', 'record' => 'Record ID', 'q' => 'Search / reference'] as $field => $label)<label class="text-xs">{{ $label }}<input class="form-input" name="{{ $field }}" value="{{ $filters[$field] ?? '' }}" maxlength="100"></label>@endforeach
     </form>
     <div class="overflow-x-auto rounded-xl border border-slate-200 bg-white">
         <table class="w-full text-left text-xs">
@@ -28,4 +29,5 @@
         </table>
     </div>
     <div class="mt-4">{{ $logs->links() }}</div>
+    <div class="mt-5 space-y-1 text-xs text-slate-600">@foreach ($logs as $log)<p>#{{ $log->id }} · {{ $log->user?->username ?? __('audit.system') }} · {{ $log->user?->employee?->name ?? '—' }} · {{ explode('.', $log->action)[0] }}</p>@endforeach</div>
 @endsection

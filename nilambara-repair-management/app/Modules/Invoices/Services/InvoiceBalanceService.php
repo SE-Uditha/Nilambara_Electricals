@@ -58,9 +58,7 @@ class InvoiceBalanceService
 
     public function constrainPaymentStatus(Builder|QueryBuilder $query, string $status): Builder|QueryBuilder
     {
-        $allocated = "(SELECT COALESCE(SUM(pa.amount - COALESCE((SELECT SUM(r.amount) FROM payment_allocation_releases r WHERE r.payment_allocation_id = pa.id), 0)), 0) FROM payment_allocations pa WHERE pa.target_type = 'invoice' AND pa.invoice_id = invoices.id)";
-        $advances = "(SELECT COALESCE(SUM(pa.amount - COALESCE((SELECT SUM(r.amount) FROM payment_allocation_releases r WHERE r.payment_allocation_id = pa.id), 0)), 0) FROM payment_allocations pa JOIN invoice_jobs ij ON ij.repair_job_id = pa.repair_job_id AND ij.invoice_id = invoices.id WHERE pa.target_type = 'job_advance')";
-        $paid = "({$allocated} + {$advances})";
+        $paid = $this->netPaidExpression();
 
         return match ($status) {
             'paid' => $query->where('invoices.status', DocumentStatus::Finalized->value)
@@ -77,6 +75,14 @@ class InvoiceBalanceService
             }),
             default => $query,
         };
+    }
+
+    public function netPaidExpression(): string
+    {
+        $allocated = "(SELECT COALESCE(SUM(pa.amount - COALESCE((SELECT SUM(r.amount) FROM payment_allocation_releases r WHERE r.payment_allocation_id = pa.id), 0)), 0) FROM payment_allocations pa WHERE pa.target_type = 'invoice' AND pa.invoice_id = invoices.id)";
+        $advances = "(SELECT COALESCE(SUM(pa.amount - COALESCE((SELECT SUM(r.amount) FROM payment_allocation_releases r WHERE r.payment_allocation_id = pa.id), 0)), 0) FROM payment_allocations pa JOIN invoice_jobs ij ON ij.repair_job_id = pa.repair_job_id AND ij.invoice_id = invoices.id WHERE pa.target_type = 'job_advance')";
+
+        return "({$allocated} + {$advances})";
     }
 
     private function netAllocated($query): BigDecimal

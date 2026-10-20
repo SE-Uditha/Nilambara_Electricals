@@ -1,5 +1,7 @@
 # Step 2 database foundation
 
+For current additive POS and administration/reporting work, see the [Step 10](../development/step-10-summary.md) and [Step 11](../development/step-11-summary.md) results. This page retains the original foundation's historical scope. Step 11 extends backup history metadata without creating another financial or stock ledger.
+
 This guide describes the original Step 2 database foundation: 58 entity tables, 58 module models, 16 migrations, enums, constraints, relationships, and database tests. Steps 3-8 add employee/account/RBAC, customer, repair, quotation, invoice, and payment workflows to the existing schema. Step 7 adds `invoice_history` and an informational invoice `payment_method`; Step 8 reuses the existing payment, allocation, release, reversal, account-ledger, and print-history tables without adding another financial ledger. Stock deduction, POS checkout, reports, and backup/restore execution remain deferred.
 
 Read the [schema overview](schema.md), [complete ERD](erd.md), [data dictionary](data-dictionary.md), [relationship rules](relationship-rules.md), [requirements traceability](requirements-traceability.md), [open decisions](open-decisions.md), [verification results](verification.md), and [file summary](change-summary.md).

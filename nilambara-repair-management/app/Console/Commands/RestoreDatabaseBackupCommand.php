@@ -2,13 +2,15 @@
 
 namespace App\Console\Commands;
 
+use App\Models\User;
+use App\Modules\AuditLogs\Models\AuditLog;
 use App\Modules\BackupRestore\Models\BackupHistory;
 use App\Modules\BackupRestore\Models\BackupRestore;
 use App\Modules\BackupRestore\Services\BackupService;
-use App\Modules\AuditLogs\Models\AuditLog;
-use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
@@ -37,13 +39,16 @@ class RestoreDatabaseBackupCommand extends Command
 
         $username = Str::lower(trim((string) $this->ask('Username of the administrator authorizing this restore')));
         $actor = User::query()->where('username', $username)->first();
-        if ($actor === null || ! $actor->hasActiveAccount() || ! $actor->hasRole('administrator')) {
+        if ($actor === null || ! $actor->hasActiveAccount() || ! $actor->hasRole('administrator')
+            || ! $actor->can('backups.restore') || ! Hash::check((string) $this->secret('Administrator password'), $actor->password)) {
             $this->error('An active administrator account is required to authorize a restore.');
 
             return self::FAILURE;
         }
 
         $restore = null;
+        $actorId = $actor->getKey();
+        $actorUsername = $actor->username;
         try {
             $preRestoreBackup = $backups->create(false, $actor, false);
         } catch (\Throwable $exception) {
@@ -67,6 +72,18 @@ class RestoreDatabaseBackupCommand extends Command
         ]);
         try {
             $backups->restoreDump($backup);
+            DB::purge();
+            DB::connection()->getPdo();
+            // The selected dump may predate the authorizing login. Never attach
+            // recovery history to an unrelated user with a recycled numeric ID.
+            $restoredActor = User::query()->whereKey($actorId)->where('username', $actorUsername)->first();
+            if ($restoredActor === null || ! $restoredActor->hasRole('administrator')) {
+                throw new \RuntimeException('The authorizing administrator is absent from the restored database.');
+            }
+            $actor = $restoredActor;
+            foreach (['users', 'repair_jobs', 'invoices', 'payments', 'stock_movements', 'backup_histories'] as $table) {
+                DB::table($table)->limit(1)->get();
+            }
         } catch (\Throwable $exception) {
             Log::critical('Database restore failed; maintenance mode remains enabled.', ['backup_history_id' => $backup->getKey()]);
             try {
@@ -108,6 +125,9 @@ class RestoreDatabaseBackupCommand extends Command
                     'verified_at' => $restoredAt,
                 ]);
             }
+            $restoredBackup->update(['file_size' => $backup->file_size, 'completed_at' => $restoredAt,
+                'verification_status' => 'restore_tested', 'is_protected' => true,
+                'destination_path' => $backup->destination_path]);
             BackupHistory::query()->create([
                 'backup_at' => $preRestoreBackup->backup_at,
                 'file_reference' => $preRestoreBackup->file_reference,
@@ -117,6 +137,9 @@ class RestoreDatabaseBackupCommand extends Command
                 'checksum_sha256' => $preRestoreBackup->checksum_sha256,
                 'verified_at' => $preRestoreBackup->verified_at,
                 'initiated_by_user_id' => $actor->getKey(),
+                'file_size' => $preRestoreBackup->file_size, 'completed_at' => $restoredAt,
+                'verification_status' => 'checksum_verified', 'is_protected' => true,
+                'destination_path' => $preRestoreBackup->destination_path,
             ]);
             $restore = BackupRestore::query()->create([
                 'backup_history_id' => $restoredBackup->getKey(),

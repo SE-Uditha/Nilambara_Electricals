@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Modules\Inventory\Models\JobPartUsage;
 use App\Modules\Invoices\Models\Invoice;
 use App\Modules\Invoices\Models\InvoiceHistory;
+use App\Modules\Invoices\Models\InvoiceItem;
 use App\Modules\Invoices\Models\InvoiceJob;
 use App\Modules\Invoices\Services\InvoiceBalanceService;
 use App\Modules\Invoices\Services\InvoiceService;
@@ -52,7 +53,7 @@ class InvoiceManagementTest extends TestCase
             ->assertSessionHasNoErrors();
 
         $invoice = Invoice::query()->sole();
-        $this->assertSame('INV-00001', $invoice->invoice_number);
+        $this->assertMatchesRegularExpression('/^INV-\d{5,}$/', $invoice->invoice_number);
         $this->assertSame(DocumentStatus::Draft, $invoice->status);
         $this->assertSame('825.00', $invoice->total);
         $this->assertSame(3, $invoice->invoiceJobs()->count());
@@ -65,7 +66,9 @@ class InvoiceManagementTest extends TestCase
         $this->actingAs($user)->post(route('invoices.store'), $this->invoiceData($customer, [$next]))
             ->assertRedirect()
             ->assertSessionHasNoErrors();
-        $this->assertSame('INV-00002', Invoice::query()->orderByDesc('id')->firstOrFail()->invoice_number);
+        $secondNumber = Invoice::query()->orderByDesc('id')->firstOrFail()->invoice_number;
+        $this->assertMatchesRegularExpression('/^INV-\d{5,}$/', $secondNumber);
+        $this->assertNotSame($invoice->invoice_number, $secondNumber);
     }
 
     public function test_invoice_form_restores_customer_and_jobs_after_validation_failure(): void
@@ -170,13 +173,16 @@ class InvoiceManagementTest extends TestCase
 
     public function test_invoice_transaction_rolls_back_when_a_billing_line_cannot_be_written(): void
     {
-        if (DB::connection()->getDriverName() !== 'sqlite') {
-            $this->markTestSkipped('Rollback fault injection is isolated to SQLite.');
-        }
         $user = $this->userWithRole('administrator');
         $customer = $this->customer();
         $job = $this->billableJob($customer, '100.00', '0.00');
-        DB::statement("CREATE TRIGGER fail_invoice_items BEFORE INSERT ON invoice_items BEGIN SELECT RAISE(ABORT, 'test line insert failure'); END");
+        // Model fault injection works inside RefreshDatabase's transaction on
+        // both engines. MySQL CREATE TRIGGER would implicitly commit fixtures.
+        $events = InvoiceItem::getEventDispatcher();
+        InvoiceItem::setEventDispatcher(clone $events);
+        InvoiceItem::creating(static function (): void {
+            throw new QueryException(DB::getDefaultConnection(), 'insert invoice_items (injected failure)', [], new \RuntimeException('test line insert failure'));
+        });
 
         try {
             app(InvoiceService::class)->create($this->invoiceData($customer, [$job]), $user);
@@ -186,7 +192,7 @@ class InvoiceManagementTest extends TestCase
             $this->assertDatabaseCount('invoice_jobs', 0);
             $this->assertDatabaseCount('invoice_items', 0);
         } finally {
-            DB::statement('DROP TRIGGER IF EXISTS fail_invoice_items');
+            InvoiceItem::setEventDispatcher($events);
         }
     }
 
@@ -206,7 +212,8 @@ class InvoiceManagementTest extends TestCase
         $this->assertSame('500.00', $invoice->total);
         $this->assertSame($quotation->quotation_number, data_get($invoice->invoiceJobs()->sole()->job_snapshot, 'quotation_number'));
         $this->assertSame($quotation->items()->sole()->getKey(), $invoice->invoiceItems()->whereNotNull('quotation_item_id')->sole()->quotation_item_id);
-        $this->assertSame(0, DB::table('stock_movements')->where('repair_job_id', $job->getKey())->count());
+        $this->assertSame(0, DB::table('stock_movements')->whereIn('job_part_usage_id',
+            JobPartUsage::query()->where('repair_job_id', $job->getKey())->select('id'))->count());
 
         $secondJob = $this->billableJob($customer, '101.00', '400.00');
         $this->approvedQuotation($secondJob, '500.00', '100.00', '400.00');

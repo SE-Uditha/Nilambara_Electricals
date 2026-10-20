@@ -20,6 +20,7 @@ class ReportDateRange
             'yesterday' => [$today->subDay(), $today->subDay()],
             'week' => [$today->startOfWeek(), $today],
             'month' => [$today->startOfMonth(), $today],
+            'year' => [$today->startOfYear(), $today],
             'custom' => [
                 isset($filters['date_from']) ? CarbonImmutable::parse($filters['date_from'], $timezone)->startOfDay()
                     : (isset($filters['date_to']) ? CarbonImmutable::parse($filters['date_to'], $timezone)->startOfDay() : $today),

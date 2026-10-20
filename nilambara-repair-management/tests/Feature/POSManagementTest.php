@@ -11,6 +11,7 @@ use App\Modules\Inventory\Models\StockReturn;
 use App\Modules\Inventory\Services\InventoryService;
 use App\Modules\Payments\Models\Payment;
 use App\Modules\POS\Models\PosSale;
+use Brick\Math\BigDecimal;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
@@ -240,6 +241,205 @@ class POSManagementTest extends TestCase
         [$part] = $this->saleablePart('AUTH-100', '10.0000', '3.000');
         $this->actingAs($cashier)->get(route('pos.returns.index'))->assertForbidden();
         $this->actingAs($cashier)->post(route('pos.returns.store'), [])->assertForbidden();
+    }
+
+    public function test_whole_unit_products_reject_fractional_cart_checkout_and_returns_without_server_errors(): void
+    {
+        $manager = $this->userWithRole('manager');
+        $manager->assignRole('cashier');
+        [$part] = $this->saleablePart('WHOLE-100', '10.0000', '5.000');
+        $part->unit->update(['quantity_scale' => 0]);
+        $this->actingAs($manager)->post(route('pos.cart.add'), ['part_id' => $part->id, 'quantity' => '0.5'])
+            ->assertSessionHasErrors('barcode');
+        $this->actingAs($manager)->put(route('pos.cart.update', $part), ['quantity' => '0.5'])
+            ->assertSessionHasErrors('quantity');
+        $this->actingAs($manager)->withSession(['pos_cart' => [$part->id => '0.500']])
+            ->post(route('pos.checkout'), $this->cashCheckoutData('10.00'))->assertSessionHasErrors('cart');
+        $this->assertDatabaseCount('pos_sales', 0);
+        $this->actingAs($manager)->withSession(['pos_cart' => [$part->id => '1.000']])
+            ->post(route('pos.checkout'), $this->cashCheckoutData('10.00'))->assertRedirect()->assertSessionHasNoErrors();
+        $this->actingAs($manager)->post(route('pos.returns.store'), [
+            'pos_sale_item_id' => PosSale::query()->sole()->items()->value('id'),
+            'quantity' => '0.500', 'condition' => 'resalable', 'reason' => 'Fraction is not a whole item.',
+            'refund_amount' => '0.00', 'idempotency_key' => (string) Str::uuid(),
+        ])->assertSessionHasErrors('quantity');
+        $this->assertDatabaseCount('stock_returns', 0);
+    }
+
+    public function test_discounted_returns_cannot_refund_the_undiscounted_item_value(): void
+    {
+        $manager = $this->userWithRole('manager');
+        $manager->assignRole('cashier');
+        [$part] = $this->saleablePart('DISCOUNT-RETURN', '10.0000', '5.000');
+        $data = $this->cashCheckoutData('20.00');
+        $data['discount_amount'] = '10.00';
+        $this->actingAs($manager)->withSession(['pos_cart' => [$part->id => '2.000']])
+            ->post(route('pos.checkout'), $data)->assertSessionHasNoErrors();
+        $return = [
+            'pos_sale_item_id' => PosSale::query()->sole()->items()->value('id'),
+            'quantity' => '1.000', 'condition' => 'resalable', 'reason' => 'Return one discounted item.',
+            'refund_amount' => '10.00', 'refund_method' => 'cash', 'idempotency_key' => (string) Str::uuid(),
+        ];
+        $this->actingAs($manager)->post(route('pos.returns.store'), $return)->assertSessionHasErrors('refund_amount');
+        $this->assertDatabaseCount('stock_returns', 0);
+        $return['refund_amount'] = '5.00';
+        $this->actingAs($manager)->post(route('pos.returns.store'), $return)->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('payment_reversals', ['amount' => '5.00']);
+    }
+
+    public function test_receipt_uses_sale_snapshots_and_all_paper_formats_generate_pdfs(): void
+    {
+        $cashier = $this->userWithRole('cashier');
+        [$part] = $this->saleablePart('SNAPSHOT-100', '12.3456', '5.000');
+        $originalName = $part->name;
+        $this->actingAs($cashier)->withSession(['pos_cart' => [$part->id => '1.000']])
+            ->post(route('pos.checkout'), $this->cashCheckoutData('20.00'))->assertSessionHasNoErrors();
+        $sale = PosSale::query()->sole();
+        $part->update(['name' => 'Changed catalog name', 'selling_price' => '99.0000', 'is_active' => false]);
+        $this->actingAs($cashier)->get(route('pos.sales.print', $sale))
+            ->assertOk()->assertSee($originalName)->assertDontSee('Changed catalog name')->assertSee('12.35');
+        foreach (['thermal', 'A4', 'A5'] as $paper) {
+            $response = $this->actingAs($cashier)->get(route('pos.sales.pdf', ['sale' => $sale, 'paper' => $paper]));
+            $response->assertOk()->assertHeader('content-type', 'application/pdf');
+            $this->assertStringStartsWith('%PDF-', $response->getContent());
+        }
+        $this->assertDatabaseCount('payments', 1);
+        $this->assertDatabaseCount('stock_movements', 2);
+    }
+
+    public function test_pending_sale_cancellation_has_no_stock_or_payment_effects_and_cannot_be_verified(): void
+    {
+        $manager = $this->userWithRole('manager');
+        $manager->assignRole('cashier');
+        [$part] = $this->saleablePart('CANCEL-100', '10.0000', '5.000');
+        $this->actingAs($manager)->withSession(['pos_cart' => [$part->id => '1.000']])
+            ->post(route('pos.checkout'), [
+                'payment_method' => 'cheque', 'payment_reference' => 'CHQ-CANCEL-100', 'cheque_date' => '2026-10-20',
+                'idempotency_key' => (string) Str::uuid(),
+            ])->assertSessionHasNoErrors();
+        $sale = PosSale::query()->sole();
+        $this->actingAs($manager)->get(route('pos.sales.print', $sale))->assertNotFound();
+        $this->actingAs($manager)->post(route('pos.sales.cancel', $sale), ['reason' => 'Customer cancelled the pending sale.'])
+            ->assertSessionHasNoErrors();
+        $this->actingAs($manager)->post(route('pos.sales.verify', $sale))->assertSessionHasErrors();
+        $this->assertDatabaseCount('payments', 0);
+        $this->assertDatabaseCount('stock_movements', 1);
+    }
+
+    public function test_client_totals_are_ignored_and_inactive_customers_are_rejected(): void
+    {
+        $cashier = $this->userWithRole('cashier');
+        [$part] = $this->saleablePart('SERVER-PRICE', '12.5000', '5.000');
+        $customer = $this->customer(['is_active' => false]);
+        $data = $this->cashCheckoutData('20.00') + ['customer_id' => $customer->id, 'total' => '0.01', 'unit_price' => '0.01'];
+        $this->actingAs($cashier)->withSession(['pos_cart' => [$part->id => '1.000']])
+            ->post(route('pos.checkout'), $data)->assertSessionHasErrors('customer_id');
+        $this->assertDatabaseCount('payments', 0);
+        $customer->update(['is_active' => true]);
+        $this->actingAs($cashier)->post(route('pos.checkout'), $data)->assertRedirect()->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('pos_sales', ['customer_id' => $customer->id, 'total' => '12.50', 'change_due' => '7.50']);
+    }
+
+    public function test_cart_refresh_update_remove_and_clear_never_change_inventory(): void
+    {
+        $cashier = $this->userWithRole('cashier');
+        [$part] = $this->saleablePart('CART-100', '10.0000', '5.000');
+        $this->actingAs($cashier)->post(route('pos.cart.add'), ['part_id' => $part->id, 'quantity' => '1'])->assertRedirect();
+        $this->get(route('pos.index'))->assertOk();
+        $this->assertSame('1.000', session('pos_cart')[$part->id]);
+        $this->put(route('pos.cart.update', $part), ['quantity' => '2'])->assertSessionHasNoErrors();
+        $this->assertSame('2.000', session('pos_cart')[$part->id]);
+        $this->delete(route('pos.cart.remove', $part))->assertRedirect();
+        $this->assertSame([], session('pos_cart'));
+        $this->post(route('pos.cart.add'), ['part_id' => $part->id, 'quantity' => '1'])->assertRedirect();
+        $this->delete(route('pos.cart.clear'))->assertRedirect();
+        $this->assertNull(session('pos_cart'));
+        $this->assertDatabaseCount('payments', 0);
+        $this->assertDatabaseCount('pos_sales', 0);
+        $this->assertDatabaseCount('stock_movements', 1);
+    }
+
+    public function test_stock_posting_failure_rolls_back_sale_payment_allocation_and_number(): void
+    {
+        $cashier = $this->userWithRole('cashier');
+        [$part] = $this->saleablePart('ROLLBACK-100', '10.0000', '5.000');
+        $this->partialMock(InventoryService::class, function ($mock): void {
+            $mock->shouldReceive('recordPosSale')->once()->andThrow(new \RuntimeException('Injected stock posting failure.'));
+        });
+        $this->actingAs($cashier)->withSession(['pos_cart' => [$part->id => '1.000']])
+            ->post(route('pos.checkout'), $this->cashCheckoutData('10.00'))->assertStatus(500);
+        $this->assertDatabaseCount('pos_sales', 0);
+        $this->assertDatabaseCount('pos_sale_items', 0);
+        $this->assertDatabaseCount('payments', 0);
+        $this->assertDatabaseCount('payment_allocations', 0);
+        $this->assertDatabaseCount('stock_movements', 1);
+        $this->assertDatabaseHas('document_sequences', ['scope' => 'pos_sale', 'next_value' => 1]);
+    }
+
+    public function test_refund_only_reporting_period_includes_negative_net_sales_and_collections(): void
+    {
+        $actor = $this->userWithRole('administrator');
+        [$part] = $this->saleablePart('REPORT-100', '10.0000', '5.000');
+        $this->travelTo(now()->setDate(2026, 10, 20));
+        $this->actingAs($actor)->withSession(['pos_cart' => [$part->id => '1.000']])
+            ->post(route('pos.checkout'), $this->cashCheckoutData('10.00'))->assertSessionHasNoErrors();
+        $sale = PosSale::query()->sole();
+        $this->travelTo(now()->addDay());
+        $this->post(route('pos.returns.store'), [
+            'pos_sale_item_id' => $sale->items()->value('id'), 'quantity' => '1.000', 'condition' => 'resalable',
+            'reason' => 'Refund on the following day.', 'refund_amount' => '10.00', 'refund_method' => 'cash',
+            'idempotency_key' => (string) Str::uuid(),
+        ])->assertSessionHasNoErrors();
+        $this->get(route('pos.reports', ['date_from' => '2026-10-21', 'date_to' => '2026-10-21']))
+            ->assertOk()->assertViewHas('netCollected', '-10.00')
+            ->assertViewHas('periods', fn ($periods) => $periods->count() === 1 && $periods->first()->net_sales === '-10.00');
+        $this->travelBack();
+    }
+
+    public function test_final_partial_return_can_refund_the_remaining_rounding_cent(): void
+    {
+        $actor = $this->userWithRole('administrator');
+        [$part] = $this->saleablePart('ROUND-RETURN', '0.5000', '3.000');
+        $this->actingAs($actor)->withSession(['pos_cart' => [$part->id => '3.000']])
+            ->post(route('pos.checkout'), array_replace($this->cashCheckoutData('1.00'), ['discount_amount' => '0.50']))
+            ->assertSessionHasNoErrors();
+        $sale = PosSale::query()->sole();
+        foreach (['0.33', '0.33', '0.34'] as $refund) {
+            $this->post(route('pos.returns.store'), [
+                'pos_sale_item_id' => $sale->items()->value('id'), 'quantity' => '1.000', 'condition' => 'resalable',
+                'reason' => 'Partial return rounding regression.', 'refund_amount' => $refund, 'refund_method' => 'cash',
+                'idempotency_key' => (string) Str::uuid(),
+            ])->assertSessionHasNoErrors();
+        }
+        $this->assertSame('1.00', (string) BigDecimal::of((string) $sale->stockReturns()->sum('refund_amount'))->toScale(2));
+        $this->assertSame('refunded', $sale->fresh()->payment_status);
+        $this->assertSame('3.000', (string) app(InventoryService::class)->availableAtDefaultLocation($part));
+    }
+
+    public function test_discount_rounding_across_lines_allows_exact_full_refund(): void
+    {
+        $actor = $this->userWithRole('administrator');
+        [$first] = $this->saleablePart('ROUND-LINE-A', '0.5000', '1.000');
+        [$second] = $this->saleablePart('ROUND-LINE-B', '0.5000', '1.000');
+        $this->actingAs($actor)->withSession(['pos_cart' => [$first->id => '1.000', $second->id => '1.000']])
+            ->post(route('pos.checkout'), array_replace($this->cashCheckoutData('1.00'), ['discount_amount' => '0.01']))
+            ->assertSessionHasNoErrors();
+        $sale = PosSale::query()->sole();
+        foreach ($sale->items()->orderBy('id')->get() as $index => $item) {
+            $this->post(route('pos.returns.store'), [
+                'pos_sale_item_id' => $item->id, 'quantity' => '1.000', 'condition' => 'resalable',
+                'reason' => 'Full return of discounted lines.', 'refund_amount' => $index === 0 ? '0.49' : '0.50',
+                'refund_method' => 'cash', 'idempotency_key' => (string) Str::uuid(),
+            ])->assertSessionHasNoErrors();
+        }
+        $this->assertSame('refunded', $sale->fresh()->payment_status);
+        $this->assertSame('0.99', (string) BigDecimal::of((string) $sale->stockReturns()->sum('refund_amount'))->toScale(2));
+    }
+
+    private function cashCheckoutData(string $tendered): array
+    {
+        return ['payment_method' => 'cash', 'amount_tendered' => $tendered,
+            'discount_amount' => '0.00', 'idempotency_key' => (string) Str::uuid()];
     }
 
     private function userWithRole(string $role): User

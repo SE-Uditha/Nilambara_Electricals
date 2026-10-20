@@ -28,7 +28,14 @@ class POSCalculationService
             if ($part === null || ! $part->is_active) {
                 throw ValidationException::withMessages(['cart' => __('pos.product_unavailable')]);
             }
-            $quantity = BigDecimal::of($quantityString)->toScale((int) $part->unit->quantity_scale);
+            $quantity = BigDecimal::of($quantityString);
+            $scale = (int) $part->unit->quantity_scale;
+            if ($quantity->compareTo($quantity->toScale($scale, RoundingMode::Down)) !== 0) {
+                throw ValidationException::withMessages(['cart' => __('pos.quantity_precision', [
+                    'product' => $part->name, 'scale' => $scale,
+                ])]);
+            }
+            $quantity = $quantity->toScale($scale);
             if (! $quantity->isGreaterThan(0)) {
                 throw ValidationException::withMessages(['cart' => __('pos.quantity_positive')]);
             }

@@ -1,5 +1,7 @@
 # POS inventory integration
 
+Transaction balance checks use locking current reads, so cashiers waiting for another checkout see its committed movements under MySQL repeatable-read isolation. Sale items retain the latest non-null stock movement unit cost at their location; unavailable cost remains null. This historical snapshot is not weighted-average inventory valuation.
+
 POS reads saleable quantity from the same `stock_movements` ledger used by inventory and repair workflows. It creates no POS-specific stock balance table. Each finalized sale item is linked to one negative `pos_sale` movement; saleable stock is recomputed from movements at the active default location.
 
 The checkout transaction locks spare-part rows in stable ID order, reloads current balances, and posts all stock movements with the sale. A pending bank-transfer or cheque sale creates no movement until an authorized manager confirms receipt and finalizes the sale.

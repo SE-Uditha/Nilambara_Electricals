@@ -19,6 +19,7 @@ use App\Support\BusinessAudit;
 use Brick\Math\BigDecimal;
 use Brick\Math\RoundingMode;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 
 class POSCheckoutService
@@ -135,9 +136,21 @@ class POSCheckoutService
                     'description' => $part->sku.' · '.$part->name,
                     'quantity' => (string) $line['quantity'],
                     'unit_price' => (string) $line['unit_price'],
-                    'unit_cost' => null,
+                    'unit_cost' => DB::table('stock_movements')->where('spare_part_id', $part->getKey())
+                        ->where('location_id', $part->default_location_id)->whereNotNull('unit_cost')
+                        ->orderByDesc('occurred_at')->orderByDesc('id')->value('unit_cost'),
                     'discount_amount' => '0.00',
                     'line_total' => (string) $line['line_total'],
+                ]);
+            }
+
+            BusinessAudit::record($actor, 'pos.sale.created', PosSale::class, (int) $sale->getKey(), newValues: [
+                'sale_number' => $saleNumber, 'subtotal' => (string) $summary['subtotal'],
+                'discount_amount' => (string) $discount, 'total' => (string) $total,
+            ]);
+            if ($discount->isGreaterThan(0)) {
+                BusinessAudit::record($actor, 'pos.sale.discounted', PosSale::class, (int) $sale->getKey(), newValues: [
+                    'discount_amount' => (string) $discount,
                 ]);
             }
 
@@ -173,6 +186,7 @@ class POSCheckoutService
 
     public function verifyAndFinalize(PosSale $sale, User $actor): PosSale
     {
+        Gate::forUser($actor)->authorize('verifyPayment', $sale);
         abort_unless($actor->can('pos.payment.verify'), 403);
 
         return DB::transaction(function () use ($sale, $actor): PosSale {
@@ -210,6 +224,7 @@ class POSCheckoutService
 
     public function cancelPending(PosSale $sale, string $reason, User $actor): PosSale
     {
+        Gate::forUser($actor)->authorize('cancel', $sale);
         abort_unless($actor->can('pos.sale.cancel'), 403);
 
         return DB::transaction(function () use ($sale, $reason, $actor): PosSale {
@@ -273,7 +288,7 @@ class POSCheckoutService
             $part = $parts->get((int) $id);
             $value = BigDecimal::of($quantity);
             $scale = (int) $part->unit->quantity_scale;
-            if ($value->compareTo($value->toScale($scale, RoundingMode::Unnecessary)) !== 0) {
+            if ($value->compareTo($value->toScale($scale, RoundingMode::Down)) !== 0) {
                 throw ValidationException::withMessages(['cart' => __('pos.quantity_precision', ['product' => $part->name, 'scale' => $scale])]);
             }
         }

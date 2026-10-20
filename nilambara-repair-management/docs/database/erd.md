@@ -109,6 +109,14 @@ erDiagram
     backup_histories {
         bigint id PK
         bigint initiated_by_user_id FK
+        bigint file_size
+        datetime completed_at
+        datetime deleted_at
+        boolean is_protected
+        string verification_status
+        string cloud_file_id
+        string cloud_status
+        text destination_path
     }
     backup_restores {
         bigint id PK
@@ -504,6 +512,7 @@ erDiagram
     users ||--o{ invoice_history : "actor_user_id"
     customers o|--o{ pos_sales : "customer_id"
     employees ||--o{ pos_sales : "cashier_employee_id"
+    users o|--o{ pos_sales : "payment_verified_by_user_id"
     pos_sales ||--o{ pos_sale_items : "pos_sale_id"
     spare_parts ||--o{ pos_sale_items : "spare_part_id"
     stock_locations ||--o{ pos_sale_items : "location_id"
@@ -589,9 +598,11 @@ erDiagram
     pos_sales o|--o{ stock_returns : "pos_sale_id"
     purchases o|--o{ stock_returns : "purchase_id"
     users ||--o{ stock_returns : "recorded_by_user_id"
+    payment_reversals o|--o{ stock_returns : "refund_payment_reversal_id"
     stock_returns ||--o{ stock_return_items : "stock_return_id"
     spare_parts ||--o{ stock_return_items : "spare_part_id"
     stock_locations ||--o{ stock_return_items : "location_id"
+    pos_sale_items o|--o{ stock_return_items : "pos_sale_item_id"
     goods_received_note_items o|--o{ stock_movements : "grn_item_id,spare_part_id,location_id"
     job_part_usages o|--o{ stock_movements : "job_part_usage_id,spare_part_id,location_id"
     pos_sale_items o|--o{ stock_movements : "pos_sale_item_id,spare_part_id,location_id"

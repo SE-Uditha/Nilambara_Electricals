@@ -60,5 +60,6 @@
         <p class="footer">{{ $footer ?: __('payments.printed_at') }} · {{ $printedAt->format(config('business.date_format').' '.config('business.time_format')) }}</p>
     </article>
     <div class="print-actions" style="text-align:center;margin-top:14px"><button type="button" onclick="window.print()">{{ __('payments.print') }}</button></div>
+@include('components.document-layout-settings')
 </body>
 </html>

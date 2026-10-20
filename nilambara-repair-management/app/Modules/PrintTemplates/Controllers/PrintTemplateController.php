@@ -10,6 +10,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class PrintTemplateController
 {
@@ -30,6 +31,15 @@ class PrintTemplateController
 
     public function update(Request $request, PrintTemplate $template): RedirectResponse
     {
+        foreach (['table_widths', 'signature_areas'] as $field) {
+            if (is_string($request->input($field))) {
+                $decoded = json_decode($request->input($field), true);
+                if (! is_array($decoded)) {
+                    throw ValidationException::withMessages([$field => 'Enter a valid JSON array.']);
+                }
+                $request->merge([$field => $decoded]);
+            }
+        }
         $values = $request->validate([
             'name' => ['required', 'string', 'max:150'],
             'business_name' => ['nullable', 'string', 'max:255'],
@@ -46,7 +56,15 @@ class PrintTemplateController
             'margin_left_mm' => ['required', 'numeric', 'between:0,30'],
             'footer' => ['nullable', 'string', 'max:2000'],
             'duplicate_copy_label' => ['required', 'string', 'max:100'],
+            'table_widths' => ['sometimes', 'array', 'list', 'max:12'],
+            'table_widths.*' => ['numeric', 'between:1,100'],
+            'signature_areas' => ['sometimes', 'array', 'list', 'max:6'],
+            'signature_areas.*' => ['string', 'max:80'],
+            'logo_path' => ['nullable', 'regex:~\A(?:storage/business/|images/)[a-zA-Z0-9_\-/]+\.(?:png|jpg|jpeg)\z~', 'max:255'],
         ]);
+        if (isset($values['table_widths']) && array_sum($values['table_widths']) > 100) {
+            throw ValidationException::withMessages(['table_widths' => 'Column percentages must total at most 100.']);
+        }
 
         $version = $this->createVersion($template, $values, $request->user(), 'print_template.updated');
 
@@ -105,6 +123,8 @@ class PrintTemplateController
     private function paperSizes(PrintTemplate $template): array
     {
         return match ($template->document_type) {
+            'job_card' => ['A6'],
+            'invoice' => ['A5'],
             'quotation' => ['A4', 'A5'],
             'pos_receipt' => ['A4', 'A5', 'thermal'],
             'repair_receipt' => ['A4', 'A5', 'A6'],

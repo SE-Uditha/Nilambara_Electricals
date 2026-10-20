@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'net_collected' => 'Collected payments less refunds/reversals',
+    'cheque_not_cleared' => 'Cheque received; bank clearance is not confirmed by this receipt.',
     'title' => 'Point of sale',
     'subtitle' => 'Scan or search parts, build the basket, and settle each sale against shared stock.',
     'scan_product' => 'Scan a product',

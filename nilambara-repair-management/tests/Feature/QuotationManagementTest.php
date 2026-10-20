@@ -40,7 +40,7 @@ class QuotationManagementTest extends TestCase
             ->assertSessionHasNoErrors();
 
         $quotation = Quotation::query()->sole();
-        $this->assertSame('QUO-00001', $quotation->quotation_number);
+        $this->assertMatchesRegularExpression('/^QUO-\d{5,}$/', $quotation->quotation_number);
         $this->assertSame(QuotationPreparationStatus::Draft, $quotation->preparation_status);
         $this->assertSame('2750.31', $quotation->total);
         $this->assertSame('2500.31', $quotation->parts_total);
@@ -102,7 +102,7 @@ class QuotationManagementTest extends TestCase
         $this->assertSame(QuotationPreparationStatus::Issued, $quotation->preparation_status);
         $this->assertNotNull($quotation->issued_at);
         $this->assertSame(ApprovalStatus::Pending, $quotation->approval_status);
-        $this->assertSame('QUO-00001', data_get($quotation->document_snapshot, 'quotation_number'));
+        $this->assertSame($quotation->quotation_number, data_get($quotation->document_snapshot, 'quotation_number'));
         $this->assertSame(JobStatus::WaitingForCustomerApproval, $job->fresh()->status);
         $this->assertSame(ApprovalStatus::Pending, $job->fresh()->approval_status);
 

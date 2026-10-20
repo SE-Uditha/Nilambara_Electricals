@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Modules\Inventory\Services\InventoryService;
 use App\Modules\Invoices\Services\InvoiceBalanceService;
 use Brick\Math\BigDecimal;
+use Brick\Math\RoundingMode;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 
@@ -23,6 +24,23 @@ class ReportDataService
      */
     public function build(string $report, array $filters, User $actor): array
     {
+        if ($actor->hasRole('cashier') && ! $actor->can('reports.financial')) {
+            $filters['employee_id'] = $this->employeeId($actor) ?: -1;
+        }
+        if (in_array($report, ['daily-sales', 'monthly-sales', 'yearly-sales', 'repair-income', 'invoice-sales', 'cash-credit-sales', 'cashier-sales', 'discounts'], true)) {
+            $filters['sales_report'] = $report;
+
+            return $this->sales($filters);
+        }
+        if (in_array($report, ['customer-statement', 'supplier-statement', 'refunds'], true)) {
+            return $this->ledgerReport($report, $filters);
+        }
+        if (in_array($report, ['cash-summary', 'cash-collections'], true)) {
+            $filters['method'] = 'cash';
+
+            return $this->financial('collections', $filters);
+        }
+
         return match ($report) {
             'repair' => $this->repair($filters, $actor),
             'technicians' => $this->technicians($filters, $actor),
@@ -54,6 +72,10 @@ class ReportDataService
                 'repair_jobs.customer_id',
                 'repair_jobs.technician_id',
             ]);
+        $hours = DB::getDriverName() === 'sqlite'
+            ? '(julianday(repair_jobs.completed_at) - julianday(repair_jobs.received_at)) * 24'
+            : 'TIMESTAMPDIFF(SECOND, repair_jobs.received_at, repair_jobs.completed_at) / 3600';
+        $query->selectRaw("{$hours} as completion_hours");
         $this->dateFilters($query, 'repair_jobs.received_at', $filters);
         $query->when($filters['status'] ?? null, fn (Builder $builder, string $status) => $builder->where('repair_jobs.status', $status))
             ->when($filters['customer_id'] ?? null, fn (Builder $builder, int $customerId) => $builder->where('repair_jobs.customer_id', $customerId))
@@ -75,6 +97,7 @@ class ReportDataService
                 'job_number' => 'job_number', 'received_at' => 'received', 'customer_name' => 'customer',
                 'item_name' => 'item', 'technician_name' => 'technician', 'status' => 'status',
                 'completed_at' => 'completed', 'total_job_amount' => 'repair_amount',
+                'completion_hours' => 'average_completion_hours',
             ]),
             'query' => $query->orderByDesc('repair_jobs.received_at'),
             'summary' => ['rows' => (string) $this->countRows($query)],
@@ -91,7 +114,7 @@ class ReportDataService
         $driver = DB::connection()->getDriverName();
         $completionHours = $driver === 'sqlite'
             ? '(julianday(repair_jobs.completed_at) - julianday(repair_jobs.received_at)) * 24'
-            : 'TIMESTAMPDIFF(HOUR, repair_jobs.received_at, repair_jobs.completed_at)';
+            : '(TIMESTAMPDIFF(SECOND, repair_jobs.received_at, repair_jobs.completed_at) / 3600)';
         $query = DB::table('employees')
             ->leftJoin('repair_jobs', 'repair_jobs.technician_id', '=', 'employees.id')
             ->where(function (Builder $builder): void {
@@ -139,7 +162,12 @@ class ReportDataService
             ->join('employees', 'pos_sales.cashier_employee_id', '=', 'employees.id')
             ->where('pos_sales.status', DocumentStatus::Finalized->value)
             ->selectRaw("'POS sale' as document_type, pos_sales.sale_number as document_number, pos_sales.sale_at as transaction_date, COALESCE(customers.customer_name, 'Walk-in') as customer_name, employees.name as employee_name, pos_sales.payment_terms, pos_sales.payment_method, pos_sales.subtotal, pos_sales.discount_amount, pos_sales.total as net_sales, pos_sales.customer_id, pos_sales.cashier_employee_id as employee_id");
-        $union = $invoices->unionAll($pos);
+        $refunds = DB::table('payment_reversals')->join('payments', 'payment_reversals.payment_id', '=', 'payments.id')
+            ->leftJoin('customers', 'payments.customer_id', '=', 'customers.id')
+            ->join('employees', 'payments.received_by_employee_id', '=', 'employees.id')
+            ->whereIn('payments.payment_type', ['pos', 'invoice', 'credit_collection'])
+            ->selectRaw("'Refund' as document_type, payments.payment_number as document_number, payment_reversals.reversed_at as transaction_date, COALESCE(customers.customer_name, 'Walk-in') as customer_name, employees.name as employee_name, CASE WHEN payments.payment_type = 'credit_collection' THEN 'credit' ELSE 'cash' END as payment_terms, payment_reversals.method as payment_method, 0 as subtotal, 0 as discount_amount, -payment_reversals.amount as net_sales, payments.customer_id, payments.received_by_employee_id as employee_id");
+        $union = $invoices->unionAll($pos)->unionAll($refunds);
         $query = DB::query()->fromSub($union, 'sales')
             ->select('document_type', 'document_number', 'transaction_date', 'customer_name', 'employee_name', 'payment_terms', 'payment_method', 'subtotal', 'discount_amount', 'net_sales', 'customer_id', 'employee_id');
         $this->dateFilters($query, 'sales.transaction_date', $filters);
@@ -148,8 +176,38 @@ class ReportDataService
             ->when($filters['method'] ?? null, fn (Builder $builder, string $method) => $builder->where('sales.payment_method', $method))
             ->when($filters['q'] ?? null, fn (Builder $builder, string $term) => $builder->where('sales.document_number', 'like', '%'.$term.'%'));
 
+        $variant = $filters['sales_report'] ?? 'sales';
+        if (in_array($variant, ['repair-income', 'invoice-sales'], true)) {
+            $query->where('sales.document_type', 'Repair invoice');
+        }
+        if ($variant === 'discounts') {
+            $query->where('sales.discount_amount', '>', 0);
+        }
+        if (isset($filters['payment_terms'])) {
+            $query->where('sales.payment_terms', $filters['payment_terms']);
+        }
+        if (in_array($variant, ['daily-sales', 'monthly-sales', 'yearly-sales', 'cash-credit-sales', 'cashier-sales'], true)) {
+            $period = match ($variant) {
+                'monthly-sales' => '%Y-%m', 'yearly-sales' => '%Y', default => '%Y-%m-%d'
+            };
+            $group = match ($variant) {
+                'cash-credit-sales' => 'payment_terms', 'cashier-sales' => 'employee_id',
+                default => DB::getDriverName() === 'sqlite' ? "strftime('{$period}', transaction_date)" : "DATE_FORMAT(transaction_date, '{$period}')",
+            };
+            $label = $variant === 'cashier-sales' ? 'MAX(employee_name)' : $group;
+            $query->select([])->selectRaw("{$label} as period, COUNT(*) as documents, SUM(subtotal) as subtotal, SUM(discount_amount) as discount_amount, SUM(net_sales) as net_sales")
+                ->groupByRaw($group);
+
+            return [
+                'title' => __('reports.'.$variant.'_title'),
+                'columns' => $this->columns(['period' => 'period', 'documents' => 'rows', 'subtotal' => 'gross_sales', 'discount_amount' => 'discounts', 'net_sales' => 'net_sales']),
+                'query' => $query->orderBy('period'), 'summary' => [],
+                'warnings' => [__('reports.sales_not_collections'), 'Cancelled documents are excluded. Refunds reduce net sales on their reversal date.'],
+            ];
+        }
+
         return [
-            'title' => __('reports.sales_title'),
+            'title' => __('reports.'.$variant.'_title'),
             'columns' => $this->columns([
                 'document_type' => 'document_type', 'document_number' => 'document_number', 'transaction_date' => 'date',
                 'customer_name' => 'customer', 'employee_name' => 'cashier', 'payment_terms' => 'terms',
@@ -161,7 +219,7 @@ class ReportDataService
                 'discounts' => $this->money((clone $query)->sum('discount_amount')),
                 'net_sales' => $this->money((clone $query)->sum('net_sales')),
             ],
-            'warnings' => [__('reports.sales_not_collections')],
+            'warnings' => [__('reports.sales_not_collections'), 'Refund rows reduce net sales on reversal dates. Repair income and invoice-only views show original issued invoice amounts; use the refund report for adjustments. Refund cash/credit attribution uses original collection type; mixed-source allocation attribution requires an approved accounting rule.'],
         ];
     }
 
@@ -188,7 +246,7 @@ class ReportDataService
                 'received_by' => 'received_by', 'net_amount' => 'net_collected',
             ]),
             'customer-credit' => $this->columns(['customer_name' => 'customer', 'mobile_number' => 'mobile', 'outstanding' => 'outstanding']),
-            'overdue-credit' => $this->columns(['invoice_number' => 'invoice_number', 'invoice_date' => 'date', 'due_date' => 'due_date', 'customer_name' => 'customer', 'total' => 'invoice_total']),
+            'overdue-credit' => $this->columns(['invoice_number' => 'invoice_number', 'invoice_date' => 'date', 'due_date' => 'due_date', 'customer_name' => 'customer', 'total' => 'invoice_total', 'outstanding' => 'outstanding']),
             'supplier-outstanding' => $this->columns(['supplier_name' => 'supplier', 'mobile_number' => 'mobile', 'outstanding' => 'outstanding']),
             'purchases', 'supplier-purchases' => $this->columns(['purchase_number' => 'purchase_number', 'purchase_date' => 'date', 'supplier_name' => 'supplier', 'payment_terms' => 'terms', 'total' => 'amount']),
             'expenses' => $this->columns(['expense_number' => 'expense_number', 'incurred_at' => 'date', 'category_name' => 'category', 'description' => 'description', 'method' => 'method', 'amount' => 'amount']),
@@ -220,19 +278,28 @@ class ReportDataService
      */
     private function paymentQuery(bool $advances, array $filters): Builder
     {
-        $query = DB::table('payments')
+        $receipts = DB::table('payments')
             ->leftJoin('customers', 'payments.customer_id', '=', 'customers.id')
             ->join('employees', 'payments.received_by_employee_id', '=', 'employees.id')
             ->select('payments.payment_number', 'payments.paid_at', 'customers.customer_name', 'payments.payment_type', 'payments.method', 'payments.amount', 'employees.name as received_by')
-            ->selectRaw('payments.amount - COALESCE((SELECT SUM(payment_reversals.amount) FROM payment_reversals WHERE payment_reversals.payment_id = payments.id), 0) as net_amount')
+            ->selectRaw('payments.amount as net_amount')
             ->when($advances, fn (Builder $builder) => $builder->where('payments.payment_type', 'advance'));
-        $this->dateFilters($query, 'payments.paid_at', $filters);
+        $refunds = DB::table('payment_reversals')->join('payments', 'payment_reversals.payment_id', '=', 'payments.id')
+            ->leftJoin('customers', 'payments.customer_id', '=', 'customers.id')
+            ->join('employees', 'payments.received_by_employee_id', '=', 'employees.id')
+            ->select('payments.payment_number', 'payment_reversals.reversed_at as paid_at', 'customers.customer_name', 'payments.payment_type', 'payment_reversals.method', 'payment_reversals.amount', 'employees.name as received_by')
+            ->selectRaw('-payment_reversals.amount as net_amount')
+            ->when($advances, fn (Builder $builder) => $builder->where('payments.payment_type', 'advance'));
+        foreach ([$receipts, $refunds] as $entryQuery) {
+            $entryQuery->when($filters['customer_id'] ?? null, fn ($builder, $id) => $builder->where('payments.customer_id', $id))
+                ->when($filters['employee_id'] ?? null, fn ($builder, $id) => $builder->where('payments.received_by_employee_id', $id));
+        }
+        $query = DB::query()->fromSub($receipts->unionAll($refunds), 'collections')->select('collections.*');
+        $this->dateFilters($query, 'paid_at', $filters);
 
         return $query
-            ->when($filters['customer_id'] ?? null, fn (Builder $builder, int $id) => $builder->where('payments.customer_id', $id))
-            ->when($filters['method'] ?? null, fn (Builder $builder, string $method) => $builder->where('payments.method', $method))
-            ->when($filters['employee_id'] ?? null, fn (Builder $builder, int $id) => $builder->where('payments.received_by_employee_id', $id))
-            ->orderByDesc('payments.paid_at');
+            ->when($filters['method'] ?? null, fn (Builder $builder, string $method) => $builder->where('method', $method))
+            ->orderByDesc('paid_at');
     }
 
     /**
@@ -241,6 +308,7 @@ class ReportDataService
     private function customerCreditQuery(array $filters): Builder
     {
         return DB::table('customer_account_entries')
+            ->when($filters['date_to'] ?? null, fn ($q, $date) => $q->whereDate('customer_account_entries.occurred_at', '<=', $date))
             ->join('customers', 'customer_account_entries.customer_id', '=', 'customers.id')
             ->select('customers.customer_name', 'customers.mobile_number')
             ->selectRaw('SUM(customer_account_entries.amount) as outstanding')
@@ -263,6 +331,9 @@ class ReportDataService
             ->select('invoices.invoice_number', 'invoices.invoice_date', 'invoices.due_date', 'customers.customer_name', 'invoices.total', 'invoices.id');
         $this->dateFilters($query, 'invoices.invoice_date', $filters);
 
+        $paid = $this->invoiceBalances->netPaidExpression();
+        $query->selectRaw("CASE WHEN invoices.total > {$paid} THEN invoices.total - {$paid} ELSE 0 END as outstanding");
+
         return $this->invoiceBalances->constrainPaymentStatus($query, 'outstanding')
             ->when($filters['customer_id'] ?? null, fn (Builder $builder, int $id) => $builder->where('invoices.customer_id', $id))
             ->orderBy('invoices.due_date');
@@ -274,6 +345,7 @@ class ReportDataService
     private function supplierOutstandingQuery(array $filters): Builder
     {
         return DB::table('supplier_account_entries')
+            ->when($filters['date_to'] ?? null, fn ($q, $date) => $q->whereDate('supplier_account_entries.occurred_at', '<=', $date))
             ->join('suppliers', 'supplier_account_entries.supplier_id', '=', 'suppliers.id')
             ->select('suppliers.name as supplier_name', 'suppliers.mobile_number')
             ->selectRaw('SUM(supplier_account_entries.amount) as outstanding')
@@ -320,7 +392,7 @@ class ReportDataService
     {
         $warnings = [];
         if (in_array($report, ['stock', 'valuation'], true)) {
-            $query = $this->inventory->defaultLocationBalancesQuery()
+            $query = $this->inventory->defaultLocationBalancesQuery(isset($filters['date_to']) ? $filters['date_to'].' 23:59:59' : null)
                 ->leftJoin('spare_part_categories', 'spare_parts.category_id', '=', 'spare_part_categories.id')
                 ->leftJoin('spare_part_brands', 'spare_parts.brand_id', '=', 'spare_part_brands.id')
                 ->leftJoin('suppliers', 'spare_parts.supplier_id', '=', 'suppliers.id')
@@ -380,14 +452,10 @@ class ReportDataService
                 ->where('goods_received_notes.status', DocumentStatus::Finalized->value)
                 ->select('goods_received_notes.grn_number as reference_number', 'goods_received_notes.received_at as occurred_at', 'suppliers.name as supplier_name', 'spare_parts.sku', 'spare_parts.name', 'goods_received_note_items.quantity', 'goods_received_note_items.unit_cost'),
         };
+        $this->stockFilters($query, $filters);
+        $query = DB::query()->fromSub($query, 'movement_rows');
         $dateColumn = 'occurred_at';
         $this->dateFilters($query, $dateColumn, $filters);
-        if (in_array($report, ['stock-movements', 'repair-parts', 'pos-parts', 'adjustments'], true) && isset($filters['q'])) {
-            $query->where(function (Builder $builder) use ($filters): void {
-                $builder->where('spare_parts.sku', 'like', '%'.$filters['q'].'%')
-                    ->orWhere('spare_parts.name', 'like', '%'.$filters['q'].'%');
-            });
-        }
 
         return [
             'title' => __('reports.'.$report.'_title'),
@@ -416,10 +484,10 @@ class ReportDataService
         $posRevenue = $pos->sum('total');
         $discounts = BigDecimal::of((string) (clone $invoices)->sum('discount_amount'))
             ->plus((string) (clone $pos)->sum('discount_amount'))->toScale(2);
-        $refundQuery = DB::table('stock_returns')->where('return_type', 'pos_return')
-            ->where('status', DocumentStatus::Finalized->value);
-        $this->dateFilters($refundQuery, 'returned_at', $filters);
-        $refunds = $refundQuery->sum('refund_amount');
+        $refundQuery = DB::table('payment_reversals')->join('payments', 'payment_reversals.payment_id', '=', 'payments.id')
+            ->whereIn('payments.payment_type', ['pos', 'invoice', 'credit_collection']);
+        $this->dateFilters($refundQuery, 'payment_reversals.reversed_at', $filters);
+        $refunds = $refundQuery->sum('payment_reversals.amount');
         $revenue = BigDecimal::of((string) $repairRevenue)->plus((string) $posRevenue)->minus((string) $refunds)->toScale(2);
         $partCost = DB::table('invoice_items')
             ->join('invoices', 'invoice_items.invoice_id', '=', 'invoices.id')
@@ -429,6 +497,10 @@ class ReportDataService
             ->when($filters['date_to'] ?? null, fn (Builder $builder, string $date) => $builder->whereDate('invoices.finalized_at', '<=', $date))
             ->whereNotNull('invoice_items.unit_cost')
             ->sum(DB::raw('invoice_items.quantity * invoice_items.unit_cost'));
+        $posCost = DB::table('pos_sale_items')->join('pos_sales', 'pos_sale_items.pos_sale_id', '=', 'pos_sales.id')
+            ->where('pos_sales.status', DocumentStatus::Finalized->value)->whereNotNull('pos_sale_items.unit_cost');
+        $this->dateFilters($posCost, 'pos_sales.finalized_at', $filters);
+        $partCost = BigDecimal::of((string) $partCost)->plus((string) $posCost->sum(DB::raw('pos_sale_items.quantity * pos_sale_items.unit_cost')));
         $labourCost = DB::table('repair_jobs')
             ->join('invoice_jobs', 'repair_jobs.id', '=', 'invoice_jobs.repair_job_id')
             ->join('invoices', 'invoice_jobs.invoice_id', '=', 'invoices.id')
@@ -457,7 +529,9 @@ class ReportDataService
             ->where('invoices.status', DocumentStatus::Finalized->value)
             ->where('invoice_items.item_type', 'part')->whereNull('invoice_items.unit_cost');
         $this->dateFilters($missingPartCostQuery, 'invoices.finalized_at', $filters);
-        $missingCost = $missingCost || $missingPartCostQuery->exists();
+        // No approved stock/expense recognition policy exists yet. Known costs
+        // are shown, but must not be represented as a complete net profit.
+        $missingCost = true;
         $summary = [
             'repair_revenue' => $this->money($repairRevenue),
             'pos_revenue' => $this->money($posRevenue),
@@ -480,9 +554,43 @@ class ReportDataService
         ];
     }
 
+    private function ledgerReport(string $report, array $filters): array
+    {
+        if ($report === 'refunds') {
+            $query = DB::table('payment_reversals')->join('payments', 'payment_reversals.payment_id', '=', 'payments.id')
+                ->leftJoin('customers', 'payments.customer_id', '=', 'customers.id')
+                ->select('payment_reversals.id', 'payment_reversals.reversed_at as occurred_at', 'payments.payment_number as reference_number', 'customers.customer_name as account_name', 'payment_reversals.amount', 'payment_reversals.method', 'payment_reversals.reason as description')
+                ->when($filters['customer_id'] ?? null, fn ($q, $id) => $q->where('payments.customer_id', $id))
+                ->when($filters['employee_id'] ?? null, fn ($q, $id) => $q->where('payments.received_by_employee_id', $id))
+                ->when($filters['method'] ?? null, fn ($q, $method) => $q->where('payment_reversals.method', $method));
+            $query = DB::query()->fromSub($query, 'refund_rows');
+        } else {
+            $supplier = $report === 'supplier-statement';
+            $table = $supplier ? 'supplier_account_entries' : 'customer_account_entries';
+            $account = $supplier ? 'suppliers' : 'customers';
+            $owner = $supplier ? 'supplier_id' : 'customer_id';
+            $name = $supplier ? 'name' : 'customer_name';
+            $ledger = DB::table($table)->join($account, $table.'.'.$owner, '=', $account.'.id')
+                ->select($table.'.id', $table.'.occurred_at', $table.'.reference_number', $account.'.'.$name.' as account_name', $table.'.amount', $table.'.description')
+                ->selectRaw("SUM({$table}.amount) OVER (PARTITION BY {$table}.{$owner} ORDER BY {$table}.occurred_at, {$table}.id ROWS UNBOUNDED PRECEDING) as running_balance")
+                ->when($filters[$owner] ?? null, fn ($q, $id) => $q->where($table.'.'.$owner, $id));
+            // Window balances include entries before the display's start date.
+            $query = DB::query()->fromSub($ledger, 'statement');
+        }
+        $this->dateFilters($query, 'occurred_at', $filters);
+        $query->when($filters['q'] ?? null, fn ($q, $term) => $q->where('reference_number', 'like', '%'.$term.'%'));
+        $fields = ['occurred_at' => 'date', 'reference_number' => 'reference', 'account_name' => 'customer', 'description' => 'description', 'amount' => 'amount'];
+        $fields += $report === 'refunds' ? ['method' => 'method'] : ['running_balance' => 'outstanding'];
+
+        return ['title' => __('reports.'.$report.'_title'), 'columns' => $this->columns($fields),
+            'query' => $query->orderBy('occurred_at')->orderBy('id'),
+            'summary' => ['total' => $this->money((clone $query)->sum('amount'))], 'warnings' => []];
+    }
+
     private function stockFilters(Builder $query, array $filters): void
     {
         $query->when($filters['category_id'] ?? null, fn (Builder $builder, int $id) => $builder->where('spare_parts.category_id', $id))
+            ->when($filters['item_id'] ?? null, fn (Builder $builder, int $id) => $builder->where('spare_parts.id', $id))
             ->when($filters['supplier_id'] ?? null, fn (Builder $builder, int $id) => $builder->where('spare_parts.supplier_id', $id))
             ->when($filters['q'] ?? null, fn (Builder $builder, string $term) => $builder->where(function (Builder $search) use ($term): void {
                 $search->where('spare_parts.sku', 'like', '%'.$term.'%')
@@ -510,12 +618,15 @@ class ReportDataService
         return collect($fields)->map(fn (string $label, string $field): array => [
             'field' => $field,
             'label' => __('reports.'.$label),
+            'type' => preg_match('/(?:_at|_date)$/', $field) ? 'date'
+                : (preg_match('/amount|cost|price|total|sales|quantity|outstanding|balance|hours|jobs|documents/', $field) ? 'number' : 'text'),
+            'sum' => in_array($field, ['amount', 'total', 'subtotal', 'discount_amount', 'net_sales', 'net_amount', 'outstanding', 'line_total', 'quantity', 'quantity_delta'], true),
         ])->values()->all();
     }
 
     private function money(mixed $value): string
     {
-        return (string) BigDecimal::of((string) $value)->toScale(2);
+        return (string) BigDecimal::of((string) $value)->toScale(2, RoundingMode::HalfUp);
     }
 
     private function countRows(Builder $query): int

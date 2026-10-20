@@ -9,9 +9,12 @@
             <h1 class="mt-2 text-2xl font-bold text-slate-900">{{ $data['title'] }}</h1>
         </div>
         <div class="flex gap-2">
+            <button type="button" class="rounded-lg border px-3 py-2 text-xs" onclick="window.print()">Print</button>
+            @can('reports.export')
             <a class="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold" href="{{ route('reports.export', ['report' => $report, 'format' => 'xlsx'] + request()->query()) }}">{{ __('reports.export_excel') }}</a>
             <a class="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold" href="{{ route('reports.export', ['report' => $report, 'format' => 'pdf'] + request()->query()) }}">{{ __('reports.export_pdf') }}</a>
             <a class="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold" href="{{ route('reports.export', ['report' => $report, 'format' => 'csv'] + request()->query()) }}">{{ __('reports.export_csv') }}</a>
+            @endcan
         </div>
     </div>
 
@@ -29,6 +32,14 @@
             <label class="text-xs text-slate-600">{{ __('reports.method') }}<select class="form-input mt-1" name="method"><option value="">{{ __('reports.all_methods') }}</option>@foreach (['cash', 'bank_transfer', 'cheque'] as $method)<option value="{{ $method }}" @selected(($filters['method'] ?? '') === $method)>{{ __('reports.'.$method) }}</option>@endforeach</select></label>
         @endif
         <button class="rounded-lg bg-teal-700 px-4 py-2 text-xs font-semibold text-white">{{ __('reports.apply_filters') }}</button>
+        @foreach (['customer_id' => 'Customer ID', 'employee_id' => 'Employee ID', 'supplier_id' => 'Supplier ID', 'item_id' => 'Part ID', 'category_id' => 'Category ID'] as $field => $label)
+            @if (($field === 'customer_id' && ! in_array($report, ['stock','stock-movements','valuation','supplier-statement','supplier-outstanding','purchases','purchase-history','supplier-purchases','adjustments','repair-parts','pos-parts'], true)) || ($field === 'employee_id' && in_array($report,['repair','technicians','sales','cashier-sales','collections','advances','refunds'],true)) || ($field === 'supplier_id' && in_array($report,['supplier-statement','supplier-outstanding','purchases','purchase-history','supplier-purchases','stock','valuation'],true)) || (in_array($field,['item_id','category_id'],true) && in_array($report,['stock','valuation','stock-movements','repair-parts','pos-parts','adjustments','purchase-history','supplier-purchases'],true)))
+            <label class="text-xs">{{ $label }}<input class="form-input" type="number" name="{{ $field }}" min="1" value="{{ $filters[$field] ?? '' }}"></label>
+            @endif
+        @endforeach
+        <label class="text-xs">Sort<select class="form-input" name="sort"><option value="">Default</option>@foreach ($data['columns'] as $column)<option value="{{ $column['field'] }}" @selected(($filters['sort'] ?? '') === $column['field'])>{{ $column['label'] }}</option>@endforeach</select></label>
+        <select class="form-input" name="direction" aria-label="Sort direction"><option value="asc" @selected(($filters['direction'] ?? '') === 'asc')>Ascending</option><option value="desc" @selected(($filters['direction'] ?? '') === 'desc')>Descending</option></select>
+        <a class="text-xs text-teal-700 underline" href="{{ route('reports.show', $report) }}">Reset</a>
     </form>
 
     @if ($data['summary'])

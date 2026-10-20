@@ -6,7 +6,7 @@
     <div class="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div><p class="mb-2 text-[10px] font-semibold tracking-[0.15em] text-teal-700 uppercase">{{ config('business.name') }}</p><h1 class="text-2xl font-bold text-slate-900">{{ __('dashboard.title') }}</h1><p class="mt-1 text-xs text-slate-500">{{ $range['date_from'] }} — {{ $range['date_to'] }} · {{ config('business.timezone') }}</p></div>
         <form method="GET" class="flex flex-wrap gap-2 rounded-xl border border-slate-200 bg-white p-3">
-            <select name="period" class="form-input"><option value="today" @selected($range['preset'] === 'today')>{{ __('dashboard.today') }}</option><option value="yesterday" @selected($range['preset'] === 'yesterday')>{{ __('dashboard.yesterday') }}</option><option value="week" @selected($range['preset'] === 'week')>{{ __('dashboard.this_week') }}</option><option value="month" @selected($range['preset'] === 'month')>{{ __('dashboard.this_month') }}</option><option value="custom" @selected($range['preset'] === 'custom')>{{ __('dashboard.custom') }}</option></select>
+            <select name="period" class="form-input"><option value="today" @selected($range['preset'] === 'today')>{{ __('dashboard.today') }}</option><option value="yesterday" @selected($range['preset'] === 'yesterday')>{{ __('dashboard.yesterday') }}</option><option value="week" @selected($range['preset'] === 'week')>{{ __('dashboard.this_week') }}</option><option value="month" @selected($range['preset'] === 'month')>{{ __('dashboard.this_month') }}</option><option value="year" @selected($range['preset'] === 'year')>This Year</option><option value="custom" @selected($range['preset'] === 'custom')>{{ __('dashboard.custom') }}</option></select>
             <input type="date" name="date_from" value="{{ $range['preset'] === 'custom' ? $range['date_from'] : '' }}" class="form-input" aria-label="{{ __('dashboard.date_from') }}">
             <input type="date" name="date_to" value="{{ $range['preset'] === 'custom' ? $range['date_to'] : '' }}" class="form-input" aria-label="{{ __('dashboard.date_to') }}">
             <button class="rounded-lg bg-teal-700 px-4 py-2 text-xs font-semibold text-white">{{ __('dashboard.apply') }}</button>
@@ -24,6 +24,8 @@
             [__('dashboard.completed'), $jobs['completed_jobs'] ?? 0, 'repair-jobs.index'],
             [__('dashboard.ready_collection'), $jobs['ready_for_collection'] ?? 0, 'repair-jobs.index'],
             [__('dashboard.delivered'), $jobs['delivered_jobs'] ?? 0, 'repair-jobs.index'],
+            ['Cancelled Jobs', $jobs['cancelled_jobs'] ?? 0, 'repair-jobs.index'],
+            ['Unable to Repair', $jobs['unable_to_repair'] ?? 0, 'repair-jobs.index'],
         ] as [$label, $value, $routeName])
             @can('jobs.view')
                 <a href="{{ route($routeName) }}" class="rounded-2xl border border-slate-200 bg-white p-4 transition hover:border-teal-300"><p class="text-[10px] font-medium text-slate-500">{{ $label }}</p><p class="mt-2 text-2xl font-bold text-slate-900">{{ $value }}</p></a>
@@ -47,7 +49,7 @@
             @endforeach
         @endcan
         @can('payments.view')
-            @foreach ([[__('dashboard.payments_collected'), $payments['collected']], [__('dashboard.advances'), $payments['advances']]] as [$label, $value])
+            @foreach ([[__('dashboard.payments_collected'), $payments['collected']], [__('dashboard.advances'), $payments['advances']], ['Credit collections', $payments['credit_collections']]] as [$label, $value])
                 <div class="rounded-2xl border border-slate-200 bg-white p-4"><p class="text-[10px] font-medium text-slate-500">{{ $label }}</p><p class="mt-2 text-xl font-bold text-slate-900">{{ config('business.currency') }} {{ $value }}</p></div>
             @endforeach
         @endcan
@@ -58,7 +60,7 @@
 
     @can('inventory.view')
     <section class="mb-6 grid gap-3 sm:grid-cols-3">
-        @foreach ([[__('dashboard.spare_parts'), $inventory['parts']], [__('dashboard.low_stock'), $inventory['low_stock']], [__('dashboard.out_of_stock'), $inventory['out_of_stock']]] as [$label, $value])
+        @foreach ([[__('dashboard.spare_parts'), $inventory['parts']], [__('dashboard.low_stock'), $inventory['low_stock']], [__('dashboard.out_of_stock'), $inventory['out_of_stock']], ['Current stock (default locations)', $inventory['current_stock']], ['Stock valuation', $inventory['valuation']]] as [$label, $value])
             <div class="rounded-2xl border border-slate-200 bg-white p-4"><p class="text-[10px] font-medium text-slate-500">{{ $label }}</p><p class="mt-2 text-xl font-bold text-slate-900">{{ $value }}</p></div>
         @endforeach
     </section>
@@ -84,4 +86,5 @@
             <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white"><div class="border-b border-slate-100 px-5 py-4"><h2 class="text-sm font-semibold">{{ __('dashboard.recent_pos_sales') }}</h2></div><div class="divide-y divide-slate-100">@forelse ($recent_pos_sales as $sale)<div class="flex items-center justify-between px-5 py-3"><div><p class="text-xs font-semibold">{{ $sale->sale_number }}</p><p class="mt-1 text-[10px] text-slate-500">{{ $sale->sale_at }}</p></div><p class="text-xs font-semibold">{{ config('business.currency') }} {{ $sale->total }}</p></div>@empty<p class="px-5 py-10 text-center text-xs text-slate-500">{{ __('dashboard.no_sales') }}</p>@endforelse</div></section>
         @endcan
     </div>
+@can('jobs.view')<section class="mt-5 rounded-xl border bg-white p-4"><h2 class="font-semibold">Ready for Collection</h2>@forelse ($ready_jobs as $job)<p class="mt-2 text-sm">{{ $job->job_number }} ? {{ $job->item_name }}</p>@empty<p class="mt-2 text-sm text-slate-500">No ready jobs in the selected received-date cohort.</p>@endforelse</section>@endcan
 @endsection

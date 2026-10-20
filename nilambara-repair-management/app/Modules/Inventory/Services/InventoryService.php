@@ -8,8 +8,8 @@ use App\Modules\Inventory\Models\StockLocation;
 use App\Modules\Inventory\Models\StockMovement;
 use App\Modules\POS\Models\PosSaleItem;
 use Brick\Math\BigDecimal;
-use Illuminate\Support\Collection;
 use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -24,11 +24,12 @@ class InventoryService
         return $this->balance((int) $part->getKey(), (int) $part->default_location_id);
     }
 
-    public function defaultLocationBalancesQuery(): Builder
+    public function defaultLocationBalancesQuery(?string $asOf = null): Builder
     {
         return DB::table('spare_parts')
             ->leftJoinSub(
                 DB::table('stock_movements')
+                    ->when($asOf !== null, fn ($query) => $query->where('occurred_at', '<=', $asOf))
                     ->select('spare_part_id', 'location_id')
                     ->selectRaw('SUM(quantity_delta) as available_quantity')
                     ->groupBy('spare_part_id', 'location_id'),
@@ -124,10 +125,16 @@ class InventoryService
 
     private function balance(int $partId, int $locationId): BigDecimal
     {
-        $sum = DB::table('stock_movements')
+        $query = DB::table('stock_movements')
             ->where('spare_part_id', $partId)
-            ->where('location_id', $locationId)
-            ->sum('quantity_delta');
+            ->where('location_id', $locationId);
+
+        // Checkout may have opened a repeatable-read snapshot before waiting
+        // for the product lock. A locking current read sees the winner's sale.
+        $sum = DB::transactionLevel() > 0
+            ? $query->lockForUpdate()->pluck('quantity_delta')
+                ->reduce(fn (BigDecimal $sum, $quantity) => $sum->plus((string) $quantity), BigDecimal::zero())
+            : $query->sum('quantity_delta');
 
         return BigDecimal::of((string) ($sum ?? '0'))->toScale(3);
     }

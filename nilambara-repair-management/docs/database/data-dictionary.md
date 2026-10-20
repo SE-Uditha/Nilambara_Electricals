@@ -1,5 +1,22 @@
 # Data dictionary
 
+## Step 11 additive backup metadata
+
+Migration `2026_10_20_100000_extend_step11_backup_metadata` extends existing `backup_histories`; no new business ledger or foreign key is introduced. Existing history rows and columns are retained.
+
+| Field | Type / default | Meaning |
+| --- | --- | --- |
+| file_size | BIGINT UNSIGNED, nullable | Completed dump size in bytes. |
+| completed_at | TIMESTAMP, nullable | Completion/failure timestamp. |
+| deleted_at | TIMESTAMP, nullable | File removed by controlled retention; history remains. This is not deletion of the history row. |
+| is_protected | BOOLEAN, false | Manual/safety copies are protected from automatic scheduled retention. |
+| verification_status | VARCHAR(32), not_verified | File-integrity or isolated recovery verification state; checksum alone does not prove recovery. |
+| cloud_file_id | VARCHAR(255), nullable | Private Google Drive file identity after configured upload. |
+| cloud_status | VARCHAR(32), not_configured | Cloud copy state, independently of successful local backup. |
+| destination_path | TEXT, nullable | Laravel-encrypted private destination, hidden from model serialization and ordinary history pages. Not an encrypted SQL dump. |
+
+The original user/history/restore relationships remain unchanged. Backup policy uses allowlisted `system_settings` entries; destination values are encrypted and secrets/OAuth credentials remain environment-only. See [Step 11](../development/step-11-summary.md) and [backup procedures](../modules/backup-restore.md).
+
 The original 58 entity tables below are defined by the Step 2 migrations. Later additive workflow migrations add `quotation_history` and `invoice_history` and extend existing tables; those additions are called out in their entries and the schema change summary. Step 8 uses the existing payment, allocation, release, reversal, account-ledger, and print-history schema without adding payment tables. Existing Laravel infrastructure follows in a separate section. Step 3 also adds account and Spatie-compatible columns to existing users and access-control tables. Names, defaults, nullability, keys, and CHECKs are explicit. Monetary values use LKR; no foreign-exchange policy is implied.
 
 MySQL/MariaDB use unsigned BIGINT auto-increment primary keys. Disposable SQLite verification substitutes INTEGER PRIMARY KEY AUTOINCREMENT; its numeric affinity does not certify native DECIMAL precision. All entity tables have Laravel timestamps.
@@ -2767,6 +2784,8 @@ These existing tables are preserved. `jobs` is Laravel's queue, not repair_jobs.
 | updated_at | timestamp | YES | NULL | — | Existing Laravel account timestamp. |
 
 ## Derived business values (not duplicate columns)
+
+Step 10 reuses existing POS, inventory, payment, return, sequence, audit, and print-history tables. Sale items preserve description, quantity, price, line total and last known non-null location stock cost; `document_snapshot.items` preserves SKU/name at checkout. Transactional balances use locking current reads. Refund ceilings allocate sale-wide discounts proportionally to returned quantities, rounded down to currency precision. Returns reference the original POS item and an optional shared payment reversal. The ERD includes these links and the verifying user.
 
 | Value | Authoritative source / formula |
 | --- | --- |

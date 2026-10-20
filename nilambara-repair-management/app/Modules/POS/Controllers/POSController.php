@@ -11,6 +11,8 @@ use App\Modules\Inventory\Models\SparePart;
 use App\Modules\Inventory\Models\StockMovement;
 use App\Modules\Inventory\Models\StockReturn;
 use App\Modules\Inventory\Services\InventoryService;
+use App\Modules\Payments\Models\Payment;
+use App\Modules\Payments\Models\PaymentReversal;
 use App\Modules\POS\Models\PosSale;
 use App\Modules\POS\Requests\CheckoutRequest;
 use App\Modules\POS\Services\POSCalculationService;
@@ -18,9 +20,11 @@ use App\Modules\POS\Services\POSCheckoutService;
 use App\Modules\POS\Services\POSReceiptService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Brick\Math\BigDecimal;
+use Brick\Math\RoundingMode;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -102,7 +106,7 @@ class POSController extends Controller
             return back()->withErrors(['barcode' => __('pos.insufficient_stock', ['product' => $part->name, 'available' => (string) $available])]);
         }
         $scale = (int) $part->unit->quantity_scale;
-        if ($newQuantity->compareTo($newQuantity->toScale($scale)) !== 0) {
+        if ($newQuantity->compareTo($newQuantity->toScale($scale, RoundingMode::Down)) !== 0) {
             return back()->withErrors(['barcode' => __('pos.quantity_precision', ['product' => $part->name, 'scale' => $scale])]);
         }
         $cart[$id] = (string) $newQuantity;
@@ -120,7 +124,7 @@ class POSController extends Controller
         $part->load(['unit', 'defaultLocation']);
         abort_unless($part->is_active && $part->defaultLocation?->is_active, 422);
         $quantity = BigDecimal::of((string) $data['quantity'])->toScale(3);
-        if ($quantity->compareTo($quantity->toScale((int) $part->unit->quantity_scale)) !== 0) {
+        if ($quantity->compareTo($quantity->toScale((int) $part->unit->quantity_scale, RoundingMode::Down)) !== 0) {
             return back()->withErrors(['quantity' => __('pos.quantity_precision', ['product' => $part->name, 'scale' => $part->unit->quantity_scale])]);
         }
         $available = $inventory->availableAtDefaultLocation($part);
@@ -195,6 +199,7 @@ class POSController extends Controller
 
     public function show(PosSale $sale): View
     {
+        Gate::authorize('view', $sale);
         $sale->load([
             'customer',
             'cashierEmployee',
@@ -250,6 +255,14 @@ class POSController extends Controller
             ->when(! empty($filters['date_to']), fn ($builder) => $builder->whereDate('returned_at', '<=', $filters['date_to']));
         $returns = (clone $returnsQuery)
             ->selectRaw('COUNT(*) as return_count, COALESCE(SUM(refund_amount), 0) as refunds')->first();
+        $refundQuery = PaymentReversal::query()->whereHas('payment', fn ($payment) => $payment->where('payment_type', 'pos'))
+            ->when(! empty($filters['date_from']), fn ($builder) => $builder->whereDate('reversed_at', '>=', $filters['date_from']))
+            ->when(! empty($filters['date_to']), fn ($builder) => $builder->whereDate('reversed_at', '<=', $filters['date_to']));
+        $returns->refunds = (string) BigDecimal::of((string) (clone $refundQuery)->sum('amount'))->toScale(2);
+        $collected = Payment::query()->where('payment_type', 'pos')
+            ->when(! empty($filters['date_from']), fn ($builder) => $builder->whereDate('paid_at', '>=', $filters['date_from']))
+            ->when(! empty($filters['date_to']), fn ($builder) => $builder->whereDate('paid_at', '<=', $filters['date_to']))->sum('amount');
+        $netCollected = (string) BigDecimal::of((string) $collected)->minus($returns->refunds)->toScale(2);
         $summary = (clone $query)->selectRaw('COUNT(*) as sale_count, COALESCE(SUM(subtotal), 0) as gross_sales, COALESCE(SUM(discount_amount), 0) as discounts, COALESCE(SUM(total), 0) as net_sales')->first();
         $summary->net_sales = (string) BigDecimal::of((string) $summary->net_sales)
             ->minus((string) $returns->refunds)->toScale(2);
@@ -263,10 +276,16 @@ class POSController extends Controller
         $periods = (clone $query)->selectRaw("{$periodExpression} as period, COUNT(*) as sale_count, COALESCE(SUM(total), 0) as net_sales")
             ->groupBy('period')->orderBy('period')->get();
         $returnPeriodExpression = $driver === 'sqlite'
-            ? "strftime('{$dateFormat}', returned_at)"
-            : "DATE_FORMAT(returned_at, '{$dateFormat}')";
-        $refundsByPeriod = (clone $returnsQuery)->selectRaw("{$returnPeriodExpression} as period, COALESCE(SUM(refund_amount), 0) as refunds")
+            ? "strftime('{$dateFormat}', reversed_at)"
+            : "DATE_FORMAT(reversed_at, '{$dateFormat}')";
+        $refundsByPeriod = (clone $refundQuery)->selectRaw("{$returnPeriodExpression} as period, COALESCE(SUM(amount), 0) as refunds")
             ->groupBy('period')->get()->keyBy('period');
+        foreach ($refundsByPeriod as $period => $refund) {
+            if (! $periods->contains('period', $period)) {
+                $periods->push((object) ['period' => $period, 'sale_count' => 0, 'net_sales' => '0.00']);
+            }
+        }
+        $periods = $periods->sortBy('period')->values();
         $periods->each(function ($period) use ($refundsByPeriod): void {
             $period->net_sales = (string) BigDecimal::of((string) $period->net_sales)
                 ->minus((string) ($refundsByPeriod->get($period->period)?->refunds ?? '0.00'))->toScale(2);
@@ -284,7 +303,7 @@ class POSController extends Controller
             ->selectRaw('employees.id, employees.name, COUNT(*) as sale_count, COALESCE(SUM(pos_sales.total), 0) as sales_total')
             ->groupBy('employees.id', 'employees.name')->orderByDesc('sales_total')->get();
 
-        return view('modules.pos.reports', compact('filters', 'summary', 'payments', 'periods', 'items', 'cashiers', 'returns'));
+        return view('modules.pos.reports', compact('filters', 'summary', 'payments', 'periods', 'items', 'cashiers', 'returns', 'netCollected'));
     }
 
     public function print(Request $request, PosSale $sale, POSReceiptService $receipts): View

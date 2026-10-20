@@ -11,7 +11,7 @@ class DashboardController extends Controller
     public function __invoke(Request $request, DashboardService $dashboard): View
     {
         $filters = $request->validate([
-            'period' => ['nullable', 'in:today,yesterday,week,month,custom'],
+            'period' => ['nullable', 'in:today,yesterday,week,month,year,custom'],
             'date_from' => ['nullable', 'date'],
             'date_to' => ['nullable', 'date', 'after_or_equal:date_from'],
         ]);

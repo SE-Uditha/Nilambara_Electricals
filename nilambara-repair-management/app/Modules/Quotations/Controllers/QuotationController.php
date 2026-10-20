@@ -339,7 +339,7 @@ class QuotationController extends Controller
             'template' => $template,
             'paperSize' => $paper,
             'orientation' => $orientation,
-            'footerText' => $template?->footer,
+            'footerText' => $template?->footer ?: config('business.document_footer'),
             'duplicate' => $duplicate,
             'duplicateLabel' => $label,
             'printedAt' => $printedAt,

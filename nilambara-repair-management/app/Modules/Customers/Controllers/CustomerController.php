@@ -8,6 +8,7 @@ use App\Modules\Customers\Requests\StoreCustomerRequest;
 use App\Modules\Customers\Requests\UpdateCustomerRequest;
 use App\Modules\Customers\Services\CustomerService;
 use App\Modules\Customers\Services\CustomerStatementService;
+use App\Modules\PrintTemplates\Models\PrintTemplate;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -176,6 +177,7 @@ class CustomerController extends Controller
             ...$statements->data($customer, $filters, false),
             'filters' => $filters,
             'printedAt' => now(config('business.timezone', 'Asia/Colombo')),
+            ...$this->statementTemplateData(),
         ]);
     }
 
@@ -189,12 +191,30 @@ class CustomerController extends Controller
             ...$statements->data($customer, $filters, false),
             'filters' => $filters,
             'printedAt' => now(config('business.timezone', 'Asia/Colombo')),
+            ...$this->statementTemplateData(),
         ])->setPaper('A4', 'landscape')->download($customer->customer_code.'-statement.pdf');
     }
 
     /**
      * @return array{date_from: string|null, date_to: string|null}
      */
+    private function statementTemplateData(): array
+    {
+        $template = PrintTemplate::where('document_type', 'customer_statement')
+            ->where('is_active', true)->orderByDesc('version')->first();
+        $logoDataUri = null;
+        $path = realpath(public_path($template?->logo_path ?: config('business.logo', '')));
+        $public = realpath(public_path());
+        if ($path && $public && str_starts_with($path, $public.DIRECTORY_SEPARATOR) && is_file($path)) {
+            $mime = mime_content_type($path);
+            if (in_array($mime, ['image/png', 'image/jpeg'], true)) {
+                $logoDataUri = 'data:'.$mime.';base64,'.base64_encode(file_get_contents($path));
+            }
+        }
+
+        return compact('template', 'logoDataUri');
+    }
+
     private function statementFilters(Request $request): array
     {
         return $request->validate([

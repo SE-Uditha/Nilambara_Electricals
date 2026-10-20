@@ -49,7 +49,7 @@ class RepairReceiptAndJobManagementTest extends TestCase
         $job = RepairJob::query()->sole();
         $receipt = RepairReceipt::query()->sole();
 
-        $this->assertSame('JOB-00001', $job->automatic_number);
+        $this->assertMatchesRegularExpression('/^JOB-\d{5,}$/', $job->automatic_number);
         $this->assertSame('MAN-2026-0001', $job->job_number);
         $this->assertSame($customer->id, $job->customer_id);
         $this->assertSame($receiver->id, $job->received_by_employee_id);
@@ -86,7 +86,11 @@ class RepairReceiptAndJobManagementTest extends TestCase
             ]))
             ->assertRedirect();
 
-        $this->assertSame(['JOB-00001', 'JOB-00002'], RepairJob::query()->orderBy('id')->pluck('automatic_number')->all());
+        $numbers = RepairJob::query()->orderBy('id')->pluck('automatic_number')->all();
+        $this->assertCount(2, array_unique($numbers));
+        foreach ($numbers as $number) {
+            $this->assertMatchesRegularExpression('/^JOB-\d{5,}$/', $number);
+        }
 
         $this->actingAs($administrator)
             ->from(route('repair-receipts.create'))

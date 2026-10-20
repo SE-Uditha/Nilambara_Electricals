@@ -6,9 +6,9 @@ use App\Enums\JobStatus;
 use App\Http\Controllers\Controller;
 use App\Modules\Customers\Models\Customer;
 use App\Modules\Employees\Models\Employee;
+use App\Modules\Payments\Models\PaymentAllocation;
 use App\Modules\PrintTemplates\Models\DocumentPrintHistory;
 use App\Modules\PrintTemplates\Models\PrintTemplate;
-use App\Modules\Payments\Models\PaymentAllocation;
 use App\Modules\RepairReceipts\Models\RepairReceipt;
 use App\Modules\RepairReceipts\Requests\StoreRepairReceiptRequest;
 use App\Modules\RepairReceipts\Services\RepairReceiptService;
@@ -240,7 +240,8 @@ class RepairReceiptController extends Controller
             'businessTelephone' => $template?->telephone_number ?: config('business.contact_number'),
             'logoUrl' => $template?->logo_path ? asset($template->logo_path) : asset(config('business.logo')),
             'documentTitle' => $template?->document_title ?: __('ui.repair_receipt'),
-            'footerText' => $template?->footer,
+            'template' => $template,
+            'footerText' => $template?->footer ?: config('business.document_footer'),
         ];
     }
 

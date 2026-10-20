@@ -50,7 +50,7 @@ class InvoicePrintService
             'printedAt' => $printedAt,
             'paperSize' => $paperSize,
             'orientation' => $orientation,
-            'footer' => $template?->footer,
+            'footer' => $template?->footer ?: config('business.document_footer'),
             'businessName' => $template?->business_name ?: config('business.name'),
             'businessAddress' => $template?->business_address ?: config('business.address'),
             'businessTelephone' => $template?->telephone_number ?: config('business.contact_number'),

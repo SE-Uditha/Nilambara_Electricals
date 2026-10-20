@@ -10,6 +10,8 @@ use App\Modules\Invoices\Models\Invoice;
 use App\Modules\Invoices\Policies\InvoicePolicy;
 use App\Modules\Payments\Models\Payment;
 use App\Modules\Payments\Policies\PaymentPolicy;
+use App\Modules\POS\Models\PosSale;
+use App\Modules\POS\Policies\PosSalePolicy;
 use App\Modules\Quotations\Models\Quotation;
 use App\Modules\Quotations\Policies\QuotationPolicy;
 use App\Modules\RepairJobs\Models\RepairJob;
@@ -84,6 +86,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Quotation::class, QuotationPolicy::class);
         Gate::policy(Invoice::class, InvoicePolicy::class);
         Gate::policy(Payment::class, PaymentPolicy::class);
+        Gate::policy(PosSale::class, PosSalePolicy::class);
 
         Event::listen(Login::class, function (Login $event): void {
             if (! $event->user instanceof User) {

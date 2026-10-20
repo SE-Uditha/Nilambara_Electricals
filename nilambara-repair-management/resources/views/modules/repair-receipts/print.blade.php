@@ -96,5 +96,6 @@
         </div>
         <footer class="print-date">{{ $footerText ?: __('ui.print_date') }}: {{ $printTime->format(config('business.date_format').' '.config('business.time_format')) }} · {{ config('business.timezone') }}</footer>
     </main>
+@include('components.document-layout-settings')
 </body>
 </html>

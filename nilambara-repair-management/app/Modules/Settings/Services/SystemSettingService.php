@@ -4,6 +4,7 @@ namespace App\Modules\Settings\Services;
 
 use App\Models\User;
 use App\Modules\AuditLogs\Models\AuditLog;
+use App\Modules\BackupRestore\Services\BackupConfigurationService;
 use App\Modules\Settings\Models\SystemSetting;
 use App\Support\SensitiveData;
 use Illuminate\Support\Facades\Config;
@@ -15,7 +16,7 @@ class SystemSettingService
 {
     private const BUSINESS_KEYS = [
         'name', 'address', 'contact_number', 'currency', 'timezone', 'date_format',
-        'time_format', 'logo',
+        'time_format', 'logo', 'default_language', 'document_footer', 'print_paper',
     ];
 
     public function apply(): void
@@ -27,6 +28,9 @@ class SystemSettingService
         foreach (SystemSetting::query()->where('group', 'business')->whereIn('key', self::BUSINESS_KEYS)->get() as $setting) {
             Config::set('business.'.$setting->key, $setting->value);
         }
+        Config::set('business.printing.paper', config('business.print_paper', config('business.printing.paper')));
+        app(BackupConfigurationService::class)->apply();
+        app()->setLocale(session('locale', config('business.default_language', 'en')));
     }
 
     /**

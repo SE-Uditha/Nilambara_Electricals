@@ -6,12 +6,14 @@
     @php
         $paperSizes = match ($template->document_type) {
             'quotation' => ['A4', 'A5'],
+            'job_card' => ['A6'],
+            'invoice' => ['A5'],
             'pos_receipt' => ['A4', 'A5', 'thermal'],
             'repair_receipt' => ['A4', 'A5', 'A6'],
             default => ['A4', 'A5', 'A6'],
         };
     @endphp
-    <div class="mb-6 flex items-start justify-between gap-3">
+    <button type="button" onclick="window.print()" class="mb-4 rounded border px-4 py-2">Print test layout (not a transaction)</button><div class="mb-6 flex items-start justify-between gap-3">
         <div><a class="text-xs text-teal-700 hover:underline" href="{{ route('print-templates.index') }}">{{ __('print_templates.title') }}</a><h1 class="mt-2 text-2xl font-bold">{{ $template->name }} · v{{ $template->version }}</h1><p class="mt-1 text-sm text-slate-500">{{ __('print_templates.preview_note') }}</p></div>
     </div>
     <div class="mb-6 overflow-auto rounded-xl border border-slate-200 bg-slate-100 p-6">
@@ -46,6 +48,9 @@
                 @endforeach
                 <label class="form-label sm:col-span-2">{{ __('print_templates.footer') }}<textarea class="form-input mt-1" name="footer" rows="3" maxlength="2000">{{ old('footer', $template->footer) }}</textarea></label>
                 <label class="form-label">{{ __('print_templates.duplicate_label') }}<input class="form-input mt-1" name="duplicate_copy_label" required maxlength="100" value="{{ old('duplicate_copy_label', $template->duplicate_copy_label) }}"></label>
+                <label class="form-label">Column widths (%) — JSON list<textarea class="form-input" name="table_widths">{{ old('table_widths', json_encode($template->table_widths ?? [])) }}</textarea></label>
+                <label class="form-label">Additional signature labels — JSON list<textarea class="form-input" name="signature_areas">{{ old('signature_areas', json_encode($template->signature_areas ?? [])) }}</textarea></label>
+                <label class="form-label">Logo asset (blank inherits business logo)<input class="form-input" name="logo_path" value="{{ $template->logo_path }}" placeholder="storage/business/uploaded-image.png"></label>
                 <div class="flex items-end gap-3 sm:col-span-2">
                     <button class="rounded-lg bg-teal-700 px-5 py-2.5 text-sm font-semibold text-white">{{ __('print_templates.save_version') }}</button>
                     <span class="text-xs text-slate-500">{{ __('print_templates.version_note') }}</span>

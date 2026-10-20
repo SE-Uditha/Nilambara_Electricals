@@ -144,7 +144,7 @@ class JobCardController extends Controller
             'businessTelephone' => $template?->telephone_number ?: config('business.contact_number'),
             'logoUrl' => $template?->logo_path ? asset($template->logo_path) : asset(config('business.logo')),
             'documentTitle' => $template?->document_title ?: __('ui.repair_job_card'),
-            'footerText' => $template?->footer,
+            'footerText' => $template?->footer ?: config('business.document_footer'),
         ]);
     }
 

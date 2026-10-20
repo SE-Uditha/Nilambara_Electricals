@@ -50,10 +50,10 @@ class RoleSeeder extends Seeder
             'users' => ['view', 'create', 'update', 'disable'],
             'roles' => ['view', 'manage'],
             'permissions' => ['manage'],
-            'reports' => ['view', 'export', 'financial'],
+            'reports' => ['view', 'export', 'financial', 'repair', 'sales', 'inventory', 'credit'],
             'settings' => ['view', 'update'],
             'print-templates' => ['view', 'update', 'reset'],
-            'backups' => ['view', 'create', 'restore'],
+            'backups' => ['view', 'create', 'restore', 'download', 'configure'],
             'audit' => ['view'],
         ];
 
@@ -115,6 +115,17 @@ class RoleSeeder extends Seeder
             }
 
             $role->givePermissionTo($permissionNames);
+        }
+
+        $reportGrants = [
+            'receptionist' => ['reports.view', 'reports.repair'],
+            'technician' => ['reports.view', 'reports.repair'],
+            'cashier' => ['reports.sales'],
+            'storekeeper' => ['reports.view', 'reports.inventory', 'reports.export'],
+            'manager' => ['reports.repair', 'reports.sales', 'reports.inventory', 'reports.credit'],
+        ];
+        foreach ($reportGrants as $roleName => $permissionNames) {
+            Role::query()->where('name', $roleName)->firstOrFail()->givePermissionTo($permissionNames);
         }
 
         $quotationGrants = [

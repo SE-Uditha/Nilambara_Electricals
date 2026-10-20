@@ -17,24 +17,18 @@ class BackupService
     {
         return $this->safeRoot() !== null
             && in_array(config('database.default'), ['mysql', 'mariadb'], true)
-            && (new ExecutableFinder)->find((string) config('backup.mysqldump_binary')) !== null;
+            && $this->executable('mysqldump_binary') !== null;
     }
 
     public function create(bool $scheduled, ?User $actor, bool $cleanup = true): BackupHistory
     {
-        $root = $this->requireRoot();
         $connection = config('database.default');
         if (! in_array($connection, ['mysql', 'mariadb'], true)) {
             throw new RuntimeException('Automated database backups are supported only for MySQL or MariaDB.');
         }
 
-        $binary = (new ExecutableFinder)->find((string) config('backup.mysqldump_binary'));
-        if ($binary === null) {
-            throw new RuntimeException('The configured mysqldump executable is not available.');
-        }
-
         $filename = 'nilambara-'.$this->timestamp().'-'.bin2hex(random_bytes(6)).'.sql';
-        $path = $root.DIRECTORY_SEPARATOR.$filename;
+        $path = null;
         $history = BackupHistory::query()->create([
             'backup_at' => now(config('backup.timezone')),
             'file_reference' => $filename,
@@ -42,10 +36,18 @@ class BackupService
             'status' => 'running',
             'storage_location' => self::STORAGE_LOCATION,
             'initiated_by_user_id' => $actor?->getKey(),
+            'is_protected' => ! $scheduled,
         ]);
         $credentialPath = null;
         $output = null;
         try {
+            $root = $this->requireRoot();
+            $history->update(['destination_path' => $root]);
+            $path = $root.DIRECTORY_SEPARATOR.$filename;
+            $binary = $this->executable('mysqldump_binary');
+            if ($binary === null) {
+                throw new RuntimeException('The configured database dump utility is unavailable.');
+            }
             $credentialPath = $this->credentialFile($root);
             $output = fopen($path, 'xb');
             if ($output === false) {
@@ -88,13 +90,19 @@ class BackupService
                 'status' => 'completed',
                 'checksum_sha256' => $checksum,
                 'verified_at' => now(config('backup.timezone')),
+                'file_size' => filesize($path),
+                'completed_at' => now(config('backup.timezone')),
+                'verification_status' => 'checksum_verified',
             ]);
         } catch (\Throwable $exception) {
             $history->update([
                 'status' => 'failed',
                 'error_details' => mb_substr($exception->getMessage(), 0, 2000),
+                'completed_at' => now(config('backup.timezone')),
+                'verification_status' => 'failed',
             ]);
-            if (is_file($path) && ! unlink($path)) {
+            $this->recordAudit($actor, 'backup.failed', $history, ['reason' => 'Database backup failed. Check protected server logs.']);
+            if (is_string($path) && is_file($path) && ! unlink($path)) {
                 throw new RuntimeException('The failed database dump could not be removed from the private destination.', 0, $exception);
             }
             throw $exception;
@@ -119,8 +127,18 @@ class BackupService
             'backup_type' => $history->backup_type,
             'checksum_sha256' => $history->checksum_sha256,
         ]);
+        try {
+            app(GoogleDriveBackupService::class)->copy($history, $path);
+        } catch (\Throwable) {
+            $history->update(['cloud_status' => 'failed']);
+            $this->recordAudit($actor, 'backup.cloud.failed', $history, ['reason' => 'Cloud copy failed; the verified local backup remains available.']);
+        }
         if ($cleanup) {
-            $this->cleanupVerifiedBackups();
+            try {
+                $this->cleanupVerifiedBackups();
+            } catch (\Throwable) {
+                $this->recordAudit($actor, 'backup.cleanup.failed', $history, ['reason' => 'Retention cleanup failed; backup retained.']);
+            }
         }
 
         return $history->fresh();
@@ -128,7 +146,7 @@ class BackupService
 
     public function verify(BackupHistory $history): bool
     {
-        if ($history->status !== 'completed'
+        if ($history->deleted_at !== null || $history->status !== 'completed'
             || $history->storage_location !== self::STORAGE_LOCATION
             || ! is_string($history->checksum_sha256)
             || strlen($history->checksum_sha256) !== 64) {
@@ -140,7 +158,7 @@ class BackupService
         } catch (RuntimeException) {
             return false;
         }
-        $checksum = is_file($path) ? hash_file('sha256', $path) : false;
+        $checksum = is_file($path) && is_readable($path) && filesize($path) > 0 ? hash_file('sha256', $path) : false;
 
         return is_string($checksum) && hash_equals($history->checksum_sha256, $checksum);
     }
@@ -160,7 +178,7 @@ class BackupService
             throw new RuntimeException('The selected backup is missing or failed checksum verification.');
         }
         $connection = config('database.default');
-        $binary = (new ExecutableFinder)->find((string) config('backup.mysql_binary'));
+        $binary = $this->executable('mysql_binary');
         if (! in_array($connection, ['mysql', 'mariadb'], true) || $binary === null) {
             throw new RuntimeException('The configured MySQL client is not available for restore.');
         }
@@ -212,11 +230,12 @@ class BackupService
         }
     }
 
-    private function cleanupVerifiedBackups(): void
+    public function cleanupVerifiedBackups(): void
     {
         $recentCutoff = now(config('backup.timezone'))->subDays((int) config('backup.retention_days'));
         $recent = BackupHistory::query()
             ->where('status', 'completed')
+            ->whereNull('deleted_at')
             ->whereNotNull('verified_at')
             ->where('verified_at', '>=', $recentCutoff)
             ->orderByDesc('backup_at')
@@ -228,6 +247,7 @@ class BackupService
         $backups = BackupHistory::query()
             ->where('status', 'completed')
             ->where('storage_location', self::STORAGE_LOCATION)
+            ->whereNull('deleted_at')->where('backup_type', 'scheduled')->where('is_protected', false)
             ->orderByDesc('backup_at')
             ->orderByDesc('id')
             ->get();
@@ -250,6 +270,10 @@ class BackupService
             }
             if (is_file($path) && $this->verify($backup) && ! unlink($path)) {
                 throw new RuntimeException('Verified backup retention cleanup could not remove an expired file.');
+            }
+            if (! is_file($path)) {
+                $backup->update(['deleted_at' => now(), 'verification_status' => 'retained_history']);
+                $this->recordAudit(null, 'backup.cleanup.deleted', $backup, ['backup_history_id' => $backup->getKey()]);
             }
         }
     }
@@ -278,8 +302,8 @@ class BackupService
         }
 
         $escape = static fn (string $value): string => str_replace(
-            ["\\", "\n", "\r", '"'],
-            ["\\\\", "\\n", "\\r", '\\"'],
+            ['\\', "\n", "\r", '"'],
+            ['\\\\', '\\n', '\\r', '\\"'],
             $value,
         );
         $contents = "[client]\nuser=\"".$escape((string) ($database['username'] ?? ''))."\"\npassword=\"".$escape((string) ($database['password'] ?? ''))."\"\nhost=\"".$escape((string) ($database['host'] ?? '127.0.0.1'))."\"\nport=".(int) ($database['port'] ?? 3306)."\n";
@@ -298,7 +322,7 @@ class BackupService
             throw new RuntimeException('The backup file reference is invalid.');
         }
 
-        $root = $this->requireRoot();
+        $root = $this->requireRoot($history->destination_path);
         $path = $root.DIRECTORY_SEPARATOR.$history->file_reference;
         $realPath = realpath($path);
         if ($realPath === false || ! $this->isWithin($realPath, $root)) {
@@ -308,9 +332,9 @@ class BackupService
         return $realPath;
     }
 
-    private function requireRoot(): string
+    private function requireRoot(?string $destination = null): string
     {
-        $root = $this->safeRoot();
+        $root = $this->safeRoot($destination);
         if ($root === null) {
             throw new RuntimeException('Backup destination is not configured or is not a private absolute path outside the application.');
         }
@@ -345,6 +369,7 @@ class BackupService
 
         if ($this->isWithin($resolved, base_path())
             || $this->isWithin($resolved, dirname(base_path()))
+            || $this->isWithin($resolved, dirname(dirname(base_path())))
             || $this->isWithin($resolved, public_path())) {
             return null;
         }
@@ -367,5 +392,18 @@ class BackupService
     private function timestamp(): string
     {
         return now(config('backup.timezone'))->format('Ymd-His');
+    }
+
+    public function isSafeDestination(string $destination): bool
+    {
+        return $this->safeRoot($destination) !== null;
+    }
+
+    private function executable(string $key): ?string
+    {
+        $name = (string) config('backup.'.$key);
+
+        // Symfony's PATH finder does not resolve absolute Windows filenames.
+        return is_file($name) ? (realpath($name) ?: null) : (new ExecutableFinder)->find($name);
     }
 }

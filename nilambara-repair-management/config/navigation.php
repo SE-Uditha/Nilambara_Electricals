@@ -35,7 +35,7 @@ return [
             ['label' => 'pos_sales_history', 'icon' => 'document', 'route' => 'pos.sales.index', 'permission' => 'pos.sales.view'],
             ['label' => 'pos_returns', 'icon' => 'receipt', 'route' => 'pos.returns.index', 'permission' => 'pos.return'],
             ['label' => 'pos_reports', 'icon' => 'chart', 'route' => 'pos.reports', 'permission' => 'pos.reports.view'],
-            ['label' => 'cash_summary', 'icon' => 'wallet', 'permission' => 'reports.view', 'roles' => ['administrator', 'cashier', 'manager']],
+            ['label' => 'cash_summary', 'icon' => 'wallet', 'route' => 'reports.show', 'route_parameters' => ['report' => 'cash-summary'], 'permission' => 'reports.view', 'roles' => ['administrator', 'cashier', 'manager']],
         ],
     ],
     [
@@ -45,6 +45,18 @@ return [
             ['label' => 'suppliers', 'icon' => 'truck', 'permission' => 'suppliers.view'],
             ['label' => 'purchases', 'icon' => 'bag', 'permission' => 'purchases.view'],
             ['label' => 'stock_issues', 'icon' => 'box', 'permission' => 'inventory.issue', 'roles' => ['administrator', 'storekeeper']],
+        ],
+    ],
+    [
+        'label' => 'business_reports',
+        'items' => [
+            ['label' => 'repair_reports', 'icon' => 'chart', 'route' => 'reports.show', 'route_parameters' => ['report' => 'repair'], 'permission' => 'reports.repair'],
+            ['label' => 'sales_reports', 'icon' => 'chart', 'route' => 'reports.show', 'route_parameters' => ['report' => 'sales'], 'permission' => 'reports.financial'],
+            ['label' => 'financial_reports', 'icon' => 'chart', 'route' => 'reports.show', 'route_parameters' => ['report' => 'collections'], 'permission' => 'reports.financial'],
+            ['label' => 'credit_reports', 'icon' => 'credit', 'route' => 'reports.show', 'route_parameters' => ['report' => 'customer-credit'], 'permission' => 'reports.credit'],
+            ['label' => 'inventory_reports', 'icon' => 'box', 'route' => 'reports.show', 'route_parameters' => ['report' => 'stock'], 'permission' => 'reports.inventory'],
+            ['label' => 'supplier_reports', 'icon' => 'truck', 'route' => 'reports.show', 'route_parameters' => ['report' => 'supplier-outstanding'], 'permission' => 'reports.financial'],
+            ['label' => 'profit_estimate', 'icon' => 'chart', 'route' => 'reports.show', 'route_parameters' => ['report' => 'profit-estimate'], 'permission' => 'reports.financial'],
         ],
     ],
     [

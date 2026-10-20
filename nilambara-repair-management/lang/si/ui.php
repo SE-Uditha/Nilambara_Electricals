@@ -1,6 +1,19 @@
 <?php
 
 return [
+    'record_payment' => 'Record payment',
+    'pos_sales_history' => 'POS sales history',
+    'pos_returns' => 'POS returns',
+    'pos_reports' => 'POS reports',
+    'business_reports' => 'Business reports',
+    'repair_reports' => 'Repair reports',
+    'sales_reports' => 'Sales reports',
+    'financial_reports' => 'Financial reports',
+    'credit_reports' => 'Credit reports',
+    'inventory_reports' => 'Inventory reports',
+    'supplier_reports' => 'Supplier reports',
+    'profit_estimate' => 'Profit estimate',
+
     'repair_management' => 'අලුත්වැඩියා කළමනාකරණය',
     'dashboard' => 'පාලන පුවරුව',
     'workspace' => 'වැඩ අවකාශය',
