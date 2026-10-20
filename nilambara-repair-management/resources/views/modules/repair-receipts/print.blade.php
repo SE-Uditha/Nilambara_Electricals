@@ -35,6 +35,7 @@
     <nav class="screen-actions" aria-label="{{ __('ui.print_actions') }}">
         <a href="{{ route('repair-receipts.show', $receipt) }}">{{ __('ui.back') }}</a>
         <button type="button" onclick="window.print()">{{ __('ui.print') }}</button>
+        <a href="{{ route('repair-receipts.pdf',['receipt'=>$receipt,'duplicate'=>$duplicate ? 1 : 0]) }}">PDF</a>
     </nav>
     <main class="document">
         <header class="business">

@@ -1,5 +1,7 @@
 # BRD module coverage
 
+Current status (2026-10-20): the Step 12 follow-up adds the previously missing inventory, supplier and purchase/GRN operations and tests their integration. Use the [current compliance matrix](../testing/brd-compliance-matrix.md) and [completion report](../testing/pending-completion-report.md) for present verification. The step-specific descriptions below preserve historical architecture boundaries.
+
 Source: [Repair Shop Management Final.pdf](../../../Repair%20Shop%20Management%20Final.pdf). Page references below use the physical PDF page number, starting with its cover as page 1. The PDF has 20 pages and is titled a project proposal internally. This map captures architecture ownership and current delivery boundaries. Steps 3-7 implement employee/authentication/RBAC, customer registration/management, repair intake/job workflow, quotation approval, and invoices; other capabilities remain planned unless explicitly delivered in a later phase.
 
 ## Required module map

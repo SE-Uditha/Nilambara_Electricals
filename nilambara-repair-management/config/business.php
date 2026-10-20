@@ -2,7 +2,7 @@
 
 return [
     'name' => env('BUSINESS_NAME', 'Nilambara Electricals'),
-    'address' => env('BUSINESS_ADDRESS'),
+    'address' => env('BUSINESS_ADDRESS') ?: '482/A/3, Colombo Road, Kaduwela',
     'contact_number' => env('BUSINESS_CONTACT_NUMBER'),
     'logo' => env('BUSINESS_LOGO') ?: 'images/nilambara-electrical-logo.png',
     'customer_code_prefix' => env('BUSINESS_CUSTOMER_CODE_PREFIX', 'CUS-'),

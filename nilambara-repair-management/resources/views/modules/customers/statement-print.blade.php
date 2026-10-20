@@ -2,10 +2,12 @@
 <html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="utf-8">
-    <title>{{ __('ui.customer_statement') }} · {{ $customer->customer_code }}</title>
+    <title>{{ $documentTitle }} · {{ $customer->customer_code }}</title>
     <style>
-        @page { margin: {{ $template?->margin_top_mm ?? 8 }}mm {{ $template?->margin_right_mm ?? 8 }}mm {{ $template?->margin_bottom_mm ?? 8 }}mm {{ $template?->margin_left_mm ?? 8 }}mm; }
-        body { color: #172033; font-family: DejaVu Sans, sans-serif; font-size: {{ $template?->font_size_pt ?? 9 }}pt; }
+        @font-face{font-family:NotoSinhala;src:url("{{ $fontRegularPath }}") format("truetype");font-style:normal;font-weight:400}
+        @font-face{font-family:NotoSinhala;src:url("{{ $fontBoldPath }}") format("truetype");font-style:normal;font-weight:700}
+        @page { size: {{ $paperSize }} {{ $orientation }}; margin: {{ $template?->margin_top_mm ?? 8 }}mm {{ $template?->margin_right_mm ?? 8 }}mm {{ $template?->margin_bottom_mm ?? 8 }}mm {{ $template?->margin_left_mm ?? 8 }}mm; }
+        body { color: #172033; font-family: NotoSinhala, "DejaVu Sans", sans-serif; font-size: {{ $template?->font_size_pt ?? 9 }}pt; }
         h1 { margin: 0; font-size: 17px; }
         p { margin: 4px 0; }
         .header { border-bottom: 2px solid #0f766e; padding-bottom: 10px; margin-bottom: 14px; }
@@ -20,11 +22,12 @@
     </style>
 </head>
 <body>
+    @if($duplicate)<p style="text-align:center;font-weight:bold">{{ $duplicateLabel }}</p>@endif
     <header class="header">
         @if (!empty($logoDataUri))<img src="{{ $logoDataUri }}" alt="" style="max-width:48mm;max-height:20mm">@endif
         <h1>{{ $template?->business_name ?: config('business.name') }}</h1>
         <p>{{ $template?->business_address ?: config('business.address') }} · {{ $template?->telephone_number ?: config('business.contact_number') }}</p>
-        <p><strong>{{ __('ui.customer_statement') }}</strong> · {{ $customer->customer_code }} · {{ $customer->display_name }} · {{ $customer->mobile_number }} · {{ $customer->address }}</p>
+        <p><strong>{{ $documentTitle }}</strong> · {{ $customer->customer_code }} · {{ $customer->display_name }} · {{ $customer->mobile_number }} · {{ $customer->address }}</p>
         @if (! empty($filters['date_from']) || ! empty($filters['date_to']))<p>{{ __('payments.statement_period') }}: {{ $filters['date_from'] ?? '—' }} – {{ $filters['date_to'] ?? '—' }}</p>@endif
     </header>
     <div class="summary">

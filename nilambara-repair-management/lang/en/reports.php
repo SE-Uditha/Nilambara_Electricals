@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'known_stock_value' => 'Known stock value',
+    'uncosted_parts' => 'Parts with unknown cost',
     'daily-sales_title' => 'Daily Sales',
     'monthly-sales_title' => 'Monthly Sales',
     'yearly-sales_title' => 'Yearly Sales',

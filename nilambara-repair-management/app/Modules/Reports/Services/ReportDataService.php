@@ -166,6 +166,7 @@ class ReportDataService
             ->leftJoin('customers', 'payments.customer_id', '=', 'customers.id')
             ->join('employees', 'payments.received_by_employee_id', '=', 'employees.id')
             ->whereIn('payments.payment_type', ['pos', 'invoice', 'credit_collection'])
+            ->where('payment_reversals.reversal_type', 'refund')
             ->selectRaw("'Refund' as document_type, payments.payment_number as document_number, payment_reversals.reversed_at as transaction_date, COALESCE(customers.customer_name, 'Walk-in') as customer_name, employees.name as employee_name, CASE WHEN payments.payment_type = 'credit_collection' THEN 'credit' ELSE 'cash' END as payment_terms, payment_reversals.method as payment_method, 0 as subtotal, 0 as discount_amount, -payment_reversals.amount as net_sales, payments.customer_id, payments.received_by_employee_id as employee_id");
         $union = $invoices->unionAll($pos)->unionAll($refunds);
         $query = DB::query()->fromSub($union, 'sales')
@@ -398,7 +399,7 @@ class ReportDataService
                 ->leftJoin('suppliers', 'spare_parts.supplier_id', '=', 'suppliers.id')
                 ->select('spare_parts.id', 'spare_parts.sku', 'spare_parts.name', 'spare_parts.selling_price', 'spare_parts.minimum_stock_level', 'spare_parts.reorder_level', 'spare_part_categories.name as category_name', 'spare_part_brands.name as brand_name', 'suppliers.name as supplier_name', 'available_quantity');
             if ($report === 'valuation') {
-                $warnings[] = __('reports.valuation_policy_missing');
+                $warnings[] = 'Latest purchase cost per location; opening cost is used only where no purchase cost is recorded. Unknown costs remain blank.';
             }
             $this->stockFilters($query, $filters);
             if (($filters['stock_state'] ?? null) === 'low') {
@@ -410,15 +411,22 @@ class ReportDataService
                 'sku' => 'sku', 'name' => 'part', 'category_name' => 'category', 'brand_name' => 'brand',
                 'available_quantity' => 'quantity', 'selling_price' => 'selling_price', 'supplier_name' => 'supplier',
             ]);
+            $query->where('spare_parts.is_active', true)->orderBy('spare_parts.sku');
+            $summary = ['rows' => (string) $this->countRows($query)];
             if ($report === 'valuation') {
-                $columns[] = ['field' => 'costing_note', 'label' => __('reports.costing_not_approved')];
-                $query->addSelect(DB::raw("'Not approved' as costing_note"));
+                $query->addSelect(['unit_cost' => $this->inventory->valuationCostQuery(isset($filters['date_to']) ? $filters['date_to'].' 23:59:59' : null)]);
+                $query = DB::query()->fromSub($query, 'valued_stock')->select('*')->selectRaw('ROUND(available_quantity * unit_cost, 2) as stock_value')->orderBy('sku');
+                $columns[] = ['field' => 'unit_cost', 'label' => 'Latest purchase unit cost', 'type' => 'money'];
+                $columns[] = ['field' => 'stock_value', 'label' => 'Stock value (LKR)', 'type' => 'money'];
+                $totals = DB::query()->fromSub(clone $query, 'valuation_totals')->selectRaw('SUM(stock_value) as known_value, SUM(CASE WHEN available_quantity <> 0 AND unit_cost IS NULL THEN 1 ELSE 0 END) as uncosted_parts')->first();
+                $summary['known_stock_value'] = $this->money($totals->known_value ?? '0');
+                $summary['uncosted_parts'] = (string) ($totals->uncosted_parts ?? 0);
             }
 
             return [
                 'title' => __('reports.'.$report.'_title'), 'columns' => $columns,
-                'query' => $query->where('spare_parts.is_active', true)->orderBy('spare_parts.sku'),
-                'summary' => ['rows' => (string) $this->countRows($query)],
+                'query' => $query,
+                'summary' => $summary,
                 'warnings' => $warnings,
             ];
         }
@@ -485,30 +493,13 @@ class ReportDataService
         $discounts = BigDecimal::of((string) (clone $invoices)->sum('discount_amount'))
             ->plus((string) (clone $pos)->sum('discount_amount'))->toScale(2);
         $refundQuery = DB::table('payment_reversals')->join('payments', 'payment_reversals.payment_id', '=', 'payments.id')
-            ->whereIn('payments.payment_type', ['pos', 'invoice', 'credit_collection']);
+            ->whereIn('payments.payment_type', ['pos', 'invoice', 'credit_collection'])->where('payment_reversals.reversal_type', 'refund');
         $this->dateFilters($refundQuery, 'payment_reversals.reversed_at', $filters);
         $refunds = $refundQuery->sum('payment_reversals.amount');
         $revenue = BigDecimal::of((string) $repairRevenue)->plus((string) $posRevenue)->minus((string) $refunds)->toScale(2);
-        $partCost = DB::table('invoice_items')
-            ->join('invoices', 'invoice_items.invoice_id', '=', 'invoices.id')
-            ->where('invoices.status', DocumentStatus::Finalized->value)
-            ->where('invoice_items.item_type', 'part')
-            ->when($filters['date_from'] ?? null, fn (Builder $builder, string $date) => $builder->whereDate('invoices.finalized_at', '>=', $date))
-            ->when($filters['date_to'] ?? null, fn (Builder $builder, string $date) => $builder->whereDate('invoices.finalized_at', '<=', $date))
-            ->whereNotNull('invoice_items.unit_cost')
-            ->sum(DB::raw('invoice_items.quantity * invoice_items.unit_cost'));
         $posCost = DB::table('pos_sale_items')->join('pos_sales', 'pos_sale_items.pos_sale_id', '=', 'pos_sales.id')
             ->where('pos_sales.status', DocumentStatus::Finalized->value)->whereNotNull('pos_sale_items.unit_cost');
         $this->dateFilters($posCost, 'pos_sales.finalized_at', $filters);
-        $partCost = BigDecimal::of((string) $partCost)->plus((string) $posCost->sum(DB::raw('pos_sale_items.quantity * pos_sale_items.unit_cost')));
-        $labourCost = DB::table('repair_jobs')
-            ->join('invoice_jobs', 'repair_jobs.id', '=', 'invoice_jobs.repair_job_id')
-            ->join('invoices', 'invoice_jobs.invoice_id', '=', 'invoices.id')
-            ->where('invoices.status', DocumentStatus::Finalized->value)
-            ->whereNotNull('repair_jobs.labour_cost')
-            ->when($filters['date_from'] ?? null, fn (Builder $builder, string $date) => $builder->whereDate('invoices.finalized_at', '>=', $date))
-            ->when($filters['date_to'] ?? null, fn (Builder $builder, string $date) => $builder->whereDate('invoices.finalized_at', '<=', $date))
-            ->sum('repair_jobs.labour_cost');
         $expenses = DB::table('expenses')->where('status', DocumentStatus::Finalized->value)
             ->when($filters['date_from'] ?? null, fn (Builder $builder, string $date) => $builder->whereDate('incurred_at', '>=', $date))
             ->when($filters['date_to'] ?? null, fn (Builder $builder, string $date) => $builder->whereDate('incurred_at', '<=', $date))
@@ -518,20 +509,24 @@ class ReportDataService
             ->whereNull('pos_sale_items.unit_cost');
         $this->dateFilters($missingCostQuery, 'pos_sales.finalized_at', $filters);
         $missingCost = $missingCostQuery->exists();
-        $missingLabourCostQuery = DB::table('repair_jobs')
-            ->join('invoice_jobs', 'repair_jobs.id', '=', 'invoice_jobs.repair_job_id')
-            ->join('invoices', 'invoice_jobs.invoice_id', '=', 'invoices.id')
-            ->where('invoices.status', DocumentStatus::Finalized->value)
-            ->whereNull('repair_jobs.labour_cost');
-        $this->dateFilters($missingLabourCostQuery, 'invoices.finalized_at', $filters);
-        $missingCost = $missingCost || $missingLabourCostQuery->exists();
-        $missingPartCostQuery = DB::table('invoice_items')->join('invoices', 'invoice_items.invoice_id', '=', 'invoices.id')
-            ->where('invoices.status', DocumentStatus::Finalized->value)
-            ->where('invoice_items.item_type', 'part')->whereNull('invoice_items.unit_cost');
-        $this->dateFilters($missingPartCostQuery, 'invoices.finalized_at', $filters);
-        // No approved stock/expense recognition policy exists yet. Known costs
-        // are shown, but must not be represented as a complete net profit.
-        $missingCost = true;
+        // Repair cost comes from issued inventory snapshots, not quoted selling
+        // quantities. Fall back only to explicitly recorded historical costs.
+        $repairCost = $this->repairCostData($filters);
+        $partCost = $repairCost['parts']->plus((string) $posCost->sum(DB::raw('pos_sale_items.quantity * pos_sale_items.unit_cost')));
+        $labourCost = $repairCost['labour'];
+        $missingCost = $missingCost || $repairCost['missing'];
+        $returns = DB::table('stock_return_items')->join('stock_returns', 'stock_return_items.stock_return_id', '=', 'stock_returns.id')
+            ->where('stock_returns.return_type', 'pos_return')->where('stock_returns.status', 'finalized')->where('stock_return_items.condition', 'resalable');
+        $this->dateFilters($returns, 'stock_returns.returned_at', $filters);
+        $recoveredCost = (clone $returns)->whereNotNull('stock_return_items.unit_cost')->sum(DB::raw('stock_return_items.quantity * stock_return_items.unit_cost'));
+        $partCost = $partCost->minus((string) $recoveredCost);
+        $missingCost = $missingCost || (clone $returns)->whereNull('stock_return_items.unit_cost')->exists()
+            || (clone $returns)->where('stock_returns.refund_amount', 0)->exists();
+        // Freight/discount allocation is a separate owner decision. Do not
+        // represent unallocated acquisition costs as fully costed profit.
+        $pendingAdjustments = DB::table('purchases')->where('status', 'finalized')->where(fn ($q) => $q->where('discount_amount', '>', 0)->orWhere('other_costs', '>', 0))->exists();
+        $ambiguousRefund = (clone $refundQuery)->whereIn('payments.payment_type', ['invoice', 'credit_collection'])->exists();
+        $missingCost = $missingCost || $pendingAdjustments || $ambiguousRefund;
         $summary = [
             'repair_revenue' => $this->money($repairRevenue),
             'pos_revenue' => $this->money($posRevenue),
@@ -552,6 +547,42 @@ class ReportDataService
             'summary' => $summary,
             'warnings' => [$missingCost ? __('reports.profit_costing_incomplete') : __('reports.profit_estimate_only')],
         ];
+    }
+
+    private function repairCostData(array $filters): array
+    {
+        $query = DB::table('invoice_jobs')->join('invoices', 'invoice_jobs.invoice_id', '=', 'invoices.id')->join('repair_jobs', 'invoice_jobs.repair_job_id', '=', 'repair_jobs.id')
+            ->where('invoices.status', 'finalized')->select('repair_jobs.id', 'repair_jobs.parts_cost', 'repair_jobs.labour_cost', 'invoice_jobs.id as link_id');
+        $this->dateFilters($query, 'invoices.finalized_at', $filters);
+        $jobs = $query->get();
+        $usages = DB::table('job_part_usages')->whereIn('repair_job_id', $jobs->pluck('id'))->where('status', 'issued')->get()->groupBy('repair_job_id');
+        $items = DB::table('invoice_items')->whereIn('invoice_job_id', $jobs->pluck('link_id'))->where('item_type', 'part')->get()->groupBy('invoice_job_id');
+        $parts = BigDecimal::zero();
+        $labour = BigDecimal::zero();
+        $missing = false;
+        foreach ($jobs as $job) {
+            if ($job->labour_cost === null) {
+                $missing = true;
+            } else {
+                $labour = $labour->plus((string) $job->labour_cost);
+            }
+            $issued = $usages->get($job->id, collect());
+            $quoted = $items->get($job->link_id, collect());
+            $lines = $issued->isNotEmpty() ? $issued : $quoted;
+            if ($lines->isNotEmpty() && $lines->every(fn ($line) => $line->unit_cost !== null)) {
+                $cost = $lines->reduce(fn (BigDecimal $sum, $line) => $sum->plus(BigDecimal::of((string) $line->quantity)->multipliedBy((string) $line->unit_cost)), BigDecimal::zero());
+                $parts = $parts->plus($cost);
+                if ($job->parts_cost !== null && $cost->toScale(2, RoundingMode::HalfUp)->compareTo((string) $job->parts_cost) !== 0) {
+                    $missing = true;
+                }
+            } elseif ($job->parts_cost !== null) {
+                $parts = $parts->plus((string) $job->parts_cost);
+            } elseif ($lines->isNotEmpty()) {
+                $missing = true;
+            }
+        }
+
+        return compact('parts', 'labour', 'missing');
     }
 
     private function ledgerReport(string $report, array $filters): array

@@ -10,11 +10,35 @@ use App\Modules\JobTracking\Models\JobStatusHistory;
 use App\Modules\RepairJobs\Models\JobInspection;
 use App\Modules\RepairJobs\Models\RepairJob;
 use App\Support\BusinessAudit;
+use Brick\Math\BigDecimal;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
 class RepairJobService
 {
+    public function setLabourCharge(RepairJob $job, string $amount, User $actor): RepairJob
+    {
+        Gate::forUser($actor)->authorize('invoices.create');
+        Gate::forUser($actor)->authorize('view', $job);
+
+        return DB::transaction(function () use ($job, $amount, $actor) {
+            $job = RepairJob::whereKey($job->id)->lockForUpdate()->firstOrFail();
+            if ($job->invoiceJobs()->exists() || $job->quotations()->where('preparation_status', 'issued')->exists() || $job->cancelled_at !== null || $job->delivered_at !== null) {
+                throw ValidationException::withMessages(['labour_charge' => 'Billed, quoted or closed job prices cannot be changed here.']);
+            }
+            Validator::make(['labour_charge' => $amount], ['labour_charge' => 'required|numeric|decimal:0,2|between:0,999999999999.99'])->validate();
+            $old = $job->only(['labour_charge', 'parts_charge', 'total_job_amount']);
+            $job->labour_charge = $amount;
+            $job->total_job_amount = (string) BigDecimal::of($amount)->plus($job->parts_charge)->toScale(2);
+            $job->save();
+            BusinessAudit::record($actor, 'repair_job.charge.updated', RepairJob::class, $job->id, $old, $job->only(['labour_charge', 'parts_charge', 'total_job_amount']));
+
+            return $job;
+        }, 3);
+    }
+
     /**
      * @param  array<string, mixed>  $data
      */
@@ -207,6 +231,12 @@ class RepairJobService
             }
 
             $lockedJob->status = $next->value;
+            if ($next === JobStatus::RepairCompleted && $lockedJob->completed_at === null) {
+                $lockedJob->completed_at = now();
+            }
+            if ($next === JobStatus::Delivered && $lockedJob->delivered_at === null) {
+                $lockedJob->delivered_at = now();
+            }
 
             if ($next === JobStatus::Cancelled && $lockedJob->cancelled_at === null) {
                 $lockedJob->cancelled_at = now();

@@ -15,6 +15,31 @@ use Illuminate\Validation\ValidationException;
 
 class InventoryService
 {
+    public function latestUnitCost(int $part, int $location): ?string
+    {
+        $query = DB::table('stock_movements')->where('spare_part_id', $part)->where('location_id', $location)
+            ->whereIn('movement_type', ['purchase_receipt', 'opening'])->whereNotNull('unit_cost')
+            ->orderByRaw("CASE WHEN movement_type = 'purchase_receipt' THEN 0 ELSE 1 END")
+            ->orderByDesc('occurred_at')->orderByDesc('id');
+        if (DB::transactionLevel() > 0) {
+            $query->lockForUpdate();
+        }
+        $cost = $query->value('unit_cost');
+
+        return $cost === null ? null : (string) BigDecimal::of((string) $cost)->toScale(4);
+    }
+
+    public function valuationCostQuery(?string $asOf = null): Builder
+    {
+        return DB::table('stock_movements as cost_movements')->select('unit_cost')
+            ->whereColumn('cost_movements.spare_part_id', 'spare_parts.id')
+            ->whereColumn('cost_movements.location_id', 'spare_parts.default_location_id')
+            ->whereIn('cost_movements.movement_type', ['purchase_receipt', 'opening'])->whereNotNull('cost_movements.unit_cost')
+            ->when($asOf !== null, fn ($query) => $query->where('cost_movements.occurred_at', '<=', $asOf))
+            ->orderByRaw("CASE WHEN cost_movements.movement_type = 'purchase_receipt' THEN 0 ELSE 1 END")
+            ->orderByDesc('cost_movements.occurred_at')->orderByDesc('cost_movements.id')->limit(1);
+    }
+
     public function availableAtDefaultLocation(SparePart $part): BigDecimal
     {
         if ($part->default_location_id === null) {

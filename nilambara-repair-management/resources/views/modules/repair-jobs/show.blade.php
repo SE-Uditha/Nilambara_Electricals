@@ -245,4 +245,10 @@
             </section>
         </aside>
     </div>
+    @can('invoices.create')
+    <details class="mt-5 rounded-2xl border bg-white p-5"><summary>Unquoted job selling charge</summary>
+        <p class="mt-2 text-sm text-slate-500">Use this for unquoted, unbilled jobs. Customer-approved quotation prices are transferred automatically. This selling charge is separate from employee labour cost.</p>
+        <form method="POST" action="{{ route('repair-jobs.labour-charge',$job) }}" class="mt-4 flex flex-wrap gap-3">@csrf<label>Labour selling charge (LKR)<input name="labour_charge" class="form-input w-full" value="{{ old('labour_charge',$job->labour_charge) }}" required></label><button class="rounded-xl bg-teal-700 px-4 py-2 text-white">Save charge</button></form>
+    </details>
+    @endcan
 @endsection

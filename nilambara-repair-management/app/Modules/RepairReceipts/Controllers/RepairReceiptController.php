@@ -9,6 +9,7 @@ use App\Modules\Employees\Models\Employee;
 use App\Modules\Payments\Models\PaymentAllocation;
 use App\Modules\PrintTemplates\Models\DocumentPrintHistory;
 use App\Modules\PrintTemplates\Models\PrintTemplate;
+use App\Modules\PrintTemplates\Services\IntakePdfService;
 use App\Modules\RepairReceipts\Models\RepairReceipt;
 use App\Modules\RepairReceipts\Requests\StoreRepairReceiptRequest;
 use App\Modules\RepairReceipts\Services\RepairReceiptService;
@@ -159,7 +160,17 @@ class RepairReceiptController extends Controller
         return $this->renderPrint($receipt, true);
     }
 
-    private function renderPrint(RepairReceipt $receipt, bool $duplicate): View
+    public function pdf(RepairReceipt $receipt)
+    {
+        $duplicate = request()->boolean('duplicate');
+        if ($duplicate) {
+            Gate::authorize('receipts.reprint');
+        }
+
+        return app(IntakePdfService::class)->download($this->renderPrint($receipt, $duplicate, true), $receipt->receipt_number.'.pdf');
+    }
+
+    private function renderPrint(RepairReceipt $receipt, bool $duplicate, bool $pdf = false): View
     {
         $receipt->load(['repairJob.customer', 'repairJob.receivedByEmployee']);
         Gate::authorize('view', $receipt->repairJob);
@@ -174,7 +185,7 @@ class RepairReceiptController extends Controller
         $label = $template?->duplicate_copy_label ?: __('ui.duplicate_copy');
         $printTime = now(config('business.timezone', 'Asia/Colombo'));
 
-        DB::transaction(function () use ($receipt, $duplicate, $template, $snapshot, $label, $printTime, $settings): void {
+        DB::transaction(function () use ($receipt, $duplicate, $template, $snapshot, $label, $printTime, $settings, $pdf): void {
             DocumentPrintHistory::query()->create([
                 'print_template_id' => $template?->getKey(),
                 'repair_receipt_id' => $receipt->getKey(),
@@ -182,6 +193,7 @@ class RepairReceiptController extends Controller
                 'printed_by_user_id' => auth()->id(),
                 'is_duplicate' => $duplicate,
                 'duplicate_label' => $duplicate ? $label : null,
+                'output_reference' => $pdf ? $receipt->receipt_number.'.pdf' : null,
                 'document_snapshot' => [
                     ...$snapshot,
                     'duplicate' => $duplicate,
@@ -189,11 +201,12 @@ class RepairReceiptController extends Controller
                     'printed_at' => $printTime->toIso8601String(),
                     'paper_size' => $settings['paperSize'],
                     'orientation' => $settings['orientation'],
+                    'export_format' => $pdf ? 'pdf' : 'html',
                 ],
             ]);
             BusinessAudit::record(
                 auth()->user(),
-                $duplicate ? 'repair_receipt.reprinted' : 'repair_receipt.print_prepared',
+                $pdf ? 'repair_receipt.pdf_exported' : ($duplicate ? 'repair_receipt.reprinted' : 'repair_receipt.print_prepared'),
                 RepairReceipt::class,
                 (int) $receipt->getKey(),
                 newValues: [

@@ -1,6 +1,6 @@
-# Executed automated test inventory
+# Automated test source inventory
 
-Source-level test method inventory. Actual execution totals come from the logs below; the presence of a method alone is not a pass.
+Actual final execution: 218 passed (3566 assertions). Source presence alone is not evidence of owner acceptance.
 
 ## tests/Feature/Auth/AuthenticationTest.php
 
@@ -138,6 +138,11 @@ Source-level test method inventory. Actual execution totals come from the logs b
 - `test_search_and_filters_use_invoice_customer_and_repair_job_records`
 - `test_step_four_customer_search_and_billable_job_lookup_are_reused`
 
+## tests/Feature/LatestPurchaseCostTest.php
+
+- `test_correcting_a_payment_changes_collections_without_reducing_the_issued_sale`
+- `test_old_customer_return_does_not_replace_latest_purchase_cost_for_pos_or_valuation`
+
 ## tests/Feature/PaymentManagementTest.php
 
 - `test_cash_bank_and_cheque_partial_payments_settle_an_invoice`
@@ -170,6 +175,11 @@ Source-level test method inventory. Actual execution totals come from the logs b
 - `test_refund_only_reporting_period_includes_negative_net_sales_and_collections`
 - `test_final_partial_return_can_refund_the_remaining_rounding_cent`
 - `test_discount_rounding_across_lines_allows_exact_full_refund`
+
+## tests/Feature/PrintGapCompletionTest.php
+
+- `test_customer_statement_uses_template_title_paper_orientation_sinhala_font_and_print_history`
+- `test_purchase_and_grn_print_pdf_and_duplicate_output_preserve_their_source`
 
 ## tests/Feature/PrintTemplateManagementTest.php
 
@@ -235,6 +245,23 @@ Source-level test method inventory. Actual execution totals come from the logs b
 
 - `test_customer_search_treats_sql_payload_as_data_and_escapes_stored_html`
 - `test_all_report_queries_execute_with_linked_fixture_and_record_local_timings`
+
+## tests/Feature/StockPurchasingWorkflowTest.php
+
+- `test_purchase_grn_payment_reversal_and_shared_stock_integrate_without_duplicate_posting`
+- `test_repair_request_does_not_deduct_stock_and_repeated_issue_deducts_once`
+- `test_stock_correction_damage_count_and_replay_preserve_history`
+- `test_new_pages_render_and_cashier_cannot_change_stock_or_suppliers`
+- `test_http_master_registration_validates_precision_and_records_opening_balance`
+- `test_complete_unused_repair_issue_can_be_returned_once_without_deleting_history`
+- `test_receiving_more_than_ordered_is_rejected_atomically`
+- `test_storekeeper_can_receive_but_cannot_pay_or_reverse_supplier_money`
+- `test_supplier_edit_and_search_preserve_the_opening_ledger`
+- `test_unquoted_labour_charge_is_authorized_audited_and_used_for_billing`
+- `test_real_intake_approval_stock_invoice_payment_and_delivery_workflow_needs_no_manual_job_pricing`
+- `test_supplier_opening_balance_payment_and_reversal_use_existing_supplier_ledger`
+- `test_supplier_return_reduces_stock_and_only_agreed_credit_reduces_payable`
+- `test_receipt_and_card_pdf_routes_render_local_sinhala_and_record_exports`
 
 ## tests/Feature/SystemSupportTest.php
 

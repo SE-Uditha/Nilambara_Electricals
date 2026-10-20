@@ -72,6 +72,9 @@ try {
     if (in_array('--step12', $argv, true)) {
         $run([], 'scripts/verify-step12-concurrency.php');
     }
+    if (in_array('--pending', $argv, true)) {
+        $run([], 'scripts/verify-pending-concurrency.php');
+    }
     if (in_array('--step11', $argv, true) || in_array('--all-step11', $argv, true)) {
         $run([], 'scripts/verify-step11-recovery.php');
     }

@@ -37,7 +37,7 @@
             </div>
         </header>
         <div class="doc-head">
-            <h2>{{ __('invoices.repair_invoice') }}</h2>
+            <h2>{{ $documentTitle }}</h2>
             <div class="meta" style="margin:0">
                 <div><span class="label">{{ __('invoices.invoice_number') }}</span><span class="value">{{ $document['invoice_number'] ?? $invoice->invoice_number }}</span></div>
                 <div><span class="label">{{ __('invoices.invoice_date') }}</span><span class="value">{{ $document['invoice_date'] ?? $invoice->invoice_date?->toDateString() }}</span></div>

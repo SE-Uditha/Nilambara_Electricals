@@ -23,6 +23,14 @@ use Illuminate\View\View;
 
 class RepairJobController extends Controller
 {
+    public function setLabourCharge(Request $request, RepairJob $job, RepairJobService $jobs): RedirectResponse
+    {
+        $data = $request->validate(['labour_charge' => 'required|numeric|decimal:0,2|between:0,999999999999.99']);
+        $jobs->setLabourCharge($job, $data['labour_charge'], $request->user());
+
+        return back()->with('status', 'Labour selling charge saved. Parts charges come from issued parts.');
+    }
+
     public function index(Request $request): View
     {
         Gate::authorize('viewAny', RepairJob::class);

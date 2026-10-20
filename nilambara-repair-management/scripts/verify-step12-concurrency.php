@@ -1,8 +1,11 @@
 <?php
 
 use App\Models\User;
+use App\Modules\Invoices\Services\InvoicePrintService;
 use App\Modules\Invoices\Services\InvoiceService;
 use App\Modules\Payments\Services\PaymentService;
+use App\Modules\POS\Services\POSCheckoutService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Support\Facades\DB;
@@ -139,13 +142,13 @@ $measure('payment-receive-and-allocate', static fn () => app(PaymentService::cla
     'payment_date' => now()->toDateString(), 'idempotency_key' => (string) Str::uuid(),
 ], $actor));
 $part = $fixture->product();
-$measure('pos-checkout-including-stock-posting', static fn () => app(\App\Modules\POS\Services\POSCheckoutService::class)->checkout([
+$measure('pos-checkout-including-stock-posting', static fn () => app(POSCheckoutService::class)->checkout([
     'payment_method' => 'cash', 'amount_tendered' => '10.00', 'discount_amount' => '0.00', 'idempotency_key' => (string) Str::uuid(),
 ], [$part => '1.000'], $actor));
 $pdf = $measure('a5-invoice-pdf-with-print-history', static function () use ($invoice, $actor): string {
-    $data = app(\App\Modules\Invoices\Services\InvoicePrintService::class)->prepare($invoice, false, true, $actor);
+    $data = app(InvoicePrintService::class)->prepare($invoice, false, true, $actor);
 
-    return \Barryvdh\DomPDF\Facade\Pdf::loadView('modules.invoices.print', $data)->setPaper('a5')->output();
+    return Pdf::loadView('modules.invoices.print', $data)->setPaper('a5')->output();
 });
 if (! str_starts_with($pdf, '%PDF-')) {
     throw new RuntimeException('Benchmark invoice PDF failed to render.');

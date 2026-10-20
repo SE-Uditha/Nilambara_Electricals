@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'known_stock_value' => 'පිරිවැය දන්නා තොග වටිනාකම',
+    'uncosted_parts' => 'පිරිවැය නොදන්නා අමතර කොටස්',
     'daily-sales_title' => 'Daily Sales',
     'monthly-sales_title' => 'Monthly Sales',
     'yearly-sales_title' => 'Yearly Sales',

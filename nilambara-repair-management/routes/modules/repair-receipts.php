@@ -23,3 +23,5 @@ Route::get('/repair-receipts/{receipt}/print', [RepairReceiptController::class, 
 Route::get('/repair-receipts/{receipt}/duplicate', [RepairReceiptController::class, 'duplicate'])
     ->middleware('can:receipts.reprint')
     ->name('repair-receipts.duplicate');
+
+Route::get('/repair-receipts/{receipt}/pdf', [RepairReceiptController::class, 'pdf'])->middleware('can:receipts.print')->name('repair-receipts.pdf');

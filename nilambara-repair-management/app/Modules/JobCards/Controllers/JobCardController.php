@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Modules\JobCards\Models\JobCard;
 use App\Modules\PrintTemplates\Models\DocumentPrintHistory;
 use App\Modules\PrintTemplates\Models\PrintTemplate;
+use App\Modules\PrintTemplates\Services\IntakePdfService;
 use App\Modules\RepairJobs\Models\RepairJob;
 use App\Support\BusinessAudit;
 use Illuminate\Support\Facades\DB;
@@ -40,7 +41,12 @@ class JobCardController extends Controller
         return $this->render($job, true);
     }
 
-    private function render(RepairJob $job, bool $duplicate): View
+    public function pdf(RepairJob $job)
+    {
+        return app(IntakePdfService::class)->download($this->render($job, request()->boolean('duplicate'), true), ($job->automatic_number ?: $job->job_number).'-card.pdf');
+    }
+
+    private function render(RepairJob $job, bool $duplicate, bool $pdf = false): View
     {
         Gate::authorize('view', $job);
         $job->load([
@@ -91,7 +97,7 @@ class JobCardController extends Controller
             'duplicate' => $duplicate,
         ];
 
-        DB::transaction(function () use ($jobCard, $job, $template, $duplicate, $label, $printedAt, $snapshot, $paperSize): void {
+        DB::transaction(function () use ($jobCard, $job, $template, $duplicate, $label, $printedAt, $snapshot, $paperSize, $pdf): void {
             DocumentPrintHistory::query()->create([
                 'print_template_id' => $template?->getKey(),
                 'job_card_id' => $jobCard->getKey(),
@@ -99,17 +105,19 @@ class JobCardController extends Controller
                 'printed_by_user_id' => auth()->id(),
                 'is_duplicate' => $duplicate,
                 'duplicate_label' => $duplicate ? $label : null,
+                'output_reference' => $pdf ? ($job->automatic_number ?: $job->job_number).'-card.pdf' : null,
                 'document_snapshot' => [
                     ...$snapshot,
                     'duplicate_label' => $duplicate ? $label : null,
                     'printed_at' => $printedAt->toIso8601String(),
                     'paper_size' => $paperSize,
+                    'export_format' => $pdf ? 'pdf' : 'html',
                 ],
             ]);
 
             BusinessAudit::record(
                 auth()->user(),
-                $duplicate ? 'job_card.reprinted' : 'job_card.print_prepared',
+                $pdf ? 'job_card.pdf_exported' : ($duplicate ? 'job_card.reprinted' : 'job_card.print_prepared'),
                 JobCard::class,
                 (int) $jobCard->getKey(),
                 newValues: [

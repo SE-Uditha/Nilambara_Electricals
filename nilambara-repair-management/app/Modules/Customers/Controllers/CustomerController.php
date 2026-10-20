@@ -8,11 +8,14 @@ use App\Modules\Customers\Requests\StoreCustomerRequest;
 use App\Modules\Customers\Requests\UpdateCustomerRequest;
 use App\Modules\Customers\Services\CustomerService;
 use App\Modules\Customers\Services\CustomerStatementService;
+use App\Modules\PrintTemplates\Models\DocumentPrintHistory;
 use App\Modules\PrintTemplates\Models\PrintTemplate;
+use App\Support\BusinessAudit;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
@@ -172,33 +175,53 @@ class CustomerController extends Controller
         Gate::authorize('statement', $customer);
         $filters = $this->statementFilters($request);
 
-        return view('modules.customers.statement-print', [
+        $data = [
             'customer' => $customer,
             ...$statements->data($customer, $filters, false),
             'filters' => $filters,
             'printedAt' => now(config('business.timezone', 'Asia/Colombo')),
             ...$this->statementTemplateData(),
-        ]);
+        ];
+        $this->recordStatementPrint($customer, $data, false);
+
+        return view('modules.customers.statement-print', $data);
     }
 
     public function statementPdf(Request $request, Customer $customer, CustomerStatementService $statements)
     {
         Gate::authorize('statement', $customer);
         $filters = $this->statementFilters($request);
+        $layout = $this->statementTemplateData(true);
 
-        return Pdf::loadView('modules.customers.statement-print', [
+        $data = [
             'customer' => $customer,
             ...$statements->data($customer, $filters, false),
             'filters' => $filters,
             'printedAt' => now(config('business.timezone', 'Asia/Colombo')),
-            ...$this->statementTemplateData(),
-        ])->setPaper('A4', 'landscape')->download($customer->customer_code.'-statement.pdf');
+            ...$layout,
+        ];
+        $this->recordStatementPrint($customer, $data, true);
+
+        return Pdf::loadView('modules.customers.statement-print', $data)->setPaper($layout['paperSize'], $layout['orientation'])->download($customer->customer_code.'-statement.pdf');
+    }
+
+    private function recordStatementPrint(Customer $customer, array $data, bool $pdf): void
+    {
+        DB::transaction(function () use ($customer, $data, $pdf) {
+            DocumentPrintHistory::create([
+                'print_template_id' => $data['template']?->id, 'customer_id' => $customer->id, 'printed_at' => $data['printedAt'], 'printed_by_user_id' => auth()->id(),
+                'is_duplicate' => $data['duplicate'], 'duplicate_label' => $data['duplicate'] ? $data['duplicateLabel'] : null,
+                'output_reference' => $pdf ? $customer->customer_code.'-statement.pdf' : null,
+                'document_snapshot' => ['customer_code' => $customer->customer_code, 'customer_name' => $customer->display_name, 'filters' => $data['filters'], 'closing_balance' => $data['closingBalance'], 'entries' => $data['entries']->toArray(), 'paper_size' => $data['paperSize'], 'orientation' => $data['orientation'], 'export_format' => $pdf ? 'pdf' : 'html'],
+            ]);
+            BusinessAudit::record(auth()->user(), $pdf ? 'customer.statement.pdf_exported' : 'customer.statement.print_prepared', Customer::class, $customer->id, newValues: ['filters' => $data['filters'], 'duplicate' => $data['duplicate']]);
+        });
     }
 
     /**
      * @return array{date_from: string|null, date_to: string|null}
      */
-    private function statementTemplateData(): array
+    private function statementTemplateData(bool $pdf = false): array
     {
         $template = PrintTemplate::where('document_type', 'customer_statement')
             ->where('is_active', true)->orderByDesc('version')->first();
@@ -212,7 +235,15 @@ class CustomerController extends Controller
             }
         }
 
-        return compact('template', 'logoDataUri');
+        $paperSize = in_array($template?->paper_size, ['A4', 'A5', 'A6'], true) ? $template->paper_size : 'A4';
+        $orientation = in_array($template?->orientation, ['portrait', 'landscape'], true) ? $template->orientation : 'landscape';
+        $documentTitle = $template?->document_title ?: __('ui.customer_statement');
+        $duplicate = request()->boolean('duplicate');
+        $duplicateLabel = $template?->duplicate_copy_label ?: __('ui.duplicate_copy');
+        $fontRegularPath = $pdf ? str_replace('\\', '/', public_path('fonts/NotoSansSinhala-Regular.ttf')) : asset('fonts/NotoSansSinhala-Regular.ttf');
+        $fontBoldPath = $pdf ? str_replace('\\', '/', public_path('fonts/NotoSansSinhala-Bold.ttf')) : asset('fonts/NotoSansSinhala-Bold.ttf');
+
+        return compact('template', 'logoDataUri', 'paperSize', 'orientation', 'documentTitle', 'fontRegularPath', 'fontBoldPath', 'duplicate', 'duplicateLabel');
     }
 
     private function statementFilters(Request $request): array

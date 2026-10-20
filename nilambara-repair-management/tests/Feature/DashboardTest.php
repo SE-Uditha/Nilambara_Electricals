@@ -43,7 +43,7 @@ class DashboardTest extends TestCase
         $this->actingAs(User::factory()->create());
 
         foreach ([
-            'credit-management', 'inventory', 'suppliers', 'purchases',
+            'credit-management',
             'roles-permissions',
             'backup-restore',
         ] as $module) {

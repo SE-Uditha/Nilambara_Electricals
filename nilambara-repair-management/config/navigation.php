@@ -41,10 +41,11 @@ return [
     [
         'label' => 'stock_purchasing',
         'items' => [
-            ['label' => 'inventory', 'icon' => 'box', 'permission' => 'inventory.view'],
-            ['label' => 'suppliers', 'icon' => 'truck', 'permission' => 'suppliers.view'],
-            ['label' => 'purchases', 'icon' => 'bag', 'permission' => 'purchases.view'],
-            ['label' => 'stock_issues', 'icon' => 'box', 'permission' => 'inventory.issue', 'roles' => ['administrator', 'storekeeper']],
+            ['label' => 'inventory', 'icon' => 'box', 'route' => 'inventory.index', 'permission' => 'inventory.view'],
+            ['label' => 'suppliers', 'icon' => 'truck', 'route' => 'suppliers.index', 'permission' => 'suppliers.view'],
+            ['label' => 'purchases', 'icon' => 'bag', 'route' => 'purchases.index', 'permission' => 'purchases.view'],
+            ['label' => 'stock_issues', 'icon' => 'box', 'route' => 'stock-issues.index', 'permission' => 'inventory.issue'],
+            ['label' => 'stock_issues', 'icon' => 'box', 'route' => 'stock-issues.index', 'permission' => 'jobs.repair', 'roles' => ['technician']],
         ],
     ],
     [

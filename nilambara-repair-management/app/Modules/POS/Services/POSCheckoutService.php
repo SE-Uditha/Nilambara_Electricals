@@ -136,9 +136,7 @@ class POSCheckoutService
                     'description' => $part->sku.' · '.$part->name,
                     'quantity' => (string) $line['quantity'],
                     'unit_price' => (string) $line['unit_price'],
-                    'unit_cost' => DB::table('stock_movements')->where('spare_part_id', $part->getKey())
-                        ->where('location_id', $part->default_location_id)->whereNotNull('unit_cost')
-                        ->orderByDesc('occurred_at')->orderByDesc('id')->value('unit_cost'),
+                    'unit_cost' => $this->inventory->latestUnitCost((int) $part->getKey(), (int) $part->default_location_id),
                     'discount_amount' => '0.00',
                     'line_total' => (string) $line['line_total'],
                 ]);

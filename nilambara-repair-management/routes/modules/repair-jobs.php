@@ -3,6 +3,8 @@
 use App\Modules\RepairJobs\Controllers\RepairJobController;
 use Illuminate\Support\Facades\Route;
 
+Route::post('/repair-jobs/{job}/labour-charge', [RepairJobController::class, 'setLabourCharge'])->middleware('can:invoices.create')->name('repair-jobs.labour-charge');
+
 Route::middleware('can:jobs.view')->group(function (): void {
     Route::get('/repair-jobs', [RepairJobController::class, 'index'])->name('repair-jobs.index');
     Route::get('/repair-jobs/status', [RepairJobController::class, 'statusSearch'])->name('repair-jobs.status-search');

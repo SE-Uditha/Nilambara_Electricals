@@ -35,7 +35,7 @@ class QuotationApprovalService
                 throw ValidationException::withMessages(['decision' => __('ui.quotation_decision_not_available')]);
             }
 
-            if ($job->status === JobStatus::Cancelled || $job->delivered_at !== null) {
+            if ($job->status === JobStatus::Cancelled || $job->delivered_at !== null || $job->invoiceJobs()->exists()) {
                 throw ValidationException::withMessages(['decision' => __('ui.quotation_job_closed')]);
             }
 
@@ -58,6 +58,9 @@ class QuotationApprovalService
                 'approval_status' => $locked->approval_status->value,
                 'job_approval_status' => $job->approval_status?->value,
                 'job_status' => $job->status->value,
+                'labour_charge' => $job->labour_charge,
+                'parts_charge' => $job->parts_charge,
+                'total_job_amount' => $job->total_job_amount,
             ];
             $locked->approval_status = $decision;
             $locked->updated_by_user_id = $user->getKey();
@@ -83,6 +86,11 @@ class QuotationApprovalService
             ]);
 
             $job->approval_status = $decision;
+            if ($decision === ApprovalStatus::Approved) {
+                $job->labour_charge = $locked->labour_charge;
+                $job->parts_charge = $locked->parts_total;
+                $job->total_job_amount = $locked->total;
+            }
             $job->save();
             $targetStatus = $decision === ApprovalStatus::Approved
                 ? JobStatus::UnderRepair
@@ -100,6 +108,9 @@ class QuotationApprovalService
                 'job_approval_status' => $job->approval_status?->value,
                 'job_status' => $job->status->value,
                 'decision_date' => $now->toIso8601String(),
+                'labour_charge' => $job->labour_charge,
+                'parts_charge' => $job->parts_charge,
+                'total_job_amount' => $job->total_job_amount,
                 'customer_contact_name' => trim($data['customer_contact_name']),
                 'approval_method' => $data['approval_method'],
             ];

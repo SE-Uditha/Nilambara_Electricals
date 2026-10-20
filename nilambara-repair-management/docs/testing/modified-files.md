@@ -1,15 +1,31 @@
-# Step 12 modified and added files
+# Pending-work modified and added files
 
-This lists only Step 12 changes; earlier uncommitted step work is not attributed to this audit. Runtime evidence under ignored storage/logs is listed separately in the reports.
+This lists the follow-up changes; it does not attribute earlier uncommitted Step 10/11 work to this task. Runtime evidence under ignored storage/logs and storage/app/testing is described in the reports. No schema migration or operational environment credential was changed.
 
-- `app/Modules/POS/Services/POSReturnService.php`
-- `tests/Feature/POSManagementTest.php`
-- `tests/Feature/InvoiceManagementTest.php`
-- `tests/Feature/Step12AuditTest.php`
-- `scripts/audit-step12-schema.php`
-- `scripts/verify-step12-concurrency.php`
-- `scripts/verify-mysql.php`
-- `scripts/write-step12-reports.py`
+- `README.md`
+- `app/Modules/Customers/Controllers/CustomerController.php`
+- `app/Modules/Inventory/Controllers/InventoryController.php`
+- `app/Modules/Inventory/Services/InventoryService.php`
+- `app/Modules/Inventory/Services/StockWorkflowService.php`
+- `app/Modules/JobCards/Controllers/JobCardController.php`
+- `app/Modules/POS/Services/POSCheckoutService.php`
+- `app/Modules/POS/Services/POSReceiptService.php`
+- `app/Modules/PrintTemplates/Services/IntakePdfService.php`
+- `app/Modules/Purchases/Controllers/PurchaseController.php`
+- `app/Modules/Purchases/Services/PurchasePrintService.php`
+- `app/Modules/Purchases/Services/PurchaseWorkflowService.php`
+- `app/Modules/Quotations/Services/QuotationApprovalService.php`
+- `app/Modules/RepairJobs/Controllers/RepairJobController.php`
+- `app/Modules/RepairJobs/Services/RepairJobService.php`
+- `app/Modules/RepairReceipts/Controllers/RepairReceiptController.php`
+- `app/Modules/Reports/Services/ReportDataService.php`
+- `app/Modules/Suppliers/Controllers/SupplierController.php`
+- `app/Modules/Suppliers/Services/SupplierPaymentService.php`
+- `config/business.php`
+- `config/inventory.php`
+- `config/navigation.php`
+- `docs/modules/brd-coverage.md`
+- `docs/modules/stock-supplier-purchase-workflows.md`
 - `docs/testing/automated-test-inventory.md`
 - `docs/testing/backup-restore-test-report.md`
 - `docs/testing/brd-compliance-matrix.md`
@@ -21,7 +37,41 @@ This lists only Step 12 changes; earlier uncommitted step work is not attributed
 - `docs/testing/functional-test-report.md`
 - `docs/testing/integration-test-report.md`
 - `docs/testing/inventory-reconciliation-report.md`
+- `docs/testing/modified-files.md`
+- `docs/testing/pending-completion-report.md`
 - `docs/testing/performance-test-report.md`
 - `docs/testing/printing-test-report.md`
 - `docs/testing/security-test-report.md`
 - `docs/testing/uat-test-cases.md`
+- `lang/en/reports.php`
+- `lang/si/reports.php`
+- `resources/views/modules/customers/statement-print.blade.php`
+- `resources/views/modules/inventory/feedback.blade.php`
+- `resources/views/modules/inventory/form.blade.php`
+- `resources/views/modules/inventory/index.blade.php`
+- `resources/views/modules/inventory/issues.blade.php`
+- `resources/views/modules/inventory/show.blade.php`
+- `resources/views/modules/invoices/print.blade.php`
+- `resources/views/modules/job-cards/print.blade.php`
+- `resources/views/modules/pos/receipt.blade.php`
+- `resources/views/modules/purchases/create.blade.php`
+- `resources/views/modules/purchases/document.blade.php`
+- `resources/views/modules/purchases/index.blade.php`
+- `resources/views/modules/purchases/show.blade.php`
+- `resources/views/modules/repair-jobs/show.blade.php`
+- `resources/views/modules/repair-receipts/print.blade.php`
+- `resources/views/modules/suppliers/form.blade.php`
+- `resources/views/modules/suppliers/index.blade.php`
+- `resources/views/modules/suppliers/show.blade.php`
+- `routes/modules/job-cards.php`
+- `routes/modules/repair-jobs.php`
+- `routes/modules/repair-receipts.php`
+- `routes/modules/stock-purchasing.php`
+- `scripts/verify-mysql.php`
+- `scripts/verify-pending-concurrency.php`
+- `scripts/write-pending-reports.py`
+- `scripts/write-step12-reports.py`
+- `tests/Feature/DashboardTest.php`
+- `tests/Feature/LatestPurchaseCostTest.php`
+- `tests/Feature/PrintGapCompletionTest.php`
+- `tests/Feature/StockPurchasingWorkflowTest.php`

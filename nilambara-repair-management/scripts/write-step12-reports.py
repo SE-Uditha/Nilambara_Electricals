@@ -217,6 +217,13 @@ These are small local observations with mostly empty financial/stock tables, not
 
 Invoice creation, standalone payment allocation, stock updates, POS checkout and PDF generation have correctness tests and whole-test durations, but isolated operation latency was not instrumented. Do not treat PHPUnit test duration as a service benchmark. Missing repair issue/GRN services cannot be benchmarked. No statistically defensible slow-query/N+1 baseline at realistic volume was established, so no speculative index or calculation changes were made. Existing schema/index inventory is in the database audit.
 '''
+if (ROOT/'storage/logs/step12-service-timings.json').exists():
+    service = json.loads(read('storage/logs/step12-service-timings.json'))
+    timing_doc = timing_doc.replace('Invoice creation, standalone payment allocation, stock updates, POS checkout and PDF generation have correctness tests and whole-test durations, but isolated operation latency was not instrumented.', 'Additional isolated service observations are recorded below. Standalone repair stock issue and GRN latency cannot be measured because those workflows are missing.')
+    timing_doc += '\n## Service observations\n\nOne local iteration per operation, one cashier; fixture setup excluded. POS timing includes stock posting. These are service calls without browser/network latency.\n\n| Operation | Milliseconds |\n|---|---:|\n'
+    timing_doc += '\n'.join(f'| {k} | {v} |' for k,v in service['milliseconds'].items())
+    timing_doc += '\n\nDisposable dataset counts: `'+json.dumps(service['dataset_rows'])+'`. PDF output: '+str(service['pdf_bytes'])+' bytes, PDF signature checked.\n'
+    timing_doc += '\n\n'+ '\n'.join('- '+line for line in re.findall(r'PASS: two simultaneous cashiers[^\r\n]+', logs))+'\n'
 write('performance-test-report.md', timing_doc)
 write('printing-test-report.md', '''# Printing and PDF verification
 
@@ -338,3 +345,10 @@ modified = ['app/Modules/POS/Services/POSReturnService.php', 'tests/Feature/POSM
 modified += [str(p.relative_to(ROOT)).replace('\\','/') for p in sorted(OUT.glob('*.md'))]
 write('modified-files.md', '# Step 12 modified and added files\n\nThis lists only Step 12 changes; earlier uncommitted step work is not attributed to this audit. Runtime evidence under ignored storage/logs is listed separately in the reports.\n\n'+'\n'.join('- `'+p+'`' for p in modified))
 print(f'Wrote {len(list(OUT.glob("*.md")))} reports and {len(rows)} matrix requirement rows.')
+pending_log = ROOT/'storage/logs/pending-complete-mysql.log'
+if pending_log.exists():
+    raw = pending_log.read_bytes()
+    completed = raw.decode('utf-16' if raw.startswith(b'\xff\xfe') else 'utf-8-sig', errors='replace')
+    if 'Disposable MySQL-compatible suite, rollback, and remigration succeeded.' in completed:
+        import runpy
+        runpy.run_path(str(ROOT/'scripts/write-pending-reports.py'))

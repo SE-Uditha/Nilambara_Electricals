@@ -41,6 +41,7 @@
         <a href="{{ route('repair-jobs.show', $job) }}">{{ __('ui.back') }}</a>
         @can('job-cards.print')<a href="{{ route('job-cards.duplicate', $job) }}">{{ __('ui.reprint_job_card') }}</a>@endcan
         <button type="button" onclick="window.print()">{{ __('ui.print') }}</button>
+        <a href="{{ route('job-cards.pdf',['job'=>$job,'duplicate'=>$duplicate ? 1 : 0]) }}">PDF</a>
     </nav>
     <main class="preview">
         <article class="page">

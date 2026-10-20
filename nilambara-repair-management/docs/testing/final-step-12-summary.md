@@ -1,20 +1,12 @@
 # Final Step 12 summary
 
-Step 12 local verification is complete to the documented extent; the business system is **not fully BRD compliant or ready for unconditional acceptance**. Mandatory stock, supplier and purchase workflows remain missing. No production build, packaging, deployment or operational database reset/migration was performed.
+The pending software workflows and confirmed integration/print defects have been implemented. **Business acceptance is still pending**; backups require an approved destination and physical tests require shop hardware.
 
-## Executed evidence
+Final native MySQL result: **218 passed (3566 assertions)**, duration 175.11s. Full evidence: `storage/logs/pending-complete-mysql.log`. The helper created its own randomized database, ran tests, rolled back/remigrated that disposable database, ran native multiuser/recovery checks, then removed only that database. Operational tables were not migrated/reset.
 
-- Final execution not yet recorded.
-
-Evidence logs are under `storage/logs/`: `step12-mysql.log` (initial baseline), `step12-mysql-final.log` (full regression), `step12-mysql-step12.log` (targeted/native additional coverage), `step12-sqlite-targeted.log`, `step12-schema.json`, `step12-syntax.log`, `step12-composer.log`, `step12-dependency-audit.log`. Test fixtures are created only in newly randomized disposable databases. `scripts/verify-mysql.php` refuses production/nonlocal connections and never reuses an existing database.
+Focused evidence: `pending-focused-final.log`; PDF dimensions/fonts: `pending-pdf-review.json`; before/after operational schema/count evidence: `pending-schema-before.json`, `pending-schema-after.json`, `pending-preservation.log`; syntax/style evidence: `pending-syntax.log`, `pending-style-check.log`. All names are under `storage/logs/`.
 
 
-Read-only schema audit: 69 tables, 247 FK column mappings, 0 per-column orphan matches; no binary floating-point storage. All observed tables use InnoDB/utf8mb4. Real backup/restore and POS races have explicit PASS lines in logs. Additional invoice/payment race results are in the targeted Step 12 log.
+The original 69-table schema is retained. No new application tables, parallel ledgers or operational migrations were introduced. All destructive verification was isolated. See [completion detail](pending-completion-report.md), [BRD matrix](brd-compliance-matrix.md) and [modified files](modified-files.md).
 
-Two defects corrected: discounted POS return rounding and MySQL invoice rollback test coverage. Added security/query execution checks and bounded local timings. No operational business records were intentionally modified; the audit uses metadata/count reads and randomized disposable test databases.
-
-## Coverage and remaining limits
-
-The matrix contains 327 requirement rows across all 27 original BRD sections. Counts: {'Partially Implemented': 66, 'Implemented but Not Tested': 214, 'Missing': 23, 'Not Applicable': 4, 'Blocked': 20}. These are audit row counts, not weighted completion percentages. Recommended optional extensions and excluded production/commercial obligations are identified separately.
-
-Supplier/GRN/repair issue workflows, complete financial costing policy, real Drive backup, approved local backup destination, physical printing/scanning, broad concurrency/capacity testing and owner UAT remain open. See [defects](defect-register.md), [UAT](uat-test-cases.md) and [final compliance report](final-brd-compliance-report.md). Stop after Step 12; no next-phase implementation is claimed.
+An approved live-backup folder has not been supplied; Google Drive folder/account/OAuth fields remain blank as requested. No host/production scheduler, production build, installer, packaging or deployment was performed. Physical printer/scanner checks, realistic-volume capacity acceptance and owner signatures remain pending. Latest purchase cost was explicitly selected by the owner. Purchase-wide discount/freight allocation remains a separate unanswered decision; affected profit estimates remain incomplete rather than assuming a policy. Existing role permissions were preserved: storekeepers can receive/issue/count/adjust, while purchase approval and supplier money operations require `purchases.approve`.

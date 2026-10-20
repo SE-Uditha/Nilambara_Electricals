@@ -4,9 +4,11 @@
     <meta charset="utf-8">
     <title>{{ $documentTitle }} · {{ $sale->sale_number }}</title>
     <style>
+        @font-face{font-family:NotoSinhala;src:url("{{ $fontRegularPath }}") format("truetype");font-style:normal;font-weight:400}
+        @font-face{font-family:NotoSinhala;src:url("{{ $fontBoldPath }}") format("truetype");font-style:normal;font-weight:700}
         @page { size: {{ $paperSize === 'thermal' ? $thermalWidth.'mm 280mm' : $paperSize.' '.$orientation }}; margin: {{ $margins['top'] }}mm {{ $margins['right'] }}mm {{ $margins['bottom'] }}mm {{ $margins['left'] }}mm; }
         * { box-sizing: border-box; }
-        body { margin: 0; color: #172033; font-family: DejaVu Sans, sans-serif; font-size: {{ $paperSize === 'thermal' ? '8' : $fontSize }}pt; }
+        body { margin: 0; color: #172033; font-family: NotoSinhala,"DejaVu Sans",sans-serif; font-size: {{ $fontSize }}pt; }
         .receipt { max-width: {{ $paperSize === 'thermal' ? $thermalWidth.'mm' : '190mm' }}; margin: auto; }
         header { border-bottom: 1px dashed #64748b; text-align: center; padding-bottom: 8px; }
         .logo { max-width: 48mm; max-height: 20mm; object-fit: contain; }

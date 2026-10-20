@@ -1,8 +1,8 @@
 # Nilambara Repair Management
 
-Laravel foundation for Nilambara Electricals' repair shop management system. The eventual application covers electrical-appliance and motor repair, customer/company records, quotations, billing, credit, spare parts, purchasing, POS, staff, reports, and operational controls.
+Laravel application for Nilambara Electricals' repair shop management system, covering electrical-appliance and motor repair, customer/company records, quotations, billing, credit, spare parts, purchasing, POS, staff, reports, and operational controls.
 
-**Current delivery: Step 11 reporting and administration.** Dashboard, reporting/exports, settings, versioned print layouts, audit viewing and tested private backup/restore software extend the existing application. The Step 11 migration is applied and existing data preserved. Live backup storage and host-task activation await destination approval; Google Drive remains blank for later configuration. See the [Step 11 results and activation status](docs/development/step-11-summary.md).
+**Current delivery: Step 12 and its pending-work follow-up.** Inventory, supplier and purchase/GRN workflows now integrate with repair billing, POS, reports and print/PDF history. The final disposable MySQL run passed 218 tests, plus native concurrency and recovery checks. See the [completion report](docs/testing/pending-completion-report.md), [workflow guide](docs/modules/stock-supplier-purchase-workflows.md) and [BRD matrix](docs/testing/brd-compliance-matrix.md). Live backup storage awaits an approved folder; Google Drive credentials remain blank. Physical hardware/UAT and purchase-wide cost allocation remain outstanding. No production build or deployment was performed.
 
 The supplied [Business Requirements Document](../Repair%20Shop%20Management%20Final.pdf) is the source of truth. See the [BRD coverage map](docs/modules/brd-coverage.md), [architecture overview](docs/architecture/overview.md), [database guide](docs/database/README.md), and [development roadmap](docs/development/roadmap.md).
 
@@ -212,7 +212,7 @@ Controllers stay small; use Form Requests, Policies, Eloquent relationships, and
 
 ## Planned next phases
 
-The next step is **Step 7 — Inventory and Purchasing**. Step 5's receipt/job features and Step 6's quotation/approval behavior are documented in the [module guides](docs/modules/repair-receipts.md), [quotation guides](docs/modules/quotation-management.md), [roadmap](docs/development/roadmap.md), and [open database decisions](docs/database/open-decisions.md). Later phases cover stock/purchasing, invoicing/payments/credit, POS, reports, backup/restore/settings, and end-to-end business acceptance.
+Development has reached local Step 12 verification. The remaining external decisions and acceptance checks are listed in the [current summary](docs/testing/final-step-12-summary.md). Earlier step guides and the [roadmap](docs/development/roadmap.md) retain historical implementation boundaries; use the current BRD matrix for present coverage. No deployment or packaging stage has been started.
 
 Dashboard business metrics remain empty until their authorized reporting queries are delivered. Step 5 repair navigation is active; future module links remain labelled as unavailable and no fabricated sales, credit, or stock data is shown.
 

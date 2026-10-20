@@ -44,6 +44,8 @@ class POSReceiptService
             'paperSize' => $paper,
             'orientation' => in_array($template?->orientation, ['portrait', 'landscape'], true) ? $template->orientation : 'portrait',
             'documentTitle' => $template?->document_title ?: __('pos.receipt_title'),
+            'fontRegularPath' => $pdf ? str_replace('\\', '/', public_path('fonts/NotoSansSinhala-Regular.ttf')) : asset('fonts/NotoSansSinhala-Regular.ttf'),
+            'fontBoldPath' => $pdf ? str_replace('\\', '/', public_path('fonts/NotoSansSinhala-Bold.ttf')) : asset('fonts/NotoSansSinhala-Bold.ttf'),
             'margins' => [
                 'top' => $this->safeMargin($template?->margin_top_mm, $paper === 'thermal' ? 3 : 8),
                 'right' => $this->safeMargin($template?->margin_right_mm, $paper === 'thermal' ? 3 : 8),
@@ -51,7 +53,7 @@ class POSReceiptService
                 'left' => $this->safeMargin($template?->margin_left_mm, $paper === 'thermal' ? 3 : 8),
             ],
             'thermalWidth' => $thermalWidth,
-            'fontSize' => is_numeric($template?->font_size_pt) ? max(8, min(14, (float) $template->font_size_pt)) : 9,
+            'fontSize' => is_numeric($template?->font_size_pt) ? max(8, min(14, (float) $template->font_size_pt)) : ($paper === 'thermal' ? 8 : 9),
         ];
 
         DB::transaction(function () use ($sale, $template, $duplicate, $duplicateLabel, $printedAt, $snapshot, $paper, $pdf, $user): void {
