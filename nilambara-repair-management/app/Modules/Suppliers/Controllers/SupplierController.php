@@ -5,6 +5,7 @@ namespace App\Modules\Suppliers\Controllers;
 use App\Modules\Suppliers\Models\Supplier;
 use App\Modules\Suppliers\Models\SupplierAccountEntry;
 use App\Modules\Suppliers\Services\SupplierPaymentService;
+use App\Rules\PhoneNumber;
 use App\Support\BusinessAudit;
 use Brick\Math\BigDecimal;
 use Illuminate\Http\Request;
@@ -36,7 +37,7 @@ class SupplierController
     public function save(Request $request, ?Supplier $supplier = null)
     {
         Gate::authorize($supplier?->exists ? 'suppliers.update' : 'suppliers.create');
-        $data = $request->validate(['name' => 'required|string|max:255', 'contact_person' => 'nullable|string|max:255', 'address' => 'required|string|max:2000', 'mobile_number' => 'required|string|max:30', 'telephone_number' => 'nullable|string|max:30', 'email' => 'nullable|email|max:255', 'opening_balance' => [$supplier?->exists ? 'prohibited' : 'required', 'numeric', 'decimal:0,2', 'between:-999999999999.99,999999999999.99'], 'credit_terms' => 'nullable|string|max:255', 'credit_days' => 'required|integer|between:0,3650', 'notes' => 'nullable|string|max:2000', 'is_active' => 'required|boolean']);
+        $data = $request->validate(['name' => 'required|string|max:255', 'contact_person' => 'nullable|string|max:255', 'address' => 'required|string|max:2000', 'mobile_number' => ['required', new PhoneNumber], 'telephone_number' => ['nullable', new PhoneNumber], 'email' => 'nullable|email|max:255', 'opening_balance' => [$supplier?->exists ? 'prohibited' : 'required', 'numeric', 'decimal:0,2', 'between:-999999999999.99,999999999999.99'], 'credit_terms' => 'nullable|string|max:255', 'credit_days' => 'required|integer|between:0,3650', 'notes' => 'nullable|string|max:2000', 'is_active' => 'required|boolean']);
         $supplier = DB::transaction(function () use ($supplier, $data, $request) {
             if ($supplier?->exists) {
                 $old = $supplier->only(array_keys($data));

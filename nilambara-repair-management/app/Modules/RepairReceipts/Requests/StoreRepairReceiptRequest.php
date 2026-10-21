@@ -3,6 +3,7 @@
 namespace App\Modules\RepairReceipts\Requests;
 
 use App\Modules\RepairJobs\Enums\RepairJobType;
+use App\Rules\DecimalValue;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
@@ -18,7 +19,9 @@ class StoreRepairReceiptRequest extends FormRequest
     {
         return [
             'customer_id' => [
+                'bail',
                 'required',
+                'integer',
                 Rule::exists('customers', 'id')->where(fn ($query) => $query->where('is_active', true)),
             ],
             'job_number' => ['required', 'string', 'max:60', 'unique:repair_jobs,job_number'],
@@ -31,11 +34,13 @@ class StoreRepairReceiptRequest extends FormRequest
             'accessories_received' => ['nullable', 'string', 'max:5000'],
             'physical_condition' => ['nullable', 'string', 'max:5000'],
             'visible_damage' => ['nullable', 'string', 'max:5000'],
-            'advance_payment' => ['nullable', 'numeric', 'decimal:0,2', 'min:0', 'max:99999999999999999.99'],
+            'advance_payment' => ['nullable', 'numeric', 'decimal:0,2', 'min:0', new DecimalValue],
             'payment_method' => ['nullable', Rule::in(['cash', 'bank_transfer', 'cheque'])],
-            'labor_cost' => ['required', 'numeric', 'decimal:0,2', 'min:0', 'max:99999999999999999.99'],
+            'labor_cost' => ['required', 'numeric', 'decimal:0,2', 'min:0', new DecimalValue],
             'received_by_employee_id' => [
+                'bail',
                 'required',
+                'integer',
                 Rule::exists('employees', 'id')->where(fn ($query) => $query->where('is_active', true)),
             ],
             'special_notes' => ['nullable', 'string', 'max:10000'],

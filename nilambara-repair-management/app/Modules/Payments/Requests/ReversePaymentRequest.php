@@ -3,6 +3,7 @@
 namespace App\Modules\Payments\Requests;
 
 use App\Enums\PaymentMethod;
+use App\Rules\DecimalValue;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -25,7 +26,7 @@ class ReversePaymentRequest extends FormRequest
     {
         return [
             'reversal_type' => ['required', Rule::in(['refund', 'reversal'])],
-            'amount' => ['required', 'numeric', 'decimal:0,2', 'gt:0', 'max:99999999999999999.99'],
+            'amount' => ['required', 'numeric', 'decimal:0,2', 'gt:0', new DecimalValue],
             'method' => ['required_if:reversal_type,refund', 'nullable', Rule::enum(PaymentMethod::class)],
             'external_reference' => ['nullable', 'string', 'max:100'],
             'reason' => ['required', 'string', 'min:5', 'max:2000'],

@@ -3,6 +3,7 @@
 namespace App\Modules\POS\Requests;
 
 use App\Enums\PaymentMethod;
+use App\Rules\DecimalValue;
 use Brick\Math\BigDecimal;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
@@ -29,7 +30,7 @@ class POSReturnRequest extends FormRequest
             'quantity' => ['required', 'numeric', 'decimal:0,3', 'gt:0', 'max:999999999999999.999'],
             'condition' => ['required', Rule::in(['resalable', 'damaged'])],
             'reason' => ['required', 'string', 'min:5', 'max:2000'],
-            'refund_amount' => ['nullable', 'numeric', 'decimal:0,2', 'gte:0', 'max:99999999999999999.99'],
+            'refund_amount' => ['nullable', 'numeric', 'decimal:0,2', 'gte:0', new DecimalValue],
             'refund_method' => [
                 Rule::requiredIf(fn (): bool => is_numeric($this->input('refund_amount'))
                     && BigDecimal::of((string) $this->input('refund_amount'))->isGreaterThan(0)),

@@ -3,6 +3,7 @@
 namespace App\Modules\RepairJobs\Requests;
 
 use App\Modules\RepairJobs\Models\RepairJob;
+use App\Rules\DecimalValue;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Validator;
 
@@ -21,8 +22,8 @@ class SaveRepairInformationRequest extends FormRequest
             'work_performed' => ['required', 'string', 'max:10000'],
             'parts_used' => ['nullable', 'string', 'max:10000'],
             'parts_quantity' => ['nullable', 'numeric', 'decimal:0,3', 'min:0', 'max:999999999.999'],
-            'parts_cost' => ['nullable', 'numeric', 'decimal:0,2', 'min:0', 'max:99999999999999999.99'],
-            'labor_cost' => ['nullable', 'numeric', 'decimal:0,2', 'min:0', 'max:99999999999999999.99'],
+            'parts_cost' => ['nullable', 'numeric', 'decimal:0,2', 'min:0', new DecimalValue],
+            'labor_cost' => ['nullable', 'numeric', 'decimal:0,2', 'min:0', new DecimalValue],
             'repair_completed_at' => ['nullable', 'date'],
             'testing_details' => ['nullable', 'string', 'max:10000'],
             'special_notes' => ['nullable', 'string', 'max:10000'],

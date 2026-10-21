@@ -21,7 +21,9 @@ class AssignTechnicianRequest extends FormRequest
     {
         return [
             'technician_id' => [
+                'bail',
                 'required',
+                'integer',
                 Rule::exists('employees', 'id')->where(fn ($query) => $query->where('is_active', true)),
             ],
         ];
@@ -31,6 +33,10 @@ class AssignTechnicianRequest extends FormRequest
     {
         return [
             function (Validator $validator): void {
+                if ($validator->errors()->any()) {
+                    return;
+                }
+
                 $employee = Employee::query()->with('user')->find($this->input('technician_id'));
 
                 if ($employee === null || ! $employee->is_active || ! $employee->user?->hasActiveAccount() || ! $employee->user->hasRole('technician')) {

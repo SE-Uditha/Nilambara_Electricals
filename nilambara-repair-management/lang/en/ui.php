@@ -1,6 +1,10 @@
 <?php
 
 return [
+    'register_part' => 'Register part',
+    'register_supplier' => 'Register supplier',
+    'new_purchase' => 'New purchase',
+    'register_employee' => 'Register employee',
     'record_payment' => 'Record payment',
     'pos_sales_history' => 'POS sales history',
     'pos_returns' => 'POS returns',

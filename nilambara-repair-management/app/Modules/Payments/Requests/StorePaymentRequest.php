@@ -4,6 +4,7 @@ namespace App\Modules\Payments\Requests;
 
 use App\Enums\PaymentMethod;
 use App\Modules\Employees\Models\Employee;
+use App\Rules\DecimalValue;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -32,7 +33,7 @@ class StorePaymentRequest extends FormRequest
             'repair_job_id' => ['nullable', 'integer', 'exists:repair_jobs,id'],
             'received_by_employee_id' => ['nullable', 'integer', 'exists:employees,id'],
             'payment_date' => ['required', 'date', 'before_or_equal:today'],
-            'amount' => ['required', 'numeric', 'decimal:0,2', 'gt:0', 'max:99999999999999999.99'],
+            'amount' => ['required', 'numeric', 'decimal:0,2', 'gt:0', new DecimalValue],
             'method' => ['required', Rule::enum(PaymentMethod::class)],
             'reference_number' => ['nullable', 'string', 'max:100', 'required_if:method,bank_transfer', 'required_if:method,cheque'],
             'bank_name' => ['nullable', 'string', 'max:150'],
@@ -46,6 +47,10 @@ class StorePaymentRequest extends FormRequest
     {
         return [
             function ($validator): void {
+                if ($validator->errors()->any()) {
+                    return;
+                }
+
                 if ($this->input('payment_type') === 'invoice' && $this->filled('repair_job_id')) {
                     $validator->errors()->add('repair_job_id', __('payments.invoice_payment_job_not_allowed'));
                 }

@@ -3,6 +3,7 @@
 namespace App\Modules\Customers\Requests;
 
 use App\Enums\CustomerType;
+use App\Rules\PhoneNumber;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -33,8 +34,8 @@ class UpdateCustomerRequest extends FormRequest
             ],
             'contact_person' => ['nullable', 'string', 'max:255'],
             'address' => ['required', 'string', 'max:5000'],
-            'mobile_number' => ['required', 'string', 'max:30', 'regex:/^\+?[0-9][0-9().\s-]{5,28}[0-9]$/'],
-            'alternate_phone' => ['nullable', 'string', 'max:30', 'regex:/^\+?[0-9][0-9().\s-]{5,28}[0-9]$/'],
+            'mobile_number' => ['required', 'string', 'max:30', new PhoneNumber],
+            'alternate_phone' => ['nullable', 'string', 'max:30', new PhoneNumber],
             'email' => ['nullable', 'email', 'max:255'],
             'special_notes' => ['nullable', 'string', 'max:10000'],
         ];

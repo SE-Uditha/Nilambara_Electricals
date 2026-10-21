@@ -136,7 +136,7 @@ class InventoryController
 
     public function requestPart(Request $request, StockWorkflowService $service)
     {
-        $data = $request->validate(['repair_job_id' => 'required|integer|exists:repair_jobs,id', 'spare_part_id' => 'required|integer|exists:spare_parts,id', 'location_id' => 'required|integer|exists:stock_locations,id', 'quantity' => 'required|numeric|decimal:0,3|gt:0', 'notes' => 'nullable|string|max:2000', 'idempotency_key' => 'required|uuid']);
+        $data = $request->validate(['repair_job_id' => 'required|integer|exists:repair_jobs,id', 'spare_part_id' => 'required|integer|exists:spare_parts,id', 'location_id' => 'required|integer|exists:stock_locations,id', 'quantity' => 'required|numeric|decimal:0,3|gt:0|max:999999999999.999', 'notes' => 'nullable|string|max:2000', 'idempotency_key' => 'required|uuid']);
         $service->request($data, $request->user());
 
         return back()->with('status', 'Part requested. Stock has not been deducted.');

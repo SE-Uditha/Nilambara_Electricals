@@ -2,6 +2,7 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     @include('partials.head')
+    @include('partials.sidebar-styles')
 </head>
 <body class="app-body" x-data="{ sidebarOpen: false, desktop: window.innerWidth >= 1024 }" x-on:resize.window="desktop = window.innerWidth >= 1024; if (desktop) sidebarOpen = false" x-on:keydown.escape.window="if (sidebarOpen) { sidebarOpen = false; $refs.menuButton.focus() }" :class="{ 'drawer-open': sidebarOpen }">
     <a href="#main-content" class="skip-link">{{ __('ui.skip_to_content') }}</a>
@@ -13,14 +14,14 @@
             <button type="button" x-ref="closeNavigation" class="rounded-lg p-2 text-slate-300 hover:bg-white/10 lg:hidden" x-on:click="sidebarOpen = false; $refs.menuButton.focus()" aria-label="{{ __('ui.close_navigation') }}"><x-icon name="close" :size="18" /></button>
         </div>
         <nav class="sidebar-scroll min-h-0 flex-1 overflow-y-auto px-3 pt-5 pb-6">
-            @foreach (config('navigation') as $group)
+            @foreach (app(\App\Support\SidebarNavigation::class)->sections(auth()->user(), request()) as $group)
                 <div class="mb-5 last:mb-0">
                     <h2 class="mb-2 px-3 text-[9px] font-semibold tracking-[0.15em] text-slate-500 uppercase">{{ __('ui.'.$group['label']) }}</h2>
                     <div class="space-y-0.5">
                         @foreach ($group['items'] as $item)
-                            @if ((! isset($item['roles']) || auth()->user()->hasAnyRole($item['roles']))
-                                && (! isset($item['except_roles']) || ! auth()->user()->hasAnyRole($item['except_roles']))
-                                && (! isset($item['permission']) || auth()->user()->can($item['permission'])))
+                            @if (isset($item['children']))
+                                <x-nav-group :item="$item" />
+                            @else
                                 <x-nav-item :item="$item" />
                             @endif
                         @endforeach
@@ -32,6 +33,31 @@
             (() => {
                 const navigation = document.currentScript.previousElementSibling;
                 const storageKey = 'nilambara.sidebar-scroll.' + @js((string) auth()->id());
+                const groupsKey = storageKey + '.groups';
+                const groups = Array.from(navigation.querySelectorAll('[data-sidebar-group]'));
+                try {
+                    const savedGroups = JSON.parse(sessionStorage.getItem(groupsKey) || '{}');
+                    for (const group of groups) {
+                        if (group.dataset.active === 'true') group.open = true;
+                        else if (typeof savedGroups[group.dataset.sidebarGroup] === 'boolean') group.open = savedGroups[group.dataset.sidebarGroup];
+                    }
+                } catch {
+                    // Default and active groups still work without browser storage.
+                }
+                for (const group of groups) {
+                    const summary = group.querySelector('summary');
+                    const updateExpanded = () => summary.setAttribute('aria-expanded', String(group.open));
+                    updateExpanded();
+                    group.addEventListener('toggle', () => {
+                        updateExpanded();
+                        try {
+                            const state = Object.fromEntries(groups.map(item => [item.dataset.sidebarGroup, item.open]));
+                            sessionStorage.setItem(groupsKey, JSON.stringify(state));
+                        } catch {
+                            // Native dropdowns remain usable without persistence.
+                        }
+                    });
+                }
                 const restore = () => {
                     try {
                         const position = Number(sessionStorage.getItem(storageKey));
@@ -99,6 +125,7 @@
             <p>{{ config('business.currency', 'LKR') }} <span class="mx-1.5 text-slate-300" aria-hidden="true">·</span> {{ config('business.timezone', 'Asia/Colombo') }}</p>
         </footer>
     </div>
+    @include('partials.form-validation')
     @livewireScripts
 </body>
 </html>
