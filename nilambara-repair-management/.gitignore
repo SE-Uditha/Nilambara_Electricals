@@ -40,3 +40,9 @@ yarn-error.log
 
 /.npm-cache
 /storage/*.sqlite
+
+/tmp/
+
+__pycache__/
+
+*.py[cod]
