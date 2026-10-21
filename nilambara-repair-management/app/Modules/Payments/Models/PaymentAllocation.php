@@ -6,7 +6,6 @@ use App\Models\BusinessModel;
 use App\Models\User;
 use App\Modules\Customers\Models\Customer;
 use App\Modules\Invoices\Models\Invoice;
-use App\Modules\POS\Models\PosSale;
 use App\Modules\RepairJobs\Models\RepairJob;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -21,7 +20,6 @@ class PaymentAllocation extends BusinessModel
         'target_type',
         'repair_job_id',
         'invoice_id',
-        'pos_sale_id',
         'amount',
         'allocated_at',
         'allocated_by_user_id',
@@ -62,11 +60,6 @@ class PaymentAllocation extends BusinessModel
     public function invoice(): BelongsTo
     {
         return $this->belongsTo(Invoice::class, 'invoice_id');
-    }
-
-    public function posSale(): BelongsTo
-    {
-        return $this->belongsTo(PosSale::class, 'pos_sale_id');
     }
 
     public function allocatedByUser(): BelongsTo

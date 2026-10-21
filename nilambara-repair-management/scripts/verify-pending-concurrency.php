@@ -4,13 +4,13 @@ use App\Models\User;
 use App\Modules\Inventory\Models\JobPartUsage;
 use App\Modules\Inventory\Services\InventoryService;
 use App\Modules\Inventory\Services\StockWorkflowService;
-use App\Modules\POS\Services\POSCheckoutService;
 use App\Modules\Purchases\Models\Purchase;
 use App\Modules\Purchases\Services\PurchaseWorkflowService;
 use App\Modules\RepairJobs\Models\RepairJob;
 use App\Modules\RepairJobs\Services\RepairJobService;
 use App\Modules\RepairReceipts\Services\RepairReceiptService;
 use App\Modules\Suppliers\Models\Supplier;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -52,9 +52,6 @@ if (($argv[1] ?? '') === 'worker') {
             case 'issue':
                 $record = app(StockWorkflowService::class)->issue(JobPartUsage::findOrFail($data['usage']), $actor);
                 break;
-            case 'pos':
-                $record = app(POSCheckoutService::class)->checkout(['payment_method' => 'cash', 'amount_tendered' => '100.00', 'discount_amount' => '0.00', 'idempotency_key' => (string) Str::uuid()], [$data['part'] => '4.000'], $actor);
-                break;
             case 'grn':
                 $record = app(PurchaseWorkflowService::class)->receive(Purchase::findOrFail($data['purchase']), $data, $actor);
                 break;
@@ -66,6 +63,8 @@ if (($argv[1] ?? '') === 'worker') {
     }
     exit;
 }
+
+$app->make(RoleSeeder::class)->run();
 
 $fixtures = new class
 {
@@ -163,8 +162,9 @@ $storekeepers = [$fixtures->actor('storekeeper'), $fixtures->actor('storekeeper'
 $part = $fixtures->product();
 $job = $fixtures->jobRecord($customer);
 $usage = app(StockWorkflowService::class)->request(['repair_job_id' => $job->id, 'spare_part_id' => $part->id, 'location_id' => $part->default_location_id, 'quantity' => '4.000', 'idempotency_key' => (string) Str::uuid()], $admin);
-$cashier = $fixtures->actor('cashier');
-$race('POS and repair issue compete for the same five units', [['operation' => 'issue', 'actor' => $storekeepers[0]->id, 'data' => ['usage' => $usage->id]], ['operation' => 'pos', 'actor' => $cashier->id, 'data' => ['part' => $part->id]]], 1);
+$otherJob = $fixtures->jobRecord($customer);
+$otherUsage = app(StockWorkflowService::class)->request(['repair_job_id' => $otherJob->id, 'spare_part_id' => $part->id, 'location_id' => $part->default_location_id, 'quantity' => '4.000', 'idempotency_key' => (string) Str::uuid()], $admin);
+$race('two repair issues compete for the same five units', [['operation' => 'issue', 'actor' => $storekeepers[0]->id, 'data' => ['usage' => $usage->id]], ['operation' => 'issue', 'actor' => $storekeepers[1]->id, 'data' => ['usage' => $otherUsage->id]]], 1);
 if ((string) app(InventoryService::class)->availableAtDefaultLocation($part) !== '1.000') {
     throw new RuntimeException('Shared stock was oversold.');
 }

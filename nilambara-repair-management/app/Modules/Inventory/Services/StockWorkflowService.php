@@ -97,7 +97,7 @@ class StockWorkflowService
         Gate::forUser($actor)->authorize('inventory.issue');
 
         return DB::transaction(function () use ($usage, $actor) {
-            // Job then part: same product lock as POS protects the shared ledger.
+            // Job then part: a consistent product lock protects the shared ledger.
             $job = RepairJob::whereKey($usage->repair_job_id)->lockForUpdate()->firstOrFail();
             $usage = JobPartUsage::whereKey($usage->id)->lockForUpdate()->firstOrFail();
             if ($usage->status === 'issued') {

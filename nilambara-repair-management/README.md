@@ -1,10 +1,12 @@
 # Nilambara Repair Management
 
-**Role update (21 October 2026):** Receptionist and Cashier are consolidated as **Cashier**, combining repair intake with billing/POS. Existing accounts keep their credentials. See [current permissions](docs/modules/role-permissions.md). Step 13 PDFs describe the earlier dated snapshot.
+**POS removed (21 October 2026):** POS screens, APIs, permissions, report components and database tables are retired. Repair inventory, purchases, invoices and payments remain. Historical Step 13 PDFs and earlier schema documents describe their dated snapshots. See [retirement details](docs/modules/pos-retirement.md).
 
-Laravel application for Nilambara Electricals' repair shop management system, covering electrical-appliance and motor repair, customer/company records, quotations, billing, credit, spare parts, purchasing, POS, staff, reports, and operational controls.
+**Role update (21 October 2026):** Receptionist and Cashier are consolidated as **Cashier**, combining repair intake with billing. Existing accounts keep their credentials. See [current permissions](docs/modules/role-permissions.md). Step 13 PDFs describe the earlier dated snapshot.
 
-**Current delivery: Step 12 and its pending-work follow-up.** Inventory, supplier and purchase/GRN workflows now integrate with repair billing, POS, reports and print/PDF history. The final disposable MySQL run passed 218 tests, plus native concurrency and recovery checks. See the [completion report](docs/testing/pending-completion-report.md), [workflow guide](docs/modules/stock-supplier-purchase-workflows.md) and [BRD matrix](docs/testing/brd-compliance-matrix.md). Live backup storage awaits an approved folder; Google Drive credentials remain blank. Physical hardware/UAT and purchase-wide cost allocation remain outstanding. No production build or deployment was performed.
+Laravel application for Nilambara Electricals' repair shop management system, covering electrical-appliance and motor repair, customer/company records, quotations, billing, credit, spare parts, purchasing, staff, reports, and operational controls.
+
+**Current delivery: Step 12 and its pending-work follow-up.** Inventory, supplier and purchase/GRN workflows now integrate with repair billing, reports and print/PDF history. The final disposable MySQL run passed 218 tests, plus native concurrency and recovery checks. See the [completion report](docs/testing/pending-completion-report.md), [workflow guide](docs/modules/stock-supplier-purchase-workflows.md) and [BRD matrix](docs/testing/brd-compliance-matrix.md). Live backup storage awaits an approved folder; Google Drive credentials remain blank. Physical hardware/UAT and purchase-wide cost allocation remain outstanding. No production build or deployment was performed.
 
 The supplied [Business Requirements Document](../Repair%20Shop%20Management%20Final.pdf) is the source of truth. See the [BRD coverage map](docs/modules/brd-coverage.md), [architecture overview](docs/architecture/overview.md), [database guide](docs/database/README.md), and [development roadmap](docs/development/roadmap.md).
 
@@ -198,10 +200,9 @@ Each module reserves `Controllers/`, `Models/`, `Services/`, `Repositories/`, `R
 | Invoices | Same-customer multi-job invoices and A5 invoice output. |
 | Payments | Advances, collections, allocations, refunds, and reversals. |
 | CreditManagement | Outstanding invoices, credit history, and collections. |
-| Inventory | Common repair/POS spare-part catalogue and movement ledger. |
+| Inventory | Repair spare-part catalogue and movement ledger. |
 | Suppliers | Supplier registration, terms, and account history. |
 | Purchases | GRNs, purchase costs, supplier credit, and stock receipt. |
-| POS | Spare-part sales and returns using shared stock/payment rules. |
 | Employees | Staff records and controlled employee account management. |
 | RolesPermissions | Agreed role/per-user access rules and policy enforcement. |
 | Reports | Repair, sales, finance, and inventory reporting/export. |

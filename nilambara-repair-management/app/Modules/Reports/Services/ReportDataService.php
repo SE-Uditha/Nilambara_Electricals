@@ -46,7 +46,7 @@ class ReportDataService
             'technicians' => $this->technicians($filters, $actor),
             'sales' => $this->sales($filters),
             'collections', 'advances', 'customer-credit', 'overdue-credit', 'supplier-outstanding', 'purchases', 'expenses' => $this->financial($report, $filters),
-            'stock', 'stock-movements', 'repair-parts', 'pos-parts', 'adjustments', 'purchase-history', 'supplier-purchases', 'valuation' => $this->inventoryReport($report, $filters),
+            'stock', 'stock-movements', 'repair-parts', 'adjustments', 'purchase-history', 'supplier-purchases', 'valuation' => $this->inventoryReport($report, $filters),
             'profit-estimate' => $this->profitEstimate($filters),
             default => abort(404),
         };
@@ -157,18 +157,13 @@ class ReportDataService
             ->join('employees', 'invoices.cashier_employee_id', '=', 'employees.id')
             ->where('invoices.status', DocumentStatus::Finalized->value)
             ->selectRaw("'Repair invoice' as document_type, invoices.invoice_number as document_number, invoices.invoice_date as transaction_date, customers.customer_name, employees.name as employee_name, invoices.payment_terms, invoices.payment_method, invoices.subtotal, invoices.discount_amount, invoices.total as net_sales, invoices.customer_id, invoices.cashier_employee_id as employee_id");
-        $pos = DB::table('pos_sales')
-            ->leftJoin('customers', 'pos_sales.customer_id', '=', 'customers.id')
-            ->join('employees', 'pos_sales.cashier_employee_id', '=', 'employees.id')
-            ->where('pos_sales.status', DocumentStatus::Finalized->value)
-            ->selectRaw("'POS sale' as document_type, pos_sales.sale_number as document_number, pos_sales.sale_at as transaction_date, COALESCE(customers.customer_name, 'Walk-in') as customer_name, employees.name as employee_name, pos_sales.payment_terms, pos_sales.payment_method, pos_sales.subtotal, pos_sales.discount_amount, pos_sales.total as net_sales, pos_sales.customer_id, pos_sales.cashier_employee_id as employee_id");
         $refunds = DB::table('payment_reversals')->join('payments', 'payment_reversals.payment_id', '=', 'payments.id')
             ->leftJoin('customers', 'payments.customer_id', '=', 'customers.id')
             ->join('employees', 'payments.received_by_employee_id', '=', 'employees.id')
-            ->whereIn('payments.payment_type', ['pos', 'invoice', 'credit_collection'])
+            ->whereIn('payments.payment_type', ['invoice', 'credit_collection'])
             ->where('payment_reversals.reversal_type', 'refund')
             ->selectRaw("'Refund' as document_type, payments.payment_number as document_number, payment_reversals.reversed_at as transaction_date, COALESCE(customers.customer_name, 'Walk-in') as customer_name, employees.name as employee_name, CASE WHEN payments.payment_type = 'credit_collection' THEN 'credit' ELSE 'cash' END as payment_terms, payment_reversals.method as payment_method, 0 as subtotal, 0 as discount_amount, -payment_reversals.amount as net_sales, payments.customer_id, payments.received_by_employee_id as employee_id");
-        $union = $invoices->unionAll($pos)->unionAll($refunds);
+        $union = $invoices->unionAll($refunds);
         $query = DB::query()->fromSub($union, 'sales')
             ->select('document_type', 'document_number', 'transaction_date', 'customer_name', 'employee_name', 'payment_terms', 'payment_method', 'subtotal', 'discount_amount', 'net_sales', 'customer_id', 'employee_id');
         $this->dateFilters($query, 'sales.transaction_date', $filters);
@@ -441,11 +436,6 @@ class ReportDataService
                 ->join('spare_parts', 'job_part_usages.spare_part_id', '=', 'spare_parts.id')
                 ->where('job_part_usages.status', 'issued')
                 ->select('repair_jobs.job_number as reference_number', 'repair_jobs.received_at as occurred_at', 'spare_parts.sku', 'spare_parts.name', 'job_part_usages.quantity', 'job_part_usages.unit_cost', 'repair_jobs.status'),
-            'pos-parts' => DB::table('pos_sale_items')
-                ->join('pos_sales', 'pos_sale_items.pos_sale_id', '=', 'pos_sales.id')
-                ->join('spare_parts', 'pos_sale_items.spare_part_id', '=', 'spare_parts.id')
-                ->where('pos_sales.status', DocumentStatus::Finalized->value)
-                ->select('pos_sales.sale_number as reference_number', 'pos_sales.sale_at as occurred_at', 'spare_parts.sku', 'spare_parts.name', 'pos_sale_items.quantity', 'pos_sale_items.unit_cost', 'pos_sale_items.line_total'),
             'adjustments' => DB::table('stock_movements')
                 ->join('stock_adjustment_items', 'stock_movements.adjustment_item_id', '=', 'stock_adjustment_items.id')
                 ->join('stock_adjustments', 'stock_adjustment_items.stock_adjustment_id', '=', 'stock_adjustments.id')
@@ -485,43 +475,25 @@ class ReportDataService
     private function profitEstimate(array $filters): array
     {
         $invoices = DB::table('invoices')->where('status', DocumentStatus::Finalized->value);
-        $pos = DB::table('pos_sales')->where('status', DocumentStatus::Finalized->value);
         $this->dateFilters($invoices, 'invoices.finalized_at', $filters);
-        $this->dateFilters($pos, 'pos_sales.finalized_at', $filters);
         $repairRevenue = $invoices->sum('total');
-        $posRevenue = $pos->sum('total');
         $discounts = BigDecimal::of((string) (clone $invoices)->sum('discount_amount'))
-            ->plus((string) (clone $pos)->sum('discount_amount'))->toScale(2);
+            ->toScale(2);
         $refundQuery = DB::table('payment_reversals')->join('payments', 'payment_reversals.payment_id', '=', 'payments.id')
-            ->whereIn('payments.payment_type', ['pos', 'invoice', 'credit_collection'])->where('payment_reversals.reversal_type', 'refund');
+            ->whereIn('payments.payment_type', ['invoice', 'credit_collection'])->where('payment_reversals.reversal_type', 'refund');
         $this->dateFilters($refundQuery, 'payment_reversals.reversed_at', $filters);
         $refunds = $refundQuery->sum('payment_reversals.amount');
-        $revenue = BigDecimal::of((string) $repairRevenue)->plus((string) $posRevenue)->minus((string) $refunds)->toScale(2);
-        $posCost = DB::table('pos_sale_items')->join('pos_sales', 'pos_sale_items.pos_sale_id', '=', 'pos_sales.id')
-            ->where('pos_sales.status', DocumentStatus::Finalized->value)->whereNotNull('pos_sale_items.unit_cost');
-        $this->dateFilters($posCost, 'pos_sales.finalized_at', $filters);
+        $revenue = BigDecimal::of((string) $repairRevenue)->minus((string) $refunds)->toScale(2);
         $expenses = DB::table('expenses')->where('status', DocumentStatus::Finalized->value)
             ->when($filters['date_from'] ?? null, fn (Builder $builder, string $date) => $builder->whereDate('incurred_at', '>=', $date))
             ->when($filters['date_to'] ?? null, fn (Builder $builder, string $date) => $builder->whereDate('incurred_at', '<=', $date))
             ->sum('amount');
-        $missingCostQuery = DB::table('pos_sale_items')->join('pos_sales', 'pos_sale_items.pos_sale_id', '=', 'pos_sales.id')
-            ->where('pos_sales.status', DocumentStatus::Finalized->value)
-            ->whereNull('pos_sale_items.unit_cost');
-        $this->dateFilters($missingCostQuery, 'pos_sales.finalized_at', $filters);
-        $missingCost = $missingCostQuery->exists();
         // Repair cost comes from issued inventory snapshots, not quoted selling
         // quantities. Fall back only to explicitly recorded historical costs.
         $repairCost = $this->repairCostData($filters);
-        $partCost = $repairCost['parts']->plus((string) $posCost->sum(DB::raw('pos_sale_items.quantity * pos_sale_items.unit_cost')));
+        $partCost = $repairCost['parts'];
         $labourCost = $repairCost['labour'];
-        $missingCost = $missingCost || $repairCost['missing'];
-        $returns = DB::table('stock_return_items')->join('stock_returns', 'stock_return_items.stock_return_id', '=', 'stock_returns.id')
-            ->where('stock_returns.return_type', 'pos_return')->where('stock_returns.status', 'finalized')->where('stock_return_items.condition', 'resalable');
-        $this->dateFilters($returns, 'stock_returns.returned_at', $filters);
-        $recoveredCost = (clone $returns)->whereNotNull('stock_return_items.unit_cost')->sum(DB::raw('stock_return_items.quantity * stock_return_items.unit_cost'));
-        $partCost = $partCost->minus((string) $recoveredCost);
-        $missingCost = $missingCost || (clone $returns)->whereNull('stock_return_items.unit_cost')->exists()
-            || (clone $returns)->where('stock_returns.refund_amount', 0)->exists();
+        $missingCost = $repairCost['missing'];
         // Freight/discount allocation is a separate owner decision. Do not
         // represent unallocated acquisition costs as fully costed profit.
         $pendingAdjustments = DB::table('purchases')->where('status', 'finalized')->where(fn ($q) => $q->where('discount_amount', '>', 0)->orWhere('other_costs', '>', 0))->exists();
@@ -529,7 +501,6 @@ class ReportDataService
         $missingCost = $missingCost || $pendingAdjustments || $ambiguousRefund;
         $summary = [
             'repair_revenue' => $this->money($repairRevenue),
-            'pos_revenue' => $this->money($posRevenue),
             'net_revenue' => $this->money($revenue),
             'parts_cost' => $this->money($partCost),
             'labour_cost' => $this->money($labourCost),

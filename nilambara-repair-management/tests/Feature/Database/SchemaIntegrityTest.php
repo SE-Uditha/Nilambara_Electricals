@@ -28,7 +28,7 @@ class SchemaIntegrityTest extends TestCase
             'invoices', 'invoice_jobs', 'invoice_items', 'payments',
             'payment_allocations', 'payment_reversals', 'stock_movements',
             'purchases', 'purchase_items', 'goods_received_notes',
-            'goods_received_note_items', 'pos_sales', 'pos_sale_items',
+            'goods_received_note_items',
             'job_status_histories',
         ] as $table) {
             $foreignKeys = Schema::getForeignKeys($table);

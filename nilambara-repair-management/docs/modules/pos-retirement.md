@@ -1,0 +1,13 @@
+# POS retirement - 21 October 2026
+
+The owner requested complete POS removal and explicitly approved removing its contributions to financial reports and dashboard aggregates. The local database was inspected: pos_sales, pos_sale_items, POS payments/allocations, stock movements, returns and approval requests were all empty. An encrypted full-database snapshot was created before removal under storage/app/private/pre-pos-removal-20261021-145310-ca5e26.json.enc. Retain the existing APP_KEY for recovery; the snapshot contains schema and rows in authenticated encrypted JSON.
+
+Removed: POS controllers/services/models/policies/requests, routes, views, menu, permission definitions/grants, receipt template, number sequences, POS approval types and unused translations. Shared inventory, repair returns, supplier purchases/GRNs, repair invoices/payments/refunds and their audit history remain. Reports and dashboard totals now use repair transactions only.
+
+Migration 2026_10_21_180000 drops the two POS tables and their columns/foreign keys in shared ledgers, return records, print history and approvals. It removes POS-only payment/ledger/stock enum branches while retaining the repair/supplier integrity checks. The migration refuses to run on another installation with populated POS transactions or references until those records are archived/reconciled. Only POS-specific permissions, print-template and sequence records are deleted.
+
+Historical migrations and database/schema/pos-retirement definitions are retained for fresh installation and schema-only rollback. They are migration history, not an active POS feature. A rollback recreates empty legacy tables/columns; recover retired data/grants from the encrypted snapshot if required. Earlier PDFs and schema documentation remain dated historical evidence.
+
+Verification includes removed-route/schema assertions, repair reporting and payment tests, latest-purchase valuation with a repair return, migration/rollback/remigration, and concurrent repair stock issues and GRN receiving. No live business records are created by tests.
+
+Final verification: 230 tests passed with 3,633 assertions on disposable MySQL. Full schema rollback and remigration passed. A separate fresh-database check passed the removal smoke tests plus concurrent cashier intake, technician status updates, competing repair stock issues and GRN receiving. The tested migration was applied locally; fingerprints across 64 non-POS tables confirmed that business records, users, password hashes and non-POS grants were unchanged. POS routes, tables, shared POS columns and incoming foreign keys are absent. Logs: storage/logs/pos-removal-mysql.log and storage/logs/pos-removal-concurrency.log.

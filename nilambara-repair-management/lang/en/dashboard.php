@@ -19,7 +19,6 @@ return [
     'ready_collection' => 'Ready for collection',
     'delivered' => 'Delivered',
     'repair_sales' => 'Repair sales',
-    'pos_sales' => 'POS sales',
     'total_sales' => 'Total sales',
     'cash_sales' => 'Cash-term sales',
     'credit_sales' => 'Credit sales',
@@ -32,7 +31,6 @@ return [
     'recent_jobs' => 'Recent repair jobs',
     'low_stock_alerts' => 'Low stock alerts',
     'recent_invoices' => 'Recent invoices',
-    'recent_pos_sales' => 'Recent POS sales',
     'job_number' => 'Job number',
     'customer' => 'Customer',
     'item' => 'Item',
@@ -40,7 +38,6 @@ return [
     'view_report' => 'View report',
     'no_jobs' => 'No repair jobs found.',
     'no_invoices' => 'No finalized invoices found.',
-    'no_sales' => 'No finalized POS sales found.',
     'no_low_stock' => 'No items at or below their reorder threshold.',
     'uncategorized' => 'Uncategorized',
 ];

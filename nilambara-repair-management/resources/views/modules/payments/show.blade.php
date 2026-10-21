@@ -47,8 +47,6 @@
                                             @can('invoices.view')<a href="{{ route('invoices.show', $allocation->invoice) }}" class="text-teal-800 hover:underline">{{ $allocation->invoice->invoice_number }}</a>@else{{ $allocation->invoice->invoice_number }}@endcan
                                         @elseif ($allocation->repairJob)
                                             <a href="{{ route('repair-jobs.show', $allocation->repairJob) }}" class="text-teal-800 hover:underline">{{ $allocation->repairJob->automatic_number ?: $allocation->repairJob->job_number }}</a> · {{ __('payments.job_advance') }}
-                                        @elseif ($allocation->posSale)
-                                            @can('pos.sales.view')<a href="{{ route('pos.sales.show', $allocation->posSale) }}" class="text-teal-800 hover:underline">{{ $allocation->posSale->sale_number }}</a>@else{{ $allocation->posSale->sale_number }}@endcan
                                         @else{{ __('payments.unallocated') }}@endif
                                     </td>
                                     <td class="px-5 py-3">{{ $allocation->allocatedByUser?->name ?: '—' }}</td>

@@ -45,7 +45,7 @@ class Step12AuditTest extends TestCase
         $reports = [
             'repair', 'technicians', 'sales', 'collections', 'advances', 'customer-credit',
             'overdue-credit', 'supplier-outstanding', 'purchases', 'expenses', 'stock',
-            'stock-movements', 'repair-parts', 'pos-parts', 'adjustments', 'purchase-history',
+            'stock-movements', 'repair-parts', 'adjustments', 'purchase-history',
             'supplier-purchases', 'valuation', 'profit-estimate', 'daily-sales', 'monthly-sales',
             'yearly-sales', 'repair-income', 'invoice-sales', 'cash-credit-sales', 'cashier-sales',
             'discounts', 'refunds', 'cash-summary', 'cash-collections', 'customer-statement', 'supplier-statement',

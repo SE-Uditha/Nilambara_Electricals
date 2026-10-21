@@ -15,11 +15,11 @@ class ApprovalRequest extends BusinessModel
 
     protected bool $preserveRecord = true;
 
-    protected array $immutableFields = ['id', 'source_key', 'kind', 'requested_by_user_id', 'purchase_id', 'pos_sale_id', 'payment_id', 'spare_part_id', 'pos_sale_item_id', 'amount', 'reason', 'payload', 'payload_hash'];
+    protected array $immutableFields = ['id', 'source_key', 'kind', 'requested_by_user_id', 'purchase_id', 'payment_id', 'spare_part_id', 'amount', 'reason', 'payload', 'payload_hash'];
 
     protected function casts(): array
     {
-        return ['payload' => 'array', 'amount' => 'decimal:2', 'decided_at' => 'datetime', 'consumed_at' => 'datetime'];
+        return ['payload' => 'array', 'amount' => 'decimal:2', 'decided_at' => 'datetime'];
     }
 
     protected static function boot(): void

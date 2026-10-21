@@ -28,13 +28,13 @@ class CashierRoleConsolidationTest extends TestCase
         $cashier->assignRole('cashier');
 
         $this->assertSame(['administrator', 'cashier', 'manager', 'storekeeper', 'technician'], Role::orderBy('name')->pluck('name')->all());
-        foreach (['customers.create', 'customers.update', 'receipts.create', 'receipts.print', 'jobs.view', 'job-cards.print', 'quotations.create', 'quotations.update', 'quotations.issue', 'reports.repair', 'invoices.create', 'invoices.issue', 'payments.receive', 'credit.collect', 'pos.sale'] as $permission) {
+        foreach (['customers.create', 'customers.update', 'receipts.create', 'receipts.print', 'jobs.view', 'job-cards.print', 'quotations.create', 'quotations.update', 'quotations.issue', 'reports.repair', 'invoices.create', 'invoices.issue', 'payments.receive', 'credit.collect'] as $permission) {
             $this->assertTrue($cashier->can($permission), $permission);
         }
-        foreach (['roles.manage', 'employees.create', 'customers.statement', 'customers.deactivate', 'jobs.assign', 'quotations.approve', 'invoices.cancel', 'payments.reverse', 'pos.refund', 'purchases.approve', 'settings.update'] as $permission) {
+        foreach (['roles.manage', 'employees.create', 'customers.statement', 'customers.deactivate', 'jobs.assign', 'quotations.approve', 'invoices.cancel', 'payments.reverse', 'purchases.approve', 'settings.update'] as $permission) {
             $this->assertFalse($cashier->can($permission), $permission);
         }
-        foreach (['customers.create', 'repair-receipts.create', 'quotations.create', 'invoices.create', 'payments.create', 'pos.index'] as $route) {
+        foreach (['customers.create', 'repair-receipts.create', 'quotations.create', 'invoices.create', 'payments.create'] as $route) {
             $this->actingAs($cashier)->get(route($route))->assertOk();
         }
     }

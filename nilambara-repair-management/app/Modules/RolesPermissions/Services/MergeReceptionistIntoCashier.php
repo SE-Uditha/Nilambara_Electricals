@@ -22,7 +22,7 @@ class MergeReceptionistIntoCashier
             $cashier = $roles->firstWhere('name', 'cashier') ?? Role::query()->create([
                 'name' => 'cashier', 'code' => 'cashier', 'label' => 'Cashier',
                 'guard_name' => 'web', 'is_active' => $receptionist->is_active,
-                'description' => 'Customer intake, repair reception, billing and point of sale.',
+                'description' => 'Customer intake, repair reception and billing.',
             ]);
             $oldPermissionIds = DB::table('permission_role')->where('role_id', $receptionist->id)
                 ->pluck('permission_id')->all();

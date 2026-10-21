@@ -9,8 +9,6 @@ use App\Modules\Invoices\Models\InvoiceJob;
 use App\Modules\JobTracking\Models\JobStatusHistory;
 use App\Modules\Payments\Models\PaymentAllocation;
 use App\Modules\Payments\Models\PaymentReversal;
-use App\Modules\POS\Models\PosSale;
-use App\Modules\POS\Models\PosSaleItem;
 use App\Modules\Purchases\Models\GoodsReceivedNote;
 use App\Modules\Purchases\Models\GoodsReceivedNoteItem;
 use App\Modules\Purchases\Models\Purchase;
@@ -207,7 +205,7 @@ class BusinessRelationshipsTest extends TestCase
         $this->assertSame(0, $part->stockMovements()->count(), 'Draft purchasing must have no implicit stock side effects.');
     }
 
-    public function test_pos_and_repair_usage_reference_the_same_spare_parts_and_movement_history(): void
+    public function test_repair_usage_references_spare_parts_and_movement_history(): void
     {
         $user = User::factory()->create();
         $part = $this->part();
@@ -226,34 +224,9 @@ class BusinessRelationshipsTest extends TestCase
             'quantity_delta' => '-2.000',
             'job_part_usage_id' => $usage->id,
         ]);
-        $sale = PosSale::create([
-            'sale_number' => $this->code('POS'),
-            'sale_at' => '2026-10-18 11:00:00',
-            'cashier_employee_id' => $this->employee()->id,
-            'subtotal' => '5.50',
-            'total' => '5.50',
-        ]);
-        $saleItem = PosSaleItem::create([
-            'pos_sale_id' => $sale->id,
-            'line_number' => 1,
-            'spare_part_id' => $part->id,
-            'location_id' => $location->id,
-            'description' => 'Same inventory part',
-            'quantity' => '1.000',
-            'unit_price' => '5.5000',
-            'line_total' => '5.50',
-        ]);
-        $saleIssue = $this->movement($part, $location, [
-            'movement_type' => 'pos_sale',
-            'quantity_delta' => '-1.000',
-            'pos_sale_item_id' => $saleItem->id,
-        ]);
-
-        $this->assertEqualsCanonicalizing([$opening->id, $jobIssue->id, $saleIssue->id], $part->stockMovements->modelKeys());
+        $this->assertEqualsCanonicalizing([$opening->id, $jobIssue->id], $part->stockMovements->modelKeys());
         $this->assertTrue($usage->sparePart->is($part));
-        $this->assertTrue($saleItem->sparePart->is($part));
         $this->assertTrue($jobIssue->sparePart->is($part));
-        $this->assertTrue($saleIssue->sparePart->is($part));
     }
 
     public function test_an_employee_can_link_to_one_existing_login_account(): void

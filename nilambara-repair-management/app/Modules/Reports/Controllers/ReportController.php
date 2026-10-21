@@ -19,7 +19,7 @@ class ReportController
     private const REPORTS = [
         'repair', 'technicians', 'sales', 'collections', 'advances', 'customer-credit',
         'overdue-credit', 'supplier-outstanding', 'purchases', 'expenses', 'stock',
-        'stock-movements', 'repair-parts', 'pos-parts', 'adjustments', 'purchase-history',
+        'stock-movements', 'repair-parts', 'adjustments', 'purchase-history',
         'supplier-purchases', 'valuation', 'profit-estimate',
         'daily-sales', 'monthly-sales', 'yearly-sales', 'repair-income', 'invoice-sales',
         'cash-credit-sales', 'cashier-sales', 'discounts', 'refunds', 'cash-summary', 'cash-collections',
@@ -147,7 +147,7 @@ class ReportController
         if (in_array($report, ['repair', 'technicians'], true)) {
             return $actor->can('reports.view') && $actor->can('jobs.view');
         }
-        if (in_array($report, ['stock', 'stock-movements', 'repair-parts', 'pos-parts', 'adjustments', 'purchase-history', 'supplier-purchases', 'valuation'], true)) {
+        if (in_array($report, ['stock', 'stock-movements', 'repair-parts', 'adjustments', 'purchase-history', 'supplier-purchases', 'valuation'], true)) {
             return $actor->can('inventory.view') || $actor->can('purchases.view');
         }
 

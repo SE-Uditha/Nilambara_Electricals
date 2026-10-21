@@ -4,7 +4,6 @@ namespace App\Modules\Inventory\Models;
 
 use App\Models\BusinessModel;
 use App\Models\User;
-use App\Modules\POS\Models\PosSaleItem;
 use App\Modules\Purchases\Models\GoodsReceivedNoteItem;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -26,7 +25,6 @@ class StockMovement extends BusinessModel
         'idempotency_key',
         'grn_item_id',
         'job_part_usage_id',
-        'pos_sale_item_id',
         'return_item_id',
         'adjustment_item_id',
         'count_item_id',
@@ -71,11 +69,6 @@ class StockMovement extends BusinessModel
     public function jobPartUsage(): BelongsTo
     {
         return $this->belongsTo(JobPartUsage::class, 'job_part_usage_id');
-    }
-
-    public function posSaleItem(): BelongsTo
-    {
-        return $this->belongsTo(PosSaleItem::class, 'pos_sale_item_id');
     }
 
     public function returnItem(): BelongsTo

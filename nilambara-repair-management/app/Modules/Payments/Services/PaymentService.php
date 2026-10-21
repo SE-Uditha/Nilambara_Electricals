@@ -14,7 +14,6 @@ use App\Modules\Invoices\Services\InvoiceBalanceService;
 use App\Modules\Payments\Models\Payment;
 use App\Modules\Payments\Models\PaymentAllocation;
 use App\Modules\Payments\Models\PaymentReversal;
-use App\Modules\POS\Models\PosSale;
 use App\Modules\RepairJobs\Models\RepairJob;
 use App\Support\BusinessAudit;
 use Brick\Math\BigDecimal;
@@ -143,97 +142,6 @@ class PaymentService
         }, 3);
     }
 
-    public function receivePosPayment(PosSale $sale, User $actor): Payment
-    {
-        abort_unless($actor->can('payments.create') && $actor->can('payments.receive'), 403);
-
-        return DB::transaction(function () use ($sale, $actor): Payment {
-            $lockedSale = PosSale::query()->whereKey($sale->getKey())->lockForUpdate()->firstOrFail();
-            if (! in_array($lockedSale->payment_status, ['pending', 'settled'], true)
-                || $lockedSale->payment_method === null
-                || ! BigDecimal::of((string) $lockedSale->total)->isGreaterThan(0)) {
-                throw ValidationException::withMessages(['payment' => __('pos.sale_payment_invalid')]);
-            }
-
-            $key = 'pos-payment:'.$lockedSale->idempotency_key;
-            $existing = Payment::query()->where('idempotency_key', $key)->first();
-            if ($existing !== null) {
-                $allocation = $existing->paymentAllocations()
-                    ->where('target_type', 'pos_sale')
-                    ->where('pos_sale_id', $lockedSale->getKey())
-                    ->first();
-                if ($existing->payment_type !== 'pos'
-                    || $existing->method->value !== $lockedSale->payment_method
-                    || BigDecimal::of((string) $existing->amount)->compareTo((string) $lockedSale->total) !== 0
-                    || $allocation === null) {
-                    throw ValidationException::withMessages(['payment' => __('payments.idempotency_mismatch')]);
-                }
-
-                return $existing;
-            }
-
-            $receiver = Employee::query()->whereKey($lockedSale->cashier_employee_id)
-                ->where('is_active', true)->first();
-            if ($receiver === null) {
-                throw ValidationException::withMessages(['payment' => __('payments.active_receiver_required')]);
-            }
-
-            $method = PaymentMethod::from($lockedSale->payment_method);
-            $reference = $this->nullableTrim($lockedSale->payment_reference);
-            if ($method === PaymentMethod::Cheque && Payment::query()->where('cheque_number', $reference)->exists()) {
-                throw ValidationException::withMessages(['payment_reference' => __('pos.duplicate_cheque_reference')]);
-            }
-
-            $payment = Payment::query()->create([
-                'payment_number' => 'TEMP-'.Str::uuid(),
-                'customer_id' => $lockedSale->customer_id,
-                'payment_type' => 'pos',
-                'method' => $method->value,
-                'amount' => (string) BigDecimal::of((string) $lockedSale->total)->toScale(2),
-                'paid_at' => $lockedSale->sale_at,
-                'received_by_employee_id' => $receiver->getKey(),
-                'bank_reference' => $method === PaymentMethod::BankTransfer ? $reference : null,
-                'cheque_number' => $method === PaymentMethod::Cheque ? $reference : null,
-                'cheque_date' => $method === PaymentMethod::Cheque ? $lockedSale->cheque_date : null,
-                'bank_name' => $this->nullableTrim($lockedSale->bank_name),
-                'notes' => $lockedSale->notes,
-                'idempotency_key' => $key,
-                'customer_scope_id' => $lockedSale->customer_scope_id,
-            ]);
-            $prefix = trim((string) config('business.payment_number_prefix', 'PAY-'));
-            if ($prefix === '' || strlen($prefix) > 20) {
-                throw new \LogicException('The payment number prefix must be non-empty and no longer than 20 characters.');
-            }
-            $payment->payment_number = $prefix.str_pad((string) $payment->getKey(), 5, '0', STR_PAD_LEFT);
-            DB::table('payments')->where('id', $payment->getKey())->update(['payment_number' => $payment->payment_number]);
-            $payment->syncOriginalAttribute('payment_number');
-
-            $allocation = PaymentAllocation::query()->create([
-                'payment_id' => $payment->getKey(),
-                'customer_id' => $lockedSale->customer_id,
-                'target_type' => 'pos_sale',
-                'pos_sale_id' => $lockedSale->getKey(),
-                'amount' => (string) $payment->amount,
-                'allocated_at' => now(config('business.timezone', 'Asia/Colombo')),
-                'allocated_by_user_id' => $actor->getKey(),
-                'idempotency_key' => 'pos-payment-allocation:'.$lockedSale->idempotency_key,
-                'customer_scope_id' => $lockedSale->customer_scope_id,
-            ]);
-            BusinessAudit::record($actor, 'pos.payment_posted', Payment::class, (int) $payment->getKey(), newValues: [
-                'payment_number' => $payment->payment_number,
-                'sale_number' => $lockedSale->sale_number,
-                'amount' => (string) $payment->amount,
-                'method' => $method->value,
-                'allocation_id' => $allocation->getKey(),
-            ]);
-
-            return $payment->refresh();
-        }, 3);
-    }
-
-    /**
-     * @param  array<string, mixed>  $data
-     */
     public function reverse(Payment $payment, array $data, User $actor): PaymentReversal
     {
         abort_unless($actor->can('payments.reverse'), 403);

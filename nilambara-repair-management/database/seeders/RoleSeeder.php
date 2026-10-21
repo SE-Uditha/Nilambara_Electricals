@@ -47,7 +47,6 @@ class RoleSeeder extends Seeder
             'inventory' => ['view', 'create', 'update', 'issue', 'adjust', 'stock-count'],
             'suppliers' => ['view', 'create', 'update'],
             'purchases' => ['view', 'create', 'receive', 'approve'],
-            'pos' => ['view', 'sale', 'refund', 'sales.view', 'receipt.print', 'discount', 'sale.cancel', 'return', 'payment.verify', 'reports.view'],
             'employees' => ['view', 'create', 'update', 'deactivate'],
             'users' => ['view', 'create', 'update', 'disable'],
             'roles' => ['view', 'manage'],
@@ -86,7 +85,7 @@ class RoleSeeder extends Seeder
                 'jobs.view', 'jobs.create', 'job-cards.view', 'job-cards.print',
                 'dashboard.view', 'invoices.view', 'invoices.create', 'invoices.print',
                 'payments.view', 'payments.create', 'payments.receive', 'payments.print', 'payments.export',
-                'credit.view', 'credit.collect', 'pos.view', 'pos.sale', 'pos.sales.view', 'pos.receipt.print',
+                'credit.view', 'credit.collect',
                 'reports.view',
             ],
             'storekeeper' => [
@@ -157,18 +156,6 @@ class RoleSeeder extends Seeder
             ],
         ];
         foreach ($paymentGrants as $roleName => $permissionNames) {
-            Role::query()->where('name', $roleName)->firstOrFail()->givePermissionTo($permissionNames);
-        }
-
-        $posGrants = [
-            'cashier' => ['pos.view', 'pos.sale', 'pos.sales.view', 'pos.receipt.print'],
-            'manager' => [
-                'pos.view', 'pos.sales.view', 'pos.receipt.print', 'pos.discount',
-                'pos.sale.cancel', 'pos.return', 'pos.refund', 'pos.payment.verify', 'pos.reports.view',
-            ],
-            'storekeeper' => ['pos.view'],
-        ];
-        foreach ($posGrants as $roleName => $permissionNames) {
             Role::query()->where('name', $roleName)->firstOrFail()->givePermissionTo($permissionNames);
         }
 

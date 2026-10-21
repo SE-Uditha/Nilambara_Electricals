@@ -54,10 +54,11 @@ try {
     $created = true;
     echo 'Created disposable database: '.$testDatabase.PHP_EOL;
     $testArguments = ['test', '--no-ansi', '--do-not-cache-result'];
-    if (in_array('--approvals', $argv, true)) {
-        $testArguments[] = '--filter=AuthorizedApprovalsTest|POSManagementTest|PaymentManagementTest|StockPurchasingWorkflowTest|SidebarNavigationTest|EmployeeManagementTest|SchemaIntegrityTest';
-    } elseif (in_array('--pos', $argv, true)) {
-        $testArguments[] = '--filter=POSManagementTest|BusinessRelationshipsTest|SchemaIntegrityTest';
+    if (in_array('--retirement', $argv, true)) {
+        $testArguments[] = '--filter=PosRemovalTest';
+    } elseif (in_array('--approvals', $argv, true)) {
+        $testArguments[] = '--filter=AuthorizedApprovalsTest|PaymentManagementTest|StockPurchasingWorkflowTest|SidebarNavigationTest|EmployeeManagementTest|SchemaIntegrityTest';
+
     } elseif (in_array('--step11', $argv, true)) {
         $testArguments[] = '--filter=Step11|ReportsTest|DashboardTest|SystemSupportTest|PrintTemplateManagementTest|BackupManagementTest|BusinessRelationshipsTest|SchemaIntegrityTest';
     }
@@ -70,7 +71,6 @@ try {
     }
     $run(['migrate', '--force', '--no-interaction', '--no-ansi']);
     $run(['migrate:status', '--no-ansi']);
-    $run([], 'scripts/verify-pos-concurrency.php');
     if (in_array('--step12', $argv, true)) {
         $run([], 'scripts/verify-step12-concurrency.php');
     }

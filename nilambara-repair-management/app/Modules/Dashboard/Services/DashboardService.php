@@ -56,13 +56,8 @@ class DashboardService
         $invoices = DB::table('invoices')
             ->where('status', DocumentStatus::Finalized->value)
             ->whereBetween('finalized_at', [$periodStart, $periodEnd]);
-        $posSales = DB::table('pos_sales')
-            ->where('status', DocumentStatus::Finalized->value)
-            ->whereBetween('finalized_at', [$periodStart, $periodEnd]);
         $invoiceSales = (clone $invoices)->sum('total');
-        $posRevenue = (clone $posSales)->sum('total');
         $invoiceCashSales = (clone $invoices)->where('payment_terms', 'cash')->sum('total');
-        $posCashSales = (clone $posSales)->where('payment_method', 'cash')->sum('total');
         $creditSales = (clone $invoices)->where('payment_terms', 'credit')->sum('total');
         $inventory = $this->inventory->defaultLocationBalancesQuery($periodEnd)->where('spare_parts.is_active', true);
         $balance = 'COALESCE(stock_balances.available_quantity, 0)';
@@ -85,9 +80,8 @@ class DashboardService
             'jobs' => (array) $jobCounts,
             'sales' => [
                 'repair' => $this->money($invoiceSales),
-                'pos' => $this->money($posRevenue),
-                'total' => $this->money(BigDecimal::of((string) $invoiceSales)->plus((string) $posRevenue)),
-                'cash_terms' => $this->money(BigDecimal::of((string) $invoiceCashSales)->plus((string) $posCashSales)),
+                'total' => $this->money($invoiceSales),
+                'cash_terms' => $this->money($invoiceCashSales),
                 'credit_terms' => $this->money($creditSales),
             ],
             'payments' => [
@@ -112,9 +106,6 @@ class DashboardService
                 ->select('invoices.id', 'invoices.invoice_number', 'invoices.invoice_date', 'invoices.total', 'invoices.status', 'customers.customer_name')
                 ->whereBetween('invoices.finalized_at', [$periodStart, $periodEnd])
                 ->where('invoices.status', DocumentStatus::Finalized->value)->orderByDesc('invoices.finalized_at')->limit(6)->get(),
-            'recent_pos_sales' => DB::table('pos_sales')->select('id', 'sale_number', 'sale_at', 'total', 'payment_status')
-                ->whereBetween('finalized_at', [$periodStart, $periodEnd])
-                ->where('status', DocumentStatus::Finalized->value)->orderByDesc('sale_at')->limit(6)->get(),
             'low_stock_items' => $this->inventory->defaultLocationBalancesQuery($periodEnd)
                 ->leftJoin('spare_part_categories', 'spare_parts.category_id', '=', 'spare_part_categories.id')
                 ->select('spare_parts.id', 'spare_parts.sku', 'spare_parts.name', 'spare_parts.minimum_stock_level', 'spare_parts.reorder_level', 'available_quantity', 'spare_part_categories.name as category_name')

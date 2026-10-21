@@ -46,12 +46,6 @@ return [
                 ['label' => 'credit_management', 'icon' => 'credit', 'route' => 'credit-invoices.index', 'permission' => 'credit.view'],
                 ['label' => 'cash_summary', 'icon' => 'wallet', 'route' => 'reports.show', 'route_parameters' => ['report' => 'cash-summary'], 'permission' => 'reports.view', 'roles' => ['administrator', 'cashier', 'manager']],
             ]],
-            ['label' => 'pos', 'icon' => 'pos', 'active_routes' => ['pos.*'], 'children' => [
-                ['label' => 'pos', 'icon' => 'pos', 'route' => 'pos.index', 'permission' => 'pos.view'],
-                ['label' => 'pos_sales_history', 'icon' => 'document', 'route' => 'pos.sales.index', 'permission' => 'pos.sales.view'],
-                ['label' => 'pos_returns', 'icon' => 'receipt', 'route' => 'pos.returns.index', 'permission' => 'pos.return'],
-                ['label' => 'pos_reports', 'icon' => 'chart', 'route' => 'pos.reports', 'permission' => 'pos.reports.view'],
-            ]],
         ],
     ],
     [

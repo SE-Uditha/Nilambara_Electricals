@@ -22,7 +22,6 @@ The migration preserves the existing identifiers and display data: role `code` r
 | Inventory | `inventory.view`, `inventory.create`, `inventory.update`, `inventory.issue`, `inventory.adjust`, `inventory.stock-count` |
 | Suppliers | `suppliers.view`, `suppliers.create`, `suppliers.update` |
 | Purchases | `purchases.view`, `purchases.create`, `purchases.receive`, `purchases.approve` |
-| POS | `pos.view`, `pos.sale`, `pos.refund` |
 | Employees | `employees.view`, `employees.create`, `employees.update`, `employees.deactivate` |
 | User accounts | `users.view`, `users.create`, `users.update`, `users.disable` |
 | Roles and permissions | `roles.view`, `roles.manage`, `permissions.manage` |
@@ -37,7 +36,7 @@ The migration preserves the existing identifiers and display data: role `code` r
 | --- | --- | --- |
 | Administrator | Every catalog permission. The role always receives all current permissions. | Cannot remove its final essential administration capabilities; an Administrator account cannot receive individual permission overrides. |
 | Technician | Dashboard, assigned job view, inspection, repair details/status/completion, and job-card view. | Job policy restricts a technician to jobs assigned to the linked employee record, even if a URL contains another job ID. |
-| Cashier | Dashboard; customer registration/edit/search; repair receiving and job/card viewing/printing; quotation preparation/issue/print; invoice creation/issue; payment/credit collection; POS sale; repair/sales reports. | No customer statements/opening balances, invoice cancellation, payment reversals, refunds, or settings by default. |
+| Cashier | Dashboard; customer registration/edit/search; repair receiving and job/card viewing/printing; quotation preparation/issue/print; invoice creation/issue; payment/credit collection; repair/sales reports. | No customer statements/opening balances, invoice cancellation, payment reversals, refunds, or settings by default. |
 | Storekeeper | Dashboard, inventory view/create/update/issue/adjust/count, purchase view/create/receive. | Supplier administration, purchase approval, and backup restore are withheld by default. |
 | Manager | Dashboard, customer view/statements, job view/assignment, quotation view/approval, invoice/payment view, credit view/collection/reports, supplier administration, purchase/receipt/approval, and reports including financial reports. | No system settings, user/role administration, administrator privilege grants, or backup restore by default. |
 

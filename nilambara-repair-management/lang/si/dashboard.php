@@ -19,7 +19,6 @@ return [
     'ready_collection' => 'භාර ගැනීමට සූදානම්',
     'delivered' => 'භාරදුන්',
     'repair_sales' => 'අලුත්වැඩියා විකුණුම්',
-    'pos_sales' => 'POS විකුණුම්',
     'total_sales' => 'මුළු විකුණුම්',
     'cash_sales' => 'මුදල් කොන්දේසි විකුණුම්',
     'credit_sales' => 'ණය විකුණුම්',
@@ -32,7 +31,6 @@ return [
     'recent_jobs' => 'මෑත අලුත්වැඩියා රැකියා',
     'low_stock_alerts' => 'අඩු තොග දැනුම්දීම්',
     'recent_invoices' => 'මෑත ඉන්වොයිසි',
-    'recent_pos_sales' => 'මෑත POS විකුණුම්',
     'job_number' => 'රැකියා අංකය',
     'customer' => 'පාරිභෝගිකයා',
     'item' => 'අයිතමය',
@@ -40,7 +38,6 @@ return [
     'view_report' => 'වාර්තාව බලන්න',
     'no_jobs' => 'අලුත්වැඩියා රැකියා හමු නොවීය.',
     'no_invoices' => 'අවසන් කළ ඉන්වොයිසි නැත.',
-    'no_sales' => 'අවසන් කළ POS විකුණුම් නැත.',
     'no_low_stock' => 'නැවත ඇණවුම් සීමාවේ හෝ ඊට අඩු අයිතම නැත.',
     'uncategorized' => 'වර්ගීකරණය නොකළ',
 ];

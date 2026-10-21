@@ -42,7 +42,6 @@
         <div class="row"><span class="label">{{ __('payments.date') }}</span><span class="value">{{ $payment->paid_at->timezone(config('business.timezone'))->format(config('business.date_format').' '.config('business.time_format')) }}</span></div>
         <div class="row"><span class="label">{{ __('payments.customer') }}</span><span class="value">{{ $payment->customer?->display_name ?: '—' }}</span></div>
         @if ($invoice)<div class="row"><span class="label">{{ __('payments.invoice') }}</span><span class="value">{{ $invoice->invoice_number }}</span></div>@endif
-        @if ($posSale)<div class="row"><span class="label">{{ __('pos.sale_number') }}</span><span class="value">{{ $posSale->sale_number }}</span></div>@endif
         @foreach ($payment->paymentAllocations as $allocation)
             @if ($allocation->repairJob)<div class="row"><span class="label">{{ __('payments.repair_job') }}</span><span class="value">{{ $allocation->repairJob->automatic_number ?: $allocation->repairJob->job_number }}</span></div>@endif
         @endforeach

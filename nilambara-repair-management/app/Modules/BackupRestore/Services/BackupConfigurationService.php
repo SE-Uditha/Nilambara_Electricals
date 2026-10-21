@@ -29,7 +29,7 @@ class BackupConfigurationService
         DB::transaction(function () use ($values, $actor): void {
             foreach (array_intersect_key($values, array_flip(self::KEYS)) as $key => $value) {
                 if ($key === 'root') {
-                    abort_unless(app(BackupService::class)->isSafeDestination($value), 422, 'Destination must be a private absolute path outside web roots.');
+                    $value = app(BackupFolderService::class)->destination($value);
                 }
                 $setting = SystemSetting::updateOrCreate(['group' => 'backup', 'key' => $key], [
                     'value' => $key === 'root' ? Crypt::encryptString($value) : $value,

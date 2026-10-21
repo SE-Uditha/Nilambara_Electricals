@@ -21,7 +21,7 @@
         <input name="date_from" type="date" value="{{ request('date_from') }}" class="form-input" aria-label="{{ __('payments.date_from') }}">
         <input name="date_to" type="date" value="{{ request('date_to') }}" class="form-input" aria-label="{{ __('payments.date_to') }}">
         <select name="method" class="form-input"><option value="">{{ __('payments.all_methods') }}</option>@foreach (\App\Enums\PaymentMethod::cases() as $method)<option value="{{ $method->value }}" @selected(request('method') === $method->value)>{{ __('payments.method_'.$method->value) }}</option>@endforeach</select>
-        <select name="payment_type" class="form-input"><option value="">{{ __('payments.all_types') }}</option>@foreach (['advance', 'invoice', 'credit_collection', 'pos'] as $type)<option value="{{ $type }}" @selected(request('payment_type') === $type)>{{ __('payments.type_'.$type) }}</option>@endforeach</select>
+        <select name="payment_type" class="form-input"><option value="">{{ __('payments.all_types') }}</option>@foreach (['advance', 'invoice', 'credit_collection'] as $type)<option value="{{ $type }}" @selected(request('payment_type') === $type)>{{ __('payments.type_'.$type) }}</option>@endforeach</select>
         <select name="status" class="form-input"><option value="">{{ __('payments.all_statuses') }}</option>@foreach (['unallocated', 'partially_allocated', 'allocated', 'partially_reversed', 'reversed'] as $status)<option value="{{ $status }}" @selected(request('status') === $status)>{{ __('payments.status_'.$status) }}</option>@endforeach</select>
         <button class="rounded-xl border border-teal-700 px-4 py-2 text-xs font-semibold text-teal-800 hover:bg-teal-50">{{ __('ui.search') }}</button>
     </form>
@@ -38,11 +38,10 @@
                         <tr class="text-slate-700">
                             <td class="px-4 py-3 font-mono font-semibold"><a href="{{ route('payments.show', $payment) }}" class="text-teal-800 hover:underline">{{ $payment->payment_number }}</a></td>
                             <td class="px-4 py-3">{{ $payment->paid_at->timezone(config('business.timezone'))->format(config('business.date_format')) }}</td>
-                            <td class="px-4 py-3">{{ $payment->customer?->display_name ?: ($payment->payment_type === 'pos' ? __('pos.walk_in') : '—') }}<span class="mt-1 block text-[10px] text-slate-400">{{ $payment->customer?->mobile_number }}</span></td>
+                            <td class="px-4 py-3">{{ $payment->customer?->display_name ?: '-' }}<span class="mt-1 block text-[10px] text-slate-400">{{ $payment->customer?->mobile_number }}</span></td>
                             <td class="px-4 py-3">
                                 @if ($allocation?->invoice)<a class="text-teal-800 hover:underline" href="{{ route('invoices.show', $allocation->invoice) }}">{{ $allocation->invoice->invoice_number }}</a>
                                 @elseif ($allocation?->repairJob)<a class="text-teal-800 hover:underline" href="{{ route('repair-jobs.show', $allocation->repairJob) }}">{{ $allocation->repairJob->automatic_number ?: $allocation->repairJob->job_number }}</a>
-                                @elseif ($allocation?->posSale)<a class="text-teal-800 hover:underline" href="{{ route('pos.sales.show', $allocation->posSale) }}">{{ $allocation->posSale->sale_number }}</a>
                                 @else{{ __('payments.unallocated') }}@endif
                             </td>
                             <td class="px-4 py-3">{{ __('payments.type_'.$payment->payment_type) }}</td>

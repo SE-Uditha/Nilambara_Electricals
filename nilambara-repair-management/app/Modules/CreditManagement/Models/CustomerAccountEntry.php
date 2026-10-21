@@ -8,7 +8,6 @@ use App\Modules\Customers\Models\Customer;
 use App\Modules\Invoices\Models\Invoice;
 use App\Modules\Payments\Models\Payment;
 use App\Modules\Payments\Models\PaymentReversal;
-use App\Modules\POS\Models\PosSale;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
@@ -25,7 +24,6 @@ class CustomerAccountEntry extends BusinessModel
         'description',
         'recorded_by_user_id',
         'invoice_id',
-        'pos_sale_id',
         'payment_id',
         'payment_reversal_id',
         'reverses_entry_id',
@@ -59,11 +57,6 @@ class CustomerAccountEntry extends BusinessModel
     public function invoice(): BelongsTo
     {
         return $this->belongsTo(Invoice::class, 'invoice_id');
-    }
-
-    public function posSale(): BelongsTo
-    {
-        return $this->belongsTo(PosSale::class, 'pos_sale_id');
     }
 
     public function payment(): BelongsTo

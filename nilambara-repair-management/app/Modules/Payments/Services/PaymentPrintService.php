@@ -29,7 +29,6 @@ class PaymentPrintService
             'receivedByEmployee',
             'paymentAllocations.invoice',
             'paymentAllocations.repairJob',
-            'paymentAllocations.posSale',
             'paymentAllocations.releases',
             'paymentReversals',
         ]);
@@ -40,7 +39,6 @@ class PaymentPrintService
             ->first();
         $invoiceAllocation = $payment->paymentAllocations->first(fn ($allocation): bool => $allocation->target_type === 'invoice');
         $invoice = $invoiceAllocation?->invoice;
-        $posSale = $payment->paymentAllocations->first(fn ($allocation): bool => $allocation->target_type === 'pos_sale')?->posSale;
         $invoiceBalance = $invoice ? $this->invoiceBalances->summary($invoice) : null;
         if ($invoice && $invoiceBalance) {
             $jobIds = $invoice->invoiceJobs()->pluck('repair_job_id');
@@ -66,7 +64,6 @@ class PaymentPrintService
         $data = [
             'payment' => $payment,
             'invoice' => $invoice,
-            'posSale' => $posSale,
             'invoiceBalance' => $invoiceBalance,
             'paymentBalance' => $paymentBalance,
             'template' => $template,

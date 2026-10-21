@@ -40,9 +40,6 @@
         @can('invoices.view')
             <div class="rounded-2xl border border-slate-200 bg-white p-4"><p class="text-[10px] font-medium text-slate-500">{{ __('dashboard.repair_sales') }}</p><p class="mt-2 text-xl font-bold text-slate-900">{{ config('business.currency') }} {{ $sales['repair'] }}</p></div>
         @endcan
-        @can('pos.sales.view')
-            <div class="rounded-2xl border border-slate-200 bg-white p-4"><p class="text-[10px] font-medium text-slate-500">{{ __('dashboard.pos_sales') }}</p><p class="mt-2 text-xl font-bold text-slate-900">{{ config('business.currency') }} {{ $sales['pos'] }}</p></div>
-        @endcan
         @can('reports.financial')
             @foreach ([[__('dashboard.total_sales'), $sales['total']], [__('dashboard.cash_sales'), $sales['cash_terms']], [__('dashboard.credit_sales'), $sales['credit_terms']]] as [$label, $value])
                 <div class="rounded-2xl border border-slate-200 bg-white p-4"><p class="text-[10px] font-medium text-slate-500">{{ $label }}</p><p class="mt-2 text-xl font-bold text-slate-900">{{ config('business.currency') }} {{ $value }}</p></div>
@@ -81,9 +78,6 @@
         @endcan
         @can('invoices.view')
             <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white"><div class="border-b border-slate-100 px-5 py-4"><h2 class="text-sm font-semibold">{{ __('dashboard.recent_invoices') }}</h2></div><div class="divide-y divide-slate-100">@forelse ($recent_invoices as $invoice)<div class="flex items-center justify-between px-5 py-3"><div><p class="text-xs font-semibold">{{ $invoice->invoice_number }} · {{ $invoice->customer_name }}</p><p class="mt-1 text-[10px] text-slate-500">{{ $invoice->invoice_date }}</p></div><p class="text-xs font-semibold">{{ config('business.currency') }} {{ $invoice->total }}</p></div>@empty<p class="px-5 py-10 text-center text-xs text-slate-500">{{ __('dashboard.no_invoices') }}</p>@endforelse</div></section>
-        @endcan
-        @can('pos.sales.view')
-            <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white"><div class="border-b border-slate-100 px-5 py-4"><h2 class="text-sm font-semibold">{{ __('dashboard.recent_pos_sales') }}</h2></div><div class="divide-y divide-slate-100">@forelse ($recent_pos_sales as $sale)<div class="flex items-center justify-between px-5 py-3"><div><p class="text-xs font-semibold">{{ $sale->sale_number }}</p><p class="mt-1 text-[10px] text-slate-500">{{ $sale->sale_at }}</p></div><p class="text-xs font-semibold">{{ config('business.currency') }} {{ $sale->total }}</p></div>@empty<p class="px-5 py-10 text-center text-xs text-slate-500">{{ __('dashboard.no_sales') }}</p>@endforelse</div></section>
         @endcan
     </div>
 @can('jobs.view')<section class="mt-5 rounded-xl border bg-white p-4"><h2 class="font-semibold">Ready for Collection</h2>@forelse ($ready_jobs as $job)<p class="mt-2 text-sm">{{ $job->job_number }} ? {{ $job->item_name }}</p>@empty<p class="mt-2 text-sm text-slate-500">No ready jobs in the selected received-date cohort.</p>@endforelse</section>@endcan

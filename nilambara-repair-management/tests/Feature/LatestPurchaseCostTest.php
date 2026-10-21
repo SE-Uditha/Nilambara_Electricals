@@ -3,10 +3,10 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use App\Modules\Inventory\Models\JobPartUsage;
+use App\Modules\Inventory\Models\StockReturn;
 use App\Modules\Inventory\Services\InventoryService;
 use App\Modules\Payments\Models\PaymentReversal;
-use App\Modules\POS\Services\POSCheckoutService;
-use App\Modules\POS\Services\POSReturnService;
 use App\Modules\Purchases\Services\PurchaseWorkflowService;
 use App\Modules\Reports\Services\ReportDataService;
 use App\Modules\Suppliers\Models\Supplier;
@@ -37,7 +37,7 @@ class LatestPurchaseCostTest extends TestCase
         $this->assertSame('20.00', (string) BigDecimal::of((string) $collections['query']->sum('net_amount'))->toScale(2));
     }
 
-    public function test_old_customer_return_does_not_replace_latest_purchase_cost_for_pos_or_valuation(): void
+    public function test_old_repair_return_does_not_replace_latest_purchase_cost_for_valuation(): void
     {
         $this->seed(RoleSeeder::class);
         $actor = User::factory()->create();
@@ -52,22 +52,22 @@ class LatestPurchaseCostTest extends TestCase
             $purchases->finalize($purchase, $actor);
             $purchases->receive($purchase, ['purchase_item_id' => $purchase->items()->sole()->id, 'location_id' => $location->id, 'quantity' => '5.000', 'idempotency_key' => (string) Str::uuid()], $actor);
         };
-        $checkout = fn () => app(POSCheckoutService::class)->checkout(['payment_method' => 'cash', 'amount_tendered' => '10.00', 'discount_amount' => '0.00', 'idempotency_key' => (string) Str::uuid()], [$part->id => '1.000'], $actor);
         $receive('3.0000');
-        $oldSale = $checkout();
-        $this->assertSame('3.0000', $oldSale->items()->sole()->unit_cost);
+        $job = $this->job();
+        $usage = JobPartUsage::create(['repair_job_id' => $job->id, 'spare_part_id' => $part->id, 'location_id' => $location->id, 'quantity' => '1.000', 'unit_cost' => '3.0000', 'requested_by_user_id' => $actor->id, 'idempotency_key' => (string) Str::uuid()]);
+        $this->movement($part, $location, ['movement_type' => 'job_issue', 'quantity_delta' => '-1.000', 'unit_cost' => '3.0000', 'job_part_usage_id' => $usage->id]);
         $receive('7.0000');
-        app(POSReturnService::class)->record(['pos_sale_item_id' => $oldSale->items()->sole()->id, 'quantity' => '1.000', 'condition' => 'resalable', 'reason' => 'Return from earlier purchase batch', 'refund_amount' => '10.00', 'refund_method' => 'cash', 'idempotency_key' => (string) Str::uuid()], $actor);
+        $return = StockReturn::create(['return_number' => $this->code('RET'), 'return_type' => 'repair_return', 'repair_job_id' => $job->id, 'returned_at' => now(), 'recorded_by_user_id' => $actor->id, 'status' => 'finalized', 'reason' => 'Unused repair part returned from the old purchase batch.']);
+        $item = $return->items()->create(['spare_part_id' => $part->id, 'location_id' => $location->id, 'quantity' => '1.000', 'unit_cost' => '3.0000', 'condition' => 'resalable']);
+        $this->movement($part, $location, ['movement_type' => 'customer_return', 'quantity_delta' => '1.000', 'unit_cost' => '3.0000', 'return_item_id' => $item->id]);
         $this->assertSame('7.0000', app(InventoryService::class)->latestUnitCost($part->id, $location->id));
-        $newSale = $checkout();
-        $this->assertSame('7.0000', $newSale->items()->sole()->unit_cost);
         $report = app(ReportDataService::class)->build('valuation', [], $actor);
         $row = $report['query']->sole();
         $this->assertSame('7.0000', (string) BigDecimal::of((string) $row->unit_cost)->toScale(4));
-        $this->assertSame('63.00', (string) BigDecimal::of((string) $row->stock_value)->toScale(2));
-        $this->assertSame('63.00', $report['summary']['known_stock_value']);
+        $this->assertSame('70.00', (string) BigDecimal::of((string) $row->stock_value)->toScale(2));
+        $this->assertSame('70.00', $report['summary']['known_stock_value']);
         $profit = app(ReportDataService::class)->build('profit-estimate', [], $actor);
-        $this->assertSame('3.00', $profit['summary']['estimated_profit']);
+        $this->assertSame('0.00', $profit['summary']['estimated_profit']);
         $this->actingAs($actor)->get(route('reports.show', 'valuation'))->assertOk();
     }
 }

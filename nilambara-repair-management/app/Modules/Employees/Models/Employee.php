@@ -6,7 +6,6 @@ use App\Models\BusinessModel;
 use App\Models\User;
 use App\Modules\Invoices\Models\Invoice;
 use App\Modules\Payments\Models\Payment;
-use App\Modules\POS\Models\PosSale;
 use App\Modules\Purchases\Models\GoodsReceivedNote;
 use App\Modules\RepairJobs\Models\JobInspection;
 use App\Modules\RepairJobs\Models\RepairJob;
@@ -76,11 +75,6 @@ class Employee extends BusinessModel
     public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class, 'cashier_employee_id');
-    }
-
-    public function posSales(): HasMany
-    {
-        return $this->hasMany(PosSale::class, 'cashier_employee_id');
     }
 
     public function payments(): HasMany

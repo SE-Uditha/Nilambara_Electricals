@@ -23,7 +23,7 @@ class ReportsTest extends TestCase
         foreach ([
             'repair', 'technicians', 'sales', 'collections', 'advances', 'customer-credit',
             'overdue-credit', 'supplier-outstanding', 'purchases', 'expenses', 'stock',
-            'stock-movements', 'repair-parts', 'pos-parts', 'adjustments', 'purchase-history',
+            'stock-movements', 'repair-parts', 'adjustments', 'purchase-history',
             'supplier-purchases', 'valuation', 'profit-estimate',
         ] as $report) {
             $this->get(route('reports.show', $report))->assertOk();

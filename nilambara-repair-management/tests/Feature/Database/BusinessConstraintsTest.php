@@ -8,7 +8,6 @@ use App\Modules\Invoices\Models\InvoiceJob;
 use App\Modules\JobTracking\Models\JobStatusHistory;
 use App\Modules\Payments\Models\PaymentAllocation;
 use App\Modules\Payments\Models\PaymentReversal;
-use App\Modules\POS\Models\PosSale;
 use App\Modules\RepairJobs\Models\RepairJob;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -260,41 +259,11 @@ class BusinessConstraintsTest extends TestCase
         $history->delete();
     }
 
-    public function test_nullable_customer_ids_cannot_bypass_payment_owner_consistency(): void
+    public function test_repair_payments_must_have_a_customer(): void
     {
-        $user = User::factory()->create();
-        $customer = $this->customer();
-        $namedPayment = $this->payment($customer);
-        $anonymousPayment = $this->payment(null, [
-            'customer_id' => null,
-            'customer_scope_id' => 0,
-            'payment_type' => 'pos',
-        ]);
-
-        foreach ([
-            [$namedPayment, null, 0],
-            [$anonymousPayment, $customer->id, $customer->id],
-        ] as [$payment, $saleCustomerId, $saleScope]) {
-            $sale = PosSale::create([
-                'sale_number' => $this->code('POS'),
-                'sale_at' => '2026-10-18 10:00:00',
-                'customer_id' => $saleCustomerId,
-                'customer_scope_id' => $saleScope,
-                'cashier_employee_id' => $this->employee()->id,
-            ]);
-
-            $this->assertDatabaseRejects(fn () => DB::table('payment_allocations')->insert([
-                'payment_id' => $payment->id,
-                'customer_id' => null,
-                'customer_scope_id' => 0,
-                'target_type' => 'pos_sale',
-                'pos_sale_id' => $sale->id,
-                'amount' => '10.00',
-                'allocated_at' => '2026-10-18 10:00:00',
-                'allocated_by_user_id' => $user->id,
-                'idempotency_key' => $this->code('ALLOC'),
-            ]));
-        }
+        $this->assertDatabaseRejects(fn () => $this->payment(null, [
+            'customer_id' => null, 'customer_scope_id' => 0, 'payment_type' => 'invoice',
+        ]));
     }
 
     public function test_allocation_releases_cannot_use_a_reversal_of_another_payment(): void

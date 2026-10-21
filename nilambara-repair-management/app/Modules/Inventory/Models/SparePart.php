@@ -4,7 +4,6 @@ namespace App\Modules\Inventory\Models;
 
 use App\Models\BusinessModel;
 use App\Modules\Invoices\Models\InvoiceItem;
-use App\Modules\POS\Models\PosSaleItem;
 use App\Modules\Purchases\Models\GoodsReceivedNoteItem;
 use App\Modules\Purchases\Models\PurchaseItem;
 use App\Modules\Quotations\Models\QuotationItem;
@@ -93,11 +92,6 @@ class SparePart extends BusinessModel
     public function invoiceItems(): HasMany
     {
         return $this->hasMany(InvoiceItem::class, 'spare_part_id');
-    }
-
-    public function posSaleItems(): HasMany
-    {
-        return $this->hasMany(PosSaleItem::class, 'spare_part_id');
     }
 
     public function jobPartUsages(): HasMany

@@ -14,13 +14,19 @@
     @can('backups.configure')
     <form method="POST" action="{{ route('backups.configure') }}" class="mb-6 grid gap-3 rounded-xl border bg-white p-4 sm:grid-cols-2">
         @csrf
-        <label>Private backup directory<input class="form-input" name="root" placeholder="Leave empty to retain current destination" maxlength="1000" disabled id="backup-destination"></label>
-        <label><input type="checkbox" onchange="document.getElementById('backup-destination').disabled=!this.checked"> Change private destination</label>
+        <div class="sm:col-span-2">
+            <label class="mb-2 block font-semibold" for="backup-destination">Custom backup folder</label>
+            <div class="flex flex-wrap items-center gap-2"><input class="form-input flex-1" name="root" value="{{ old('root') }}" placeholder="Example: D:\NilambaraBackups" maxlength="1000" @disabled(!old('root')) id="backup-destination"><button type="button" id="browse-backup-folder" class="rounded-lg border px-4 py-2 text-teal-700">Browse folders</button></div>
+            <label class="mt-2 block text-sm"><input type="checkbox" id="change-backup-destination" @checked(old('root'))> Change backup location</label>
+            <p class="mt-2 text-xs text-slate-500">Choose a folder on the PC running this system, or enter its full path. A new subfolder is created on the first backup. Existing backups stay in their original locations.</p>
+            @error('root')<p role="alert" class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+        </div>
         <label>Daily time (Asia/Colombo)<input class="form-input" type="time" name="schedule_time" value="{{ config('backup.schedule_time') }}" required></label>
         <label>Retention days<input class="form-input" type="number" name="retention_days" min="1" max="3650" value="{{ config('backup.retention_days') }}" required></label>
         <label>Maximum scheduled versions<input class="form-input" type="number" name="maximum_backups" min="1" max="1000" value="{{ config('backup.maximum_backups') }}" required></label>
         <button class="rounded bg-teal-700 px-4 py-2 text-white">Save backup policy</button>
     </form>
+    @include('modules.backup-restore.folder-picker')
     <p class="mb-4 text-xs">Restore uses the protected <code>php artisan backup:restore ID</code> command with administrator password, exact database confirmation and a safety backup. Selecting a history row never starts a restore. Manual backups are protected from automatic retention cleanup.</p>
     @endcan
     @error('backup')<p class="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-800">{{ $message }}</p>@enderror

@@ -3,7 +3,6 @@
 namespace App\Modules\Inventory\Models;
 
 use App\Models\BusinessModel;
-use App\Modules\POS\Models\PosSaleItem;
 use App\Modules\Purchases\Models\GoodsReceivedNoteItem;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -37,11 +36,6 @@ class StockLocation extends BusinessModel
     public function goodsReceivedNoteItems(): HasMany
     {
         return $this->hasMany(GoodsReceivedNoteItem::class, 'location_id');
-    }
-
-    public function posSaleItems(): HasMany
-    {
-        return $this->hasMany(PosSaleItem::class, 'location_id');
     }
 
     public function jobPartUsages(): HasMany

@@ -10,7 +10,6 @@ use App\Modules\Invoices\Models\InvoiceJob;
 use App\Modules\Payments\Models\Payment;
 use App\Modules\Payments\Models\PaymentAllocation;
 use App\Modules\Payments\Models\PaymentReversal;
-use App\Modules\POS\Models\PosSale;
 use App\Modules\PrintTemplates\Models\DocumentPrintHistory;
 use App\Modules\Quotations\Models\Quotation;
 use App\Modules\RepairJobs\Models\RepairJob;
@@ -84,11 +83,6 @@ class Customer extends BusinessModel
     public function invoiceJobs(): HasMany
     {
         return $this->hasMany(InvoiceJob::class, 'customer_id');
-    }
-
-    public function posSales(): HasMany
-    {
-        return $this->hasMany(PosSale::class, 'customer_id');
     }
 
     public function payments(): HasMany

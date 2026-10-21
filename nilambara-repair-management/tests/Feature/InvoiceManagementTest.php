@@ -500,7 +500,6 @@ class InvoiceManagementTest extends TestCase
             'target_type' => $target,
             'repair_job_id' => $jobId,
             'invoice_id' => $invoiceId,
-            'pos_sale_id' => null,
             'amount' => $amount,
             'allocated_at' => now(),
             'allocated_by_user_id' => $user->getKey(),

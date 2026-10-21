@@ -36,7 +36,7 @@ class PaymentController extends Controller
             'date_from' => ['nullable', 'date'],
             'date_to' => ['nullable', 'date', 'after_or_equal:date_from'],
             'method' => ['nullable', Rule::enum(PaymentMethod::class)],
-            'payment_type' => ['nullable', Rule::in(['advance', 'invoice', 'credit_collection', 'pos'])],
+            'payment_type' => ['nullable', Rule::in(['advance', 'invoice', 'credit_collection'])],
             'status' => ['nullable', Rule::in(['unallocated', 'partially_allocated', 'allocated', 'partially_reversed', 'reversed'])],
         ]);
         $query = Payment::query()->with([
@@ -44,10 +44,9 @@ class PaymentController extends Controller
             'receivedByEmployee',
             'paymentAllocations.invoice',
             'paymentAllocations.repairJob',
-            'paymentAllocations.posSale',
             'paymentReversals',
         ])
-            ->whereIn('payment_type', ['advance', 'invoice', 'credit_collection', 'pos'])
+            ->whereIn('payment_type', ['advance', 'invoice', 'credit_collection'])
             ->orderByDesc('paid_at')->orderByDesc('id');
 
         if (($term = trim((string) ($filters['q'] ?? ''))) !== '') {
@@ -59,8 +58,7 @@ class PaymentController extends Controller
                         ->orWhere('mobile_number', 'like', $like))
                     ->orWhereHas('paymentAllocations.invoice', fn ($invoice) => $invoice->where('invoice_number', 'like', $like))
                     ->orWhereHas('paymentAllocations.repairJob', fn ($job) => $job->where('job_number', 'like', $like)
-                        ->orWhere('automatic_number', 'like', $like))
-                    ->orWhereHas('paymentAllocations.posSale', fn ($sale) => $sale->where('sale_number', 'like', $like));
+                        ->orWhere('automatic_number', 'like', $like));
             });
         }
         if (! empty($filters['date_from'])) {
@@ -181,7 +179,6 @@ class PaymentController extends Controller
             'receivedByEmployee',
             'paymentAllocations.invoice.customer',
             'paymentAllocations.repairJob',
-            'paymentAllocations.posSale',
             'paymentAllocations.allocatedByUser',
             'paymentAllocations.releases.releasedByUser',
             'paymentReversals.reversedByUser',

@@ -8,7 +8,6 @@
             'quotation' => ['A4', 'A5'],
             'job_card' => ['A6'],
             'invoice' => ['A5'],
-            'pos_receipt' => ['A4', 'A5', 'thermal'],
             'repair_receipt' => ['A4', 'A5', 'A6'],
             default => ['A4', 'A5', 'A6'],
         };

@@ -22,8 +22,6 @@ class SubmitApprovalRequest extends FormRequest
             $rules += ['payment_id' => ['required', 'integer', 'exists:payments,id'], 'amount' => ['required', 'numeric', 'gt:0', new DecimalValue], 'method' => [$kind === 'payment_refund' ? 'required' : 'nullable', Rule::in(['cash', 'bank_transfer', 'cheque'])], 'external_reference' => ['nullable', 'string', 'max:100']];
         } elseif (in_array($kind, ['stock_adjustment', 'stock_count'], true)) {
             $rules += ['spare_part_id' => ['required', 'integer', 'exists:spare_parts,id'], 'location_id' => ['required', 'integer', 'exists:stock_locations,id'], 'quantity' => ['required', 'numeric', 'decimal:0,3', 'between:-999999999999.999,999999999999.999'], 'adjustment_type' => ['required', Rule::in(['correction', 'damaged'])]];
-        } elseif ($kind === 'pos_return') {
-            $rules += ['pos_sale_item_id' => ['required', 'integer', 'exists:pos_sale_items,id'], 'quantity' => ['required', 'numeric', 'decimal:0,3', 'gt:0', 'max:999999999999.999'], 'condition' => ['required', Rule::in(['resalable', 'damaged'])], 'amount' => ['required', 'numeric', 'min:0', new DecimalValue], 'method' => ['required', Rule::in(['cash', 'bank_transfer', 'cheque'])]];
         } elseif ($kind === 'pos_discount') {
             $rules += ['customer_id' => ['nullable', 'integer', Rule::exists('customers', 'id')->where('is_active', true)], 'amount' => ['required', 'numeric', 'gt:0', new DecimalValue]];
         }

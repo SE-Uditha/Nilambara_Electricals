@@ -2,9 +2,6 @@
 
 return [
     'record_payment' => 'Record payment',
-    'pos_sales_history' => 'POS sales history',
-    'pos_returns' => 'POS returns',
-    'pos_reports' => 'POS reports',
     'business_reports' => 'Business reports',
     'repair_reports' => 'Repair reports',
     'sales_reports' => 'Sales reports',
@@ -43,7 +40,6 @@ return [
     'stock_issues' => 'තොග නිකුත් කිරීම්',
     'suppliers' => 'සැපයුම්කරුවන්',
     'purchases' => 'මිලදී ගැනීම්',
-    'pos' => 'විකුණුම් කවුළුව',
     'employees' => 'සේවකයන්',
     'users' => 'පරිශීලක ගිණුම්',
     'permissions' => 'අවසර',
