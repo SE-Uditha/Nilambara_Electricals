@@ -3,6 +3,7 @@
 @section('title',$part->name)
 
 @section('content')
+<a class="mb-4 inline-block text-sm text-teal-700 underline" href="{{ route('approval-requests.create',['kind'=>'stock_adjustment','subject_id'=>$part->id]) }}">Request stock correction / write-off approval</a>
 <div class="mb-5 flex justify-between"><h1 class="text-2xl font-bold">{{ $part->name }} · {{ $part->sku }}</h1>
 @can('inventory.update')<a class="text-teal-700 underline" href="{{ route('inventory.edit',$part) }}">Edit part</a>
 @endcan</div>

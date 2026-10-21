@@ -5,6 +5,7 @@ namespace App\Modules\POS\Services;
 use App\Enums\DocumentStatus;
 use App\Enums\PaymentMethod;
 use App\Models\User;
+use App\Modules\Approvals\Services\DiscountApprovalService;
 use App\Modules\Customers\Models\Customer;
 use App\Modules\Employees\Models\Employee;
 use App\Modules\Inventory\Models\SparePart;
@@ -73,7 +74,10 @@ class POSCheckoutService
 
             $discount = BigDecimal::of((string) ($data['discount_amount'] ?? '0.00'))->toScale(2, RoundingMode::HalfUp);
             if ($discount->isGreaterThan(0)) {
-                abort_unless($actor->can('pos.discount'), 403);
+                if (! $actor->can('pos.discount')) {
+                    abort_unless(! empty($data['discount_approval_id']), 403);
+                    app(DiscountApprovalService::class)->consume((int) $data['discount_approval_id'], $cart, $data, $actor);
+                }
             }
 
             $customer = null;

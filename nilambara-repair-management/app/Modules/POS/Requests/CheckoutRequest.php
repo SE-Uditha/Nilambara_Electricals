@@ -32,6 +32,7 @@ class CheckoutRequest extends FormRequest
             'cheque_date' => ['required_if:payment_method,cheque', 'nullable', 'date'],
             'bank_name' => ['nullable', 'string', 'max:150'],
             'discount_amount' => ['nullable', 'numeric', 'decimal:0,2', 'gte:0', new DecimalValue],
+            'discount_approval_id' => ['nullable', 'integer', 'min:1', 'exists:authorized_approval_requests,id'],
             'notes' => ['nullable', 'string', 'max:2000'],
             'idempotency_key' => ['required', 'uuid', 'max:100'],
         ];

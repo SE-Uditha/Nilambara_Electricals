@@ -106,7 +106,7 @@ return [
             ]],
             ['label' => 'backup_restore', 'icon' => 'database', 'route' => 'backups.index', 'permission' => 'backups.view'],
             ['label' => 'audit_logs', 'icon' => 'activity', 'route' => 'audit-logs.index', 'permission' => 'audit.view'],
-            ['label' => 'approvals', 'icon' => 'shield', 'permission' => 'purchases.approve', 'roles' => ['administrator', 'manager']],
+            ['label' => 'approvals', 'icon' => 'shield', 'route' => 'approvals.index', 'roles' => ['administrator', 'manager']],
         ],
     ],
 ];

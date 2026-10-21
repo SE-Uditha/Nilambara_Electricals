@@ -3,6 +3,7 @@
 @section('title', $sale->sale_number)
 
 @section('content')
+<a class="mb-4 inline-block text-sm text-teal-700 underline" href="{{ route('approval-requests.create',['kind'=>'pos_return']) }}">Request return / refund approval</a>
     <div class="mb-6 flex flex-wrap items-end justify-between gap-3"><div><p class="mb-2 text-[10px] font-semibold tracking-[0.15em] text-teal-700 uppercase">{{ __('pos.title') }}</p><h1 class="text-2xl font-bold tracking-tight text-slate-900">{{ $sale->sale_number }}</h1><p class="mt-1 text-sm text-slate-500">{{ $sale->sale_at->timezone(config('business.timezone'))->format(config('business.date_format').' '.config('business.time_format')) }}</p></div>
         <div class="flex flex-wrap gap-2">@can('pos.sales.view')<a href="{{ route('pos.sales.index') }}" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold">{{ __('pos.sales_history') }}</a>@endcan
             @if ($sale->status === \App\Enums\DocumentStatus::Finalized && auth()->user()->can('pos.receipt.print'))<a href="{{ route('pos.sales.print', $sale) }}" class="rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white">{{ __('pos.print_receipt') }}</a><a href="{{ route('pos.sales.pdf', ['sale' => $sale, 'paper' => 'A5']) }}" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold">{{ __('payments.download_pdf') }}</a>@endif

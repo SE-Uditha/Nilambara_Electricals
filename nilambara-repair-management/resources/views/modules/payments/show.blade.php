@@ -3,6 +3,7 @@
 @section('title', __('payments.payment_details').' · '.$payment->payment_number)
 
 @section('content')
+<a class="mb-4 inline-block text-sm text-teal-700 underline" href="{{ route('approval-requests.create',['kind'=>'payment_refund','subject_id'=>$payment->id]) }}">Request refund / reversal approval</a>
     <div class="mb-7 flex flex-wrap items-end justify-between gap-4">
         <div>
             <a href="{{ route('payments.index') }}" class="text-xs font-semibold text-teal-700 hover:text-teal-900">← {{ __('payments.back_to_payments') }}</a>
