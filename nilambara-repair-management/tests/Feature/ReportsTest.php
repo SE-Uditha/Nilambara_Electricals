@@ -62,14 +62,14 @@ class ReportsTest extends TestCase
         unlink($path);
     }
 
-    public function test_cashier_cannot_view_financial_reports_or_export_reports(): void
+    public function test_cashier_can_view_financial_reports_and_export_reports(): void
     {
         $this->seed(RoleSeeder::class);
         $user = User::factory()->create();
         $user->assignRole('cashier');
         $this->actingAs($user);
 
-        $this->get(route('reports.show', 'sales'))->assertForbidden();
-        $this->get(route('reports.export', ['report' => 'sales', 'format' => 'xlsx']))->assertForbidden();
+        $this->get(route('reports.show', 'sales'))->assertOk();
+        $this->get(route('reports.export', ['report' => 'sales', 'format' => 'xlsx']))->assertOk();
     }
 }

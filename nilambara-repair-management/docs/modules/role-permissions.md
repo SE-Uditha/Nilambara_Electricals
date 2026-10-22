@@ -35,27 +35,36 @@ The migration preserves the existing identifiers and display data: role `code` r
 | Role | Default access | Important restrictions |
 | --- | --- | --- |
 | Administrator | Every catalog permission. The role always receives all current permissions. | Cannot remove its final essential administration capabilities; an Administrator account cannot receive individual permission overrides. |
-| Technician | Dashboard, assigned job view, inspection, repair details/status/completion, and job-card view. | Job policy restricts a technician to jobs assigned to the linked employee record, even if a URL contains another job ID. |
-| Cashier | Dashboard; customer registration/edit/search; repair receiving and job/card viewing/printing; quotation preparation/issue/print; invoice creation/issue; payment/credit collection; repair/sales reports. | No customer statements/opening balances, invoice cancellation, payment reversals, refunds, or settings by default. |
-| Storekeeper | Dashboard, inventory view/create/update/issue/adjust/count, purchase view/create/receive. | Supplier administration, purchase approval, and backup restore are withheld by default. |
-| Manager | Dashboard, customer view/statements, job view/assignment, quotation view/approval, invoice/payment view, credit view/collection/reports, supplier administration, purchase/receipt/approval, and reports including financial reports. | No system settings, user/role administration, administrator privilege grants, or backup restore by default. |
+| Cashier | Customer intake, receipts, job assignment, inspection, repair notes/status/completion, quotation preparation/approval, invoicing/cancellation, collection/refunds/reversals, customer statements, inventory, suppliers, purchasing/receiving/approval and financial/stock reports. | No user/role administration, settings or backup restore by default. Explicit permission denials still apply; users cannot decide their own manual approval requests. |
 
-`rolePermissions` in `RoleSeeder` is the source for initial role grants. Storekeeper supplier creation and purchase approval stay management-only; the Storekeeper retains operational purchase entry and receipt. Cashier financial reversals/cancellations and unspecified approval actions are denied by default.
+`rolePermissions` in `RoleSeeder` defines the two current roles: Administrator and Cashier. Cashier combines the previous cashier, manager, storekeeper and technician defaults.
 
 ## Evaluation and administration
 
 - Route authorization uses Laravel `can` middleware. Views filter sidebar items with the same abilities; hiding a link is not the authorization boundary.
 - Spatie resolves role and direct permission grants. The configured Gate check applies explicit `deny` overrides before grants; explicit `allow` adds an individual grant, and `inherit` removes an override.
 - Individual overrides are managed only by users with `permissions.manage`. A user cannot change their own role or overrides.
-- The five seeded roles cannot be deleted from the UI. Administrator role permissions cannot be reduced; other role grants can be configured at **Administration → Roles & Permissions**.
+- The two seeded roles cannot be deleted from the UI. Administrator role permissions cannot be reduced; other role grants can be configured at **Administration → Roles & Permissions**.
 - Disabling or demoting the last active Administrator is rejected. A disabled user is logged out on the next request.
-- The RepairJob policy checks technician assignment in addition to the broad `jobs.view` permission. Future job controllers must call the policy for every record action.
+- RepairJob policies enforce the permission for each action. Cashiers can work across repair assignments; an employee assignment no longer restricts account access.
 
 ## Decisions for owner confirmation
 
-The BRD does not specify detailed approval authority. The restricted default allows Managers and Administrators to approve purchases and quotations; only Managers/Administrators receive purchase approval and job assignment. Confirm whether repair-price changes, refunds, invoice cancellation, and backup restore should have additional approvers before those workflows are built.
+Cashiers now perform operational management and stock duties. Administrators retain system administration. Manual approval requests still require a different authorized Cashier or Administrator to decide them.
 
 
 ## Cashier consolidation (2026-10-21)
 
 Receptionist is no longer a selectable role. Existing receptionist accounts now have Cashier with their usernames, passwords, employment history and individual overrides preserved. Existing Cashier and Receptionist permission grants are combined, including customized grants. The retired role and assignments are recorded in an audit event. The merge is transactional/idempotent and runs via `2026_10_21_100000_merge_receptionist_into_cashier.php`; RoleSeeder also handles legacy installations without recreating the retired role. Automatic rollback does not split merged accounts/permissions because their later intent cannot be inferred. Historical Step 13 PDFs retain their dated six-role snapshot.
+
+## Operational role consolidation (2026-10-21)
+
+Manager and Storekeeper grants and memberships migrate into Cashier via `2026_10_21_190000_merge_operations_into_cashier.php`. Extra operational logins are disabled, with existing Cashier, Administrator and Technician accounts protected. User IDs, password hashes, employees, transaction histories and individual overrides remain unchanged. Retired roles and original grants/memberships/account states are recorded in audit events; the encrypted pre-migration snapshot supports recovery. Historical PDFs remain dated evidence.
+
+## Technician role retirement (2026-10-21)
+
+Only Administrator and Cashier are selectable roles. Cashier inherits the former Technician repair grants as well as all existing operational grants. A separate migration transfers customized Technician permissions and memberships, disables extra Technician-only logins and preserves existing Cashier/Administrator accounts. Password hashes, employee IDs, repairs, assignments and history remain intact.
+
+Repair assignment now selects an active employee, including employees with no login or a disabled login. The assignment field records who performs the repair; it no longer requires a Technician login role. Inactive employees cannot receive new assignments. Individual permission denials, active-login checks and the manual self-approval restriction remain effective.
+
+Verification: 232 isolated MySQL tests passed (3,666 assertions), followed by complete rollback/remigration and four concurrency checks. Two focused employee-assignment and retirement tests also passed (28 assertions). The live migration applied successfully; exact original permission/membership union, password hashes and records in 59 other tables were verified against `storage/app/private/pre-technician-consolidation-20261021-204157-9d5c33.json.enc`. Keep the existing APP_KEY for recovery. The technician.demo login is disabled; Cashier and Administrator logins are preserved.

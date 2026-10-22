@@ -321,7 +321,7 @@ return [
     'inspection_saved' => 'Inspection details saved.',
     'repair_information_saved' => 'Repair information saved.',
     'job_status_updated' => 'Job status updated and history recorded.',
-    'active_technician_required' => 'Select an active employee with an active Technician account.',
+    'active_technician_required' => 'Select an active employee for this repair.',
     'inspection_date_before_received' => 'Inspection date cannot be before the job received date.',
     'completion_date_before_received' => 'Completion date cannot be before the job received date.',
     'cancellation_not_authorized' => 'You are not authorized to cancel repair jobs.',

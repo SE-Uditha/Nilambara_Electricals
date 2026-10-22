@@ -86,7 +86,7 @@ class RepairJobService
                 ->where('is_active', true)
                 ->first();
 
-            if ($technician === null || ! $technician->user?->hasActiveAccount() || ! $technician->user->hasRole('technician')) {
+            if ($technician === null) {
                 throw ValidationException::withMessages([
                     'technician_id' => __('ui.active_technician_required'),
                 ]);

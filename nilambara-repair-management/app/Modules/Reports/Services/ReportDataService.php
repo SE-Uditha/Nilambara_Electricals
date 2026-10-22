@@ -86,11 +86,6 @@ class ReportDataService
                     ->orWhere('customers.customer_name', 'like', '%'.$term.'%');
             }));
 
-        if ($actor->hasRole('technician')) {
-            $employeeId = $this->employeeId($actor);
-            $query->where('repair_jobs.technician_id', $employeeId > 0 ? $employeeId : -1);
-        }
-
         return [
             'title' => __('reports.repair_title'),
             'columns' => $this->columns([
@@ -110,7 +105,7 @@ class ReportDataService
      */
     private function technicians(array $filters, User $actor): array
     {
-        $employeeId = $actor->hasRole('technician') ? $this->employeeId($actor) : ($filters['employee_id'] ?? null);
+        $employeeId = $filters['employee_id'] ?? null;
         $driver = DB::connection()->getDriverName();
         $completionHours = $driver === 'sqlite'
             ? '(julianday(repair_jobs.completed_at) - julianday(repair_jobs.received_at)) * 24'

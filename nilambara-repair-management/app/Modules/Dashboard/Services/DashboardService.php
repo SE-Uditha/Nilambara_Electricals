@@ -31,14 +31,6 @@ class DashboardService
         $terminal = [JobStatus::Delivered->value, JobStatus::Cancelled->value, JobStatus::UnableToRepair->value];
 
         $jobs = DB::table('repair_jobs')->whereBetween('received_at', [$periodStart, $periodEnd]);
-        if ($actor->hasRole('technician')) {
-            $employeeId = DB::table('employees')->where('user_id', $actor->getKey())->value('id');
-            if ($employeeId === null) {
-                $jobs->whereRaw('1 = 0');
-            } else {
-                $jobs->where('technician_id', $employeeId);
-            }
-        }
         $jobCounts = (clone $jobs)
             ->selectRaw('COUNT(*) as total_jobs')
             ->selectRaw('SUM(CASE WHEN status NOT IN (?, ?, ?) THEN 1 ELSE 0 END) as active_jobs', $terminal)
@@ -125,15 +117,6 @@ class DashboardService
         $query = DB::table('repair_jobs')->join('customers', 'repair_jobs.customer_id', '=', 'customers.id')
             ->whereBetween('repair_jobs.received_at', [$start, $end])
             ->select('repair_jobs.id', 'repair_jobs.job_number', 'repair_jobs.item_name', 'repair_jobs.status', 'repair_jobs.received_at', 'customers.customer_name');
-
-        if ($actor->hasRole('technician')) {
-            $employeeId = DB::table('employees')->where('user_id', $actor->getKey())->value('id');
-            if ($employeeId === null) {
-                $query->whereRaw('1 = 0');
-            } else {
-                $query->where('repair_jobs.technician_id', $employeeId);
-            }
-        }
 
         return $query->orderByDesc('repair_jobs.received_at')->limit(8)->get();
     }

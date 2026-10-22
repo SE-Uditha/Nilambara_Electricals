@@ -318,7 +318,7 @@ return [
     'inspection_saved' => 'පරීක්ෂණ තොරතුරු සුරකින ලදී.',
     'repair_information_saved' => 'අලුත්වැඩියා තොරතුරු සුරකින ලදී.',
     'job_status_updated' => 'කාර්ය තත්ත්වය සහ ඉතිහාසය සුරකින ලදී.',
-    'active_technician_required' => 'සක්‍රීය කාර්මික ගිණුමක් ඇති සේවකයෙකු තෝරන්න.',
+    'active_technician_required' => '??? ???????????? ???? ??????? ???????? ??????.',
     'inspection_date_before_received' => 'පරීක්ෂණ දිනය භාණ්ඩය භාරගත් දිනයට පෙර විය නොහැක.',
     'completion_date_before_received' => 'අවසන් කළ දිනය භාණ්ඩය භාරගත් දිනයට පෙර විය නොහැක.',
     'cancellation_not_authorized' => 'අලුත්වැඩියා කාර්ය අවලංගු කිරීමට ඔබට අවසර නැත.',

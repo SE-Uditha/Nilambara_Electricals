@@ -62,7 +62,7 @@ class BackupFolderSelectionTest extends TestCase
     {
         $this->actor('cashier');
         $this->getJson(route('backups.folders', ['path' => $this->root]))->assertForbidden();
-        $this->actor('manager');
+        $this->actor('cashier');
         $this->getJson(route('backups.folders', ['path' => $this->root]))->assertForbidden();
         $this->actor('administrator');
         $response = $this->getJson(route('backups.folders', ['path' => $this->root]))->assertOk()->assertJsonPath('path', realpath($this->root))->assertJsonPath('selectable', true)->assertJsonCount(2, 'folders');

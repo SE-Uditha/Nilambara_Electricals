@@ -182,6 +182,8 @@ class RepairReceiptController extends Controller
             ->first();
         $settings = $this->printSettings($template, 'A5');
         $snapshot = $receipt->document_snapshot ?? [];
+        // Job type is internal and must not enter customer print/export data.
+        unset($snapshot['job_type']);
         $label = $template?->duplicate_copy_label ?: __('ui.duplicate_copy');
         $printTime = now(config('business.timezone', 'Asia/Colombo'));
 

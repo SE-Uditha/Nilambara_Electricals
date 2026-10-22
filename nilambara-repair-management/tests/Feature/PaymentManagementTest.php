@@ -12,9 +12,11 @@ use App\Modules\Payments\Models\PaymentAllocation;
 use App\Modules\Payments\Services\PaymentAllocationService;
 use App\Modules\Payments\Services\PaymentService;
 use App\Modules\RepairReceipts\Services\RepairReceiptService;
+use App\Modules\RolesPermissions\Models\Permission;
 use Brick\Math\BigDecimal;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Tests\Feature\Database\CreatesDatabaseRecords;
@@ -175,7 +177,7 @@ class PaymentManagementTest extends TestCase
 
     public function test_cross_customer_allocation_is_rejected_without_creating_an_allocation(): void
     {
-        $manager = $this->userWithRole('manager');
+        $manager = $this->userWithRole('cashier');
         $customer = $this->customer();
         $invoice = $this->issuedInvoice($manager, $customer, '100.00');
         $otherCustomer = $this->customer();
@@ -202,7 +204,7 @@ class PaymentManagementTest extends TestCase
 
     public function test_refund_and_full_accounting_reversal_restore_invoice_balance_and_log_entries(): void
     {
-        $manager = $this->userWithRole('manager');
+        $manager = $this->userWithRole('cashier');
         $customer = $this->customer();
         $invoice = $this->issuedInvoice($manager, $customer, '100.00');
         $payment = app(PaymentService::class)->receiveInvoicePayment($this->paymentData($invoice, '100.00'), $manager);
@@ -237,6 +239,7 @@ class PaymentManagementTest extends TestCase
     public function test_only_authorized_roles_can_reverse_and_receiver_impersonation_is_restricted(): void
     {
         $cashier = $this->userWithRole('cashier');
+        DB::table('permission_user')->insert(['user_id' => $cashier->id, 'permission_id' => Permission::findByName('payments.reverse')->id, 'model_type' => User::class, 'effect' => 'deny']);
         $customer = $this->customer();
         $invoice = $this->issuedInvoice($cashier, $customer, '100.00');
         $payment = app(PaymentService::class)->receiveInvoicePayment($this->paymentData($invoice, '20.00'), $cashier);
@@ -256,7 +259,7 @@ class PaymentManagementTest extends TestCase
 
     public function test_customer_statement_uses_ledger_running_balance_and_pdf_route(): void
     {
-        $cashier = $this->userWithRole('manager');
+        $cashier = $this->userWithRole('cashier');
         $customer = $this->customer(['opening_balance' => '15.00']);
         CustomerAccountEntry::query()->create([
             'customer_id' => $customer->getKey(),

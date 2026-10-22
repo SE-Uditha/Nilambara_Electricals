@@ -22,10 +22,6 @@ class JobCardController extends Controller
             ->orderByDesc('received_at')
             ->orderByDesc('id');
 
-        if (auth()->user()->hasRole('technician') && ! auth()->user()->hasAnyRole(['administrator', 'manager'])) {
-            $query->where('technician_id', auth()->user()->employee?->getKey() ?? 0);
-        }
-
         return view('modules.job-cards.index', [
             'jobs' => $query->paginate(20),
         ]);

@@ -39,6 +39,11 @@ class InvoicePrintService
         $paperSize = in_array($template?->paper_size, ['A4', 'A5', 'A6'], true) ? $template->paper_size : 'A5';
         $orientation = in_array($template?->orientation, ['portrait', 'landscape'], true) ? $template->orientation : 'portrait';
         $document = $invoice->document_snapshot ?: $this->invoices->snapshot($invoice);
+        // Exclude internal job classification from current and historical exports.
+        unset($document['job_type']);
+        foreach ($document['jobs'] ?? [] as $index => $job) {
+            unset($document['jobs'][$index]['job_type']);
+        }
         $balance = $this->balances->summary($invoice);
         $data = [
             'invoice' => $invoice,

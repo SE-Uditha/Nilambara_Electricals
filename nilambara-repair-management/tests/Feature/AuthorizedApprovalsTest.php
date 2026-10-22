@@ -8,9 +8,11 @@ use App\Modules\AuditLogs\Models\AuditLog;
 use App\Modules\Inventory\Services\StockWorkflowService;
 use App\Modules\Purchases\Models\Purchase;
 use App\Modules\Purchases\Services\PurchaseWorkflowService;
+use App\Modules\RolesPermissions\Models\Permission;
 use App\Modules\Suppliers\Models\Supplier;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Tests\Feature\Database\CreatesDatabaseRecords;
 use Tests\TestCase;
@@ -23,6 +25,11 @@ class AuthorizedApprovalsTest extends TestCase
     {
         parent::setUp();
         $this->seed(RoleSeeder::class);
+    }
+
+    private function actorWithoutPermissions(): User
+    {
+        return User::factory()->create();
     }
 
     private function actor(string $role): User
@@ -59,24 +66,23 @@ class AuthorizedApprovalsTest extends TestCase
         return ApprovalRequest::latest('id')->firstOrFail();
     }
 
-    public function test_inbox_is_restricted_and_manual_requests_are_private(): void
+    public function test_cashier_can_review_another_cashiers_request_but_technician_cannot(): void
     {
         $cashier = $this->actor('cashier');
-        $manager = $this->actor('manager');
-        $this->actingAs($cashier)->get(route('approvals.index'))->assertForbidden();
-        $this->actingAs($manager)->get(route('approvals.index'))->assertOk()->assertSee('Authorized Approvals');
-        $storekeeper = $this->actor('storekeeper');
-        $approval = $this->requestStock($storekeeper);
-        $this->actingAs($cashier)->get(route('approval-requests.show', $approval))->assertForbidden();
-        $this->post(route('approval-requests.decide', $approval), ['decision' => 'approved', 'comment' => 'Looks correct.'])->assertForbidden();
-        $this->actingAs($storekeeper)->get(route('approval-requests.index'))->assertOk()->assertSee('Stock correction');
+        $approval = $this->requestStock($cashier);
+        $technician = $this->actorWithoutPermissions();
+        $this->actingAs($technician)->get(route('approvals.index'))->assertForbidden();
+        $this->get(route('approval-requests.show', $approval))->assertForbidden();
+        $this->actingAs($cashier)->post(route('approval-requests.decide', $approval), ['decision' => 'approved', 'comment' => 'Cannot approve my own request.'])->assertForbidden();
+        $this->actingAs($this->actor('cashier'))->get(route('approvals.index'))->assertOk()->assertSee('Authorized Approvals');
+        $this->get(route('approval-requests.show', $approval))->assertOk();
         $this->assertSame('pending', $approval->fresh()->status);
     }
 
     public function test_purchase_approval_posts_payable_once_and_retains_decision(): void
     {
-        $purchase = $this->draft($this->actor('storekeeper'));
-        $manager = $this->actor('manager');
+        $purchase = $this->draft($this->actor('cashier'));
+        $manager = $this->actor('cashier');
         $this->actingAs($manager)->get(route('approvals.index'))->assertOk()->assertSee($purchase->purchase_number);
         $url = route('approvals.document.decide', ['kind' => 'purchase', 'id' => $purchase->id]);
         $this->get(route('approvals.document', ['kind' => 'purchase', 'id' => $purchase->id]))->assertOk()->assertSee('Approval test supplier');
@@ -95,8 +101,8 @@ class AuthorizedApprovalsTest extends TestCase
 
     public function test_rejected_purchase_is_cancelled_without_payable_or_goods(): void
     {
-        $purchase = $this->draft($this->actor('storekeeper'));
-        $this->actingAs($this->actor('manager'))->post(route('approvals.document.decide', ['kind' => 'purchase', 'id' => $purchase->id]), ['decision' => 'rejected', 'comment' => 'Supplier prices are incorrect.'])->assertRedirect()->assertSessionHasNoErrors();
+        $purchase = $this->draft($this->actor('cashier'));
+        $this->actingAs($this->actor('cashier'))->post(route('approvals.document.decide', ['kind' => 'purchase', 'id' => $purchase->id]), ['decision' => 'rejected', 'comment' => 'Supplier prices are incorrect.'])->assertRedirect()->assertSessionHasNoErrors();
         $this->assertSame('cancelled', $purchase->fresh()->status->value);
         $this->assertDatabaseCount('supplier_account_entries', 0);
         $this->assertDatabaseCount('goods_received_notes', 0);
@@ -104,7 +110,7 @@ class AuthorizedApprovalsTest extends TestCase
 
     public function test_stock_requests_wait_then_execute_once_and_rejections_do_not_post(): void
     {
-        $storekeeper = $this->actor('storekeeper');
+        $storekeeper = $this->actor('cashier');
         $approval = $this->requestStock($storekeeper);
         $this->assertDatabaseCount('stock_adjustments', 0);
         $this->actingAs($this->actor('administrator'))->get(route('approval-requests.show', $approval))->assertOk()->assertSee('Reconcile the physical stock.');
@@ -138,14 +144,14 @@ class AuthorizedApprovalsTest extends TestCase
         $this->assertDatabaseCount('authorized_approval_requests', 1);
         $this->postJson(route('approval-requests.store'), array_replace($data, ['amount' => '11.00']))->assertUnprocessable();
         $approval = ApprovalRequest::sole();
-        $this->actingAs($this->actor('manager'))->post(route('approval-requests.decide', $approval), ['decision' => 'approved', 'comment' => 'Refund checked against payment.'])->assertRedirect()->assertSessionHasNoErrors();
+        $this->actingAs($this->actor('cashier'))->post(route('approval-requests.decide', $approval), ['decision' => 'approved', 'comment' => 'Refund checked against payment.'])->assertRedirect()->assertSessionHasNoErrors();
         $this->assertDatabaseCount('payment_reversals', 1);
         $this->assertSame('approved', $approval->fresh()->status);
     }
 
     public function test_stock_count_rechecks_movements_and_keeps_failed_request_pending(): void
     {
-        $storekeeper = $this->actor('storekeeper');
+        $storekeeper = $this->actor('cashier');
         $approval = $this->requestStock($storekeeper, 'stock_count');
         $reviewer = $this->actor('administrator');
         $stock = app(StockWorkflowService::class);
@@ -158,10 +164,12 @@ class AuthorizedApprovalsTest extends TestCase
         $this->assertDatabaseCount('stock_counts', 1);
     }
 
-    public function test_manager_cannot_review_stock_without_existing_stock_permissions(): void
+    public function test_cashier_cannot_review_stock_when_explicitly_denied_required_permission(): void
     {
-        $approval = $this->requestStock($this->actor('storekeeper'));
-        $this->actingAs($this->actor('manager'))->get(route('approval-requests.show', $approval))->assertForbidden();
+        $approval = $this->requestStock($this->actor('cashier'));
+        $reviewer = $this->actor('cashier');
+        DB::table('permission_user')->insert(['user_id' => $reviewer->id, 'permission_id' => Permission::findByName('inventory.adjust')->id, 'model_type' => User::class, 'effect' => 'deny']);
+        $this->actingAs($reviewer)->get(route('approval-requests.show', $approval))->assertForbidden();
         $this->post(route('approval-requests.decide', $approval), ['decision' => 'approved', 'comment' => 'Try to approve stock.'])->assertForbidden();
         $this->assertSame('pending', $approval->fresh()->status);
         $this->get(route('approvals.index'))->assertOk()->assertDontSee($approval->reason);

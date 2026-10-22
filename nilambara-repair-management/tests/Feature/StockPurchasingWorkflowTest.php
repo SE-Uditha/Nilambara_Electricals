@@ -29,6 +29,11 @@ class StockPurchasingWorkflowTest extends TestCase
 {
     use CreatesDatabaseRecords, RefreshDatabase;
 
+    private function actorWithoutPermissions(): User
+    {
+        return User::factory()->create();
+    }
+
     private function actor(string $role = 'administrator'): User
     {
         $this->seed(RoleSeeder::class);
@@ -130,14 +135,14 @@ class StockPurchasingWorkflowTest extends TestCase
         $service->adjust(array_replace($data, ['quantity' => '-10.000', 'idempotency_key' => (string) Str::uuid()]), $actor);
     }
 
-    public function test_new_pages_render_and_cashier_cannot_change_stock_or_suppliers(): void
+    public function test_cashier_stock_pages_render_but_technician_cannot_change_stock_or_suppliers(): void
     {
-        $actor = $this->actor();
+        $actor = $this->actor('cashier');
         $this->actingAs($actor);
         foreach (['inventory.index', 'inventory.create', 'suppliers.index', 'suppliers.create', 'purchases.index', 'purchases.create', 'stock-issues.index'] as $route) {
             $this->get(route($route))->assertOk();
         }
-        $cashier = $this->actor('cashier');
+        $cashier = $this->actorWithoutPermissions();
         $this->actingAs($cashier)->get(route('inventory.create'))->assertForbidden();
         $this->post(route('inventory.store'), [])->assertForbidden();
         $this->post(route('suppliers.store'), [])->assertForbidden();
@@ -196,17 +201,17 @@ class StockPurchasingWorkflowTest extends TestCase
         }
     }
 
-    public function test_storekeeper_can_receive_but_cannot_pay_or_reverse_supplier_money(): void
+    public function test_cashier_can_receive_and_pay_supplier_money(): void
     {
         $admin = $this->actor();
         $location = $this->location();
         $part = $this->part(['default_location_id' => $location->id]);
         $purchase = $this->draft($admin, $part);
         app(PurchaseWorkflowService::class)->finalize($purchase, $admin);
-        $storekeeper = $this->actor('storekeeper');
+        $storekeeper = $this->actor('cashier');
         $this->actingAs($storekeeper)->post(route('purchases.receive', $purchase), ['purchase_item_id' => $purchase->items()->sole()->id, 'location_id' => $location->id, 'quantity' => '1', 'idempotency_key' => (string) Str::uuid()])->assertSessionHasNoErrors();
-        $this->post(route('purchases.pay', $purchase), ['amount' => '1.00', 'method' => 'cash', 'idempotency_key' => (string) Str::uuid()])->assertForbidden();
-        $this->assertDatabaseCount('supplier_payments', 0);
+        $this->post(route('purchases.pay', $purchase), ['amount' => '1.00', 'method' => 'cash', 'idempotency_key' => (string) Str::uuid()])->assertRedirect()->assertSessionHasNoErrors();
+        $this->assertDatabaseCount('supplier_payments', 1);
     }
 
     public function test_supplier_edit_and_search_preserve_the_opening_ledger(): void
@@ -231,7 +236,7 @@ class StockPurchasingWorkflowTest extends TestCase
         $this->actingAs($actor)->post(route('repair-jobs.labour-charge', $job), ['labour_charge' => '125.50'])->assertSessionHasNoErrors();
         $this->assertSame('125.50', $job->fresh()->total_job_amount);
         $this->assertDatabaseHas('audit_logs', ['action' => 'repair_job.charge.updated', 'user_id' => $actor->id]);
-        $technician = $this->actor('technician');
+        $technician = $this->actorWithoutPermissions();
         $this->actingAs($technician)->post(route('repair-jobs.labour-charge', $job), ['labour_charge' => '1.00'])->assertForbidden();
         $this->assertSame('125.50', $job->fresh()->total_job_amount);
     }

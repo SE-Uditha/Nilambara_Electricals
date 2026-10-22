@@ -46,7 +46,7 @@ class RepairJobController extends Controller
     public function myAssigned(Request $request): View
     {
         Gate::authorize('viewAny', RepairJob::class);
-        abort_unless($request->user()->hasRole('technician') && $request->user()->employee?->is_active, 403);
+        abort_unless($request->user()->can('jobs.repair') && $request->user()->employee?->is_active, 403);
 
         return view('modules.repair-jobs.index', [
             'jobs' => $this->filteredJobs($request)
@@ -183,10 +183,6 @@ class RepairJobController extends Controller
             ->orderByDesc('received_at')
             ->orderByDesc('id');
 
-        if ($request->user()->hasRole('technician') && ! $request->user()->hasAnyRole(['administrator', 'manager'])) {
-            $query->where('technician_id', $request->user()->employee?->getKey() ?? 0);
-        }
-
         if (($search = trim((string) ($filters['q'] ?? ''))) !== '') {
             $like = '%'.$search.'%';
             $query->where(function ($builder) use ($like): void {
@@ -228,7 +224,6 @@ class RepairJobController extends Controller
     {
         return Employee::query()
             ->where('is_active', true)
-            ->whereHas('user', fn ($user) => $user->where('is_active', true)->role('technician'))
             ->orderBy('name')
             ->get(['id', 'name', 'employee_code']);
     }

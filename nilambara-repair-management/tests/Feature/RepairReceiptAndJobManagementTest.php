@@ -15,8 +15,10 @@ use App\Modules\RepairJobs\Models\JobInspection;
 use App\Modules\RepairJobs\Models\RepairJob;
 use App\Modules\RepairReceipts\Models\RepairReceipt;
 use App\Modules\RepairReceipts\Services\RepairReceiptService;
+use App\Modules\RolesPermissions\Models\Permission;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\Feature\Database\CreatesDatabaseRecords;
 use Tests\TestCase;
 
@@ -227,7 +229,7 @@ class RepairReceiptAndJobManagementTest extends TestCase
     public function test_job_assignment_and_record_level_access_are_limited_to_active_technicians(): void
     {
         $administrator = $this->userWithRole('administrator');
-        $technician = $this->userWithRole('technician');
+        $technician = $this->userWithRole('cashier');
         $technicianEmployee = $this->employee(['user_id' => $technician->id]);
         $job = $this->job();
 
@@ -238,7 +240,7 @@ class RepairReceiptAndJobManagementTest extends TestCase
         $this->assertSame($technicianEmployee->id, $job->fresh()->technician_id);
         $this->assertDatabaseHas('audit_logs', ['action' => 'repair_job.technician_assigned', 'entity_id' => $job->id]);
 
-        $unlinkedEmployee = $this->employee();
+        $unlinkedEmployee = $this->employee(['is_active' => false]);
         $this->actingAs($administrator)
             ->from(route('repair-jobs.assign-form', $job))
             ->post(route('repair-jobs.assign', $job), ['technician_id' => $unlinkedEmployee->id])
@@ -248,13 +250,14 @@ class RepairReceiptAndJobManagementTest extends TestCase
         $assignedJob = $this->job(null, ['technician_id' => $technicianEmployee->id]);
         $otherJob = $this->job();
         $this->actingAs($technician)->get(route('repair-jobs.show', $assignedJob))->assertOk();
-        $this->actingAs($technician)->get(route('repair-jobs.show', $otherJob))->assertForbidden();
-        $this->actingAs($technician)->get(route('repair-jobs.index'))->assertOk()->assertDontSee($otherJob->automatic_number);
+        $this->actingAs($technician)->get(route('repair-jobs.show', $otherJob))->assertOk();
+        $this->actingAs($technician)->get(route('repair-jobs.index'))->assertOk()->assertSee($otherJob->automatic_number);
     }
 
-    public function test_cashier_can_register_and_print_but_cannot_assign_or_change_status(): void
+    public function test_cashier_can_register_print_and_assign_but_technical_status_requires_permission(): void
     {
         $cashier = $this->userWithRole('cashier');
+        DB::table('permission_user')->insert(['user_id' => $cashier->id, 'permission_id' => Permission::findByName('jobs.update-status')->id, 'model_type' => User::class, 'effect' => 'deny']);
         $job = $this->job();
 
         $this->actingAs($cashier)->get(route('repair-receipts.index'))->assertOk();
@@ -262,14 +265,17 @@ class RepairReceiptAndJobManagementTest extends TestCase
         $this->actingAs($cashier)->post(route('repair-jobs.update-status', $job), [
             'status' => JobStatus::UnderRepair->value,
         ])->assertForbidden();
+        $technician = $this->userWithRole('cashier');
+        $employee = $this->employee(['user_id' => $technician->id]);
         $this->actingAs($cashier)->post(route('repair-jobs.assign', $job), [
-            'technician_id' => $this->employee()->id,
-        ])->assertForbidden();
+            'technician_id' => $employee->id,
+        ])->assertRedirect(route('repair-jobs.show', $job))->assertSessionHasNoErrors();
+        $this->assertSame($employee->id, $job->fresh()->technician_id);
     }
 
     public function test_technician_can_record_inspection_and_repair_notes_without_stock_deduction(): void
     {
-        $technician = $this->userWithRole('technician');
+        $technician = $this->userWithRole('cashier');
         $employee = $this->employee(['user_id' => $technician->id]);
         $job = $this->job(null, ['technician_id' => $employee->id]);
 

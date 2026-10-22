@@ -15,12 +15,11 @@ return [
                 ['label' => 'register_customer', 'icon' => 'users', 'route' => 'customers.create', 'permission' => 'customers.create'],
             ]],
             ['label' => 'repair_receipts', 'icon' => 'receipt', 'active_routes' => ['repair-receipts.*'], 'children' => [
-                ['label' => 'repair_receipts', 'icon' => 'receipt', 'route' => 'repair-receipts.index', 'permission' => 'receipts.view'],
                 ['label' => 'new_repair_receipt', 'icon' => 'receipt', 'route' => 'repair-receipts.create', 'permission' => 'receipts.create'],
+                ['label' => 'repair_receipts', 'icon' => 'receipt', 'route' => 'repair-receipts.index', 'permission' => 'receipts.view'],
             ]],
             ['label' => 'repair_jobs', 'icon' => 'tool', 'active_routes' => ['repair-jobs.*', 'job-cards.*'], 'children' => [
-                ['label' => 'repair_jobs', 'icon' => 'tool', 'route' => 'repair-jobs.index', 'permission' => 'jobs.view', 'except_roles' => ['technician']],
-                ['label' => 'my_assigned_jobs', 'icon' => 'tool', 'route' => 'repair-jobs.assigned', 'permission' => 'jobs.view', 'roles' => ['technician']],
+                ['label' => 'repair_jobs', 'icon' => 'tool', 'route' => 'repair-jobs.index', 'permission' => 'jobs.view'],
                 ['label' => 'job_cards', 'icon' => 'clipboard', 'route' => 'job-cards.index', 'permission' => 'job-cards.view'],
                 ['label' => 'job_status', 'icon' => 'activity', 'route' => 'repair-jobs.status-search', 'permission' => 'jobs.view'],
             ]],
@@ -44,7 +43,7 @@ return [
                 ['label' => 'payments', 'icon' => 'wallet', 'route' => 'payments.index', 'permission' => 'payments.view'],
                 ['label' => 'record_payment', 'icon' => 'wallet', 'route' => 'payments.create', 'permission' => 'payments.receive'],
                 ['label' => 'credit_management', 'icon' => 'credit', 'route' => 'credit-invoices.index', 'permission' => 'credit.view'],
-                ['label' => 'cash_summary', 'icon' => 'wallet', 'route' => 'reports.show', 'route_parameters' => ['report' => 'cash-summary'], 'permission' => 'reports.view', 'roles' => ['administrator', 'cashier', 'manager']],
+                ['label' => 'cash_summary', 'icon' => 'wallet', 'route' => 'reports.show', 'route_parameters' => ['report' => 'cash-summary'], 'permission' => 'reports.view', 'roles' => ['administrator', 'cashier']],
             ]],
         ],
     ],
@@ -55,7 +54,6 @@ return [
                 ['label' => 'inventory', 'icon' => 'box', 'route' => 'inventory.index', 'permission' => 'inventory.view'],
                 ['label' => 'register_part', 'icon' => 'box', 'route' => 'inventory.create', 'permission' => 'inventory.create'],
                 ['label' => 'stock_issues', 'icon' => 'box', 'route' => 'stock-issues.index', 'permission' => 'inventory.issue'],
-                ['label' => 'stock_issues', 'icon' => 'box', 'route' => 'stock-issues.index', 'permission' => 'jobs.repair', 'roles' => ['technician']],
             ]],
             ['label' => 'suppliers', 'icon' => 'truck', 'active_routes' => ['suppliers.*'], 'children' => [
                 ['label' => 'suppliers', 'icon' => 'truck', 'route' => 'suppliers.index', 'permission' => 'suppliers.view'],
@@ -100,7 +98,7 @@ return [
             ]],
             ['label' => 'backup_restore', 'icon' => 'database', 'route' => 'backups.index', 'permission' => 'backups.view'],
             ['label' => 'audit_logs', 'icon' => 'activity', 'route' => 'audit-logs.index', 'permission' => 'audit.view'],
-            ['label' => 'approvals', 'icon' => 'shield', 'route' => 'approvals.index', 'roles' => ['administrator', 'manager']],
+            ['label' => 'approvals', 'icon' => 'shield', 'route' => 'approvals.index', 'roles' => ['administrator', 'cashier']],
         ],
     ],
 ];

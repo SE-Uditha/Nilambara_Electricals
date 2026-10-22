@@ -324,7 +324,7 @@ class InvoiceManagementTest extends TestCase
         $invoice = Invoice::query()->sole();
         $this->actingAs($cashier)->get(route('invoices.print', $invoice))->assertOk();
 
-        $technician = $this->userWithRole('technician');
+        $technician = User::factory()->create();
         $this->actingAs($technician)->get(route('invoices.index'))->assertForbidden();
         $this->actingAs($technician)->get(route('invoices.show', $invoice))->assertForbidden();
     }

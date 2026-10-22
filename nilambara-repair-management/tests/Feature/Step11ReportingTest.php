@@ -6,9 +6,11 @@ use App\Models\User;
 use App\Modules\Dashboard\Services\DashboardService;
 use App\Modules\Payments\Models\PaymentReversal;
 use App\Modules\Reports\Services\ReportDataService;
+use App\Modules\RolesPermissions\Models\Permission;
 use Brick\Math\BigDecimal;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\Feature\Database\CreatesDatabaseRecords;
 use Tests\TestCase;
 
@@ -88,11 +90,14 @@ class Step11ReportingTest extends TestCase
         file_put_contents($previewRoot.'/step11-dashboard.html', $response->getContent());
     }
 
-    public function test_cashier_own_collections_and_technician_reports_do_not_grant_financial_access(): void
+    public function test_explicit_financial_and_export_denials_restrict_cashier_to_own_collections(): void
     {
         $this->seed(RoleSeeder::class);
         $cashier = User::factory()->create();
         $cashier->assignRole('cashier');
+        foreach (['reports.financial', 'reports.export'] as $permission) {
+            DB::table('permission_user')->insert(['user_id' => $cashier->id, 'permission_id' => Permission::findByName($permission)->id, 'model_type' => User::class, 'effect' => 'deny']);
+        }
         $employee = $this->employee(['user_id' => $cashier->id]);
         $this->payment(null, ['received_by_employee_id' => $employee->id, 'amount' => '10.00']);
         $this->payment(null, ['amount' => '20.00']);

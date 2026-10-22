@@ -18,11 +18,7 @@ class RepairJobPolicy
             return false;
         }
 
-        if (! $user->hasRole('technician') || $user->hasAnyRole(['administrator', 'manager'])) {
-            return true;
-        }
-
-        return $user->employee !== null && $job->technician_id === $user->employee->id;
+        return true;
     }
 
     public function inspect(User $user, RepairJob $job): bool

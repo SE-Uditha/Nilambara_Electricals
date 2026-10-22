@@ -148,17 +148,17 @@ if (DB::table('repair_receipts')->count() !== $before + 2) {
 $inputs = [];
 $jobs = [];
 foreach (range(1, 2) as $index) {
-    $actor = $fixtures->actor('technician');
+    $actor = $fixtures->actor('cashier');
     $job = $fixtures->jobRecord($customer, ['technician_id' => $actor->employee->id]);
     $jobs[] = $job->id;
     $inputs[] = ['operation' => 'status', 'actor' => $actor->id, 'data' => ['job_id' => $job->id]];
 }
-$race('two technicians update their assigned jobs with retained histories', $inputs, 2);
+$race('two cashiers update their assigned jobs with retained histories', $inputs, 2);
 if (DB::table('job_status_histories')->whereIn('repair_job_id', $jobs)->count() !== 2) {
     throw new RuntimeException('Technician history count mismatch.');
 }
 $admin = $fixtures->actor('administrator');
-$storekeepers = [$fixtures->actor('storekeeper'), $fixtures->actor('storekeeper')];
+$storekeepers = [$fixtures->actor('cashier'), $fixtures->actor('cashier')];
 $part = $fixtures->product();
 $job = $fixtures->jobRecord($customer);
 $usage = app(StockWorkflowService::class)->request(['repair_job_id' => $job->id, 'spare_part_id' => $part->id, 'location_id' => $part->default_location_id, 'quantity' => '4.000', 'idempotency_key' => (string) Str::uuid()], $admin);
@@ -175,7 +175,7 @@ $inputs = [];
 foreach ($storekeepers as $actor) {
     $inputs[] = ['operation' => 'grn', 'actor' => $actor->id, 'data' => ['purchase' => $purchase->id, 'purchase_item_id' => $purchase->items()->sole()->id, 'location_id' => $part->default_location_id, 'quantity' => '4.000', 'idempotency_key' => (string) Str::uuid()]];
 }
-$race('two storekeepers cannot over-receive a purchase', $inputs, 1);
+$race('two cashiers cannot over-receive a purchase', $inputs, 1);
 if ($purchase->goodsReceivedNoteItems()->sum('quantity') !== '4.000') {
     throw new RuntimeException('Concurrent GRN quantity mismatch.');
 }

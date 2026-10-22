@@ -32,7 +32,7 @@ class EmployeeManagementTest extends TestCase
     public function test_administrator_can_register_employee_and_link_a_hashed_login_account(): void
     {
         $administrator = $this->administrator();
-        $role = Role::query()->where('name', 'technician')->firstOrFail();
+        $role = Role::query()->where('name', 'cashier')->firstOrFail();
 
         $this->actingAs($administrator)->post(route('employees.store'), [
             'name' => 'Technician One',
@@ -55,7 +55,7 @@ class EmployeeManagementTest extends TestCase
         $this->assertStringStartsWith('EMP-', $employee->employee_code);
         $this->assertSame('technician.one', $user->username);
         $this->assertTrue(Hash::check('Strong-Password-123', $user->password));
-        $this->assertTrue($user->hasRole('technician'));
+        $this->assertTrue($user->hasRole('cashier'));
         $this->assertSame($employee->id, $user->employee->id);
         $this->assertDatabaseHas('audit_logs', ['action' => 'employee.created', 'entity_id' => $employee->id]);
     }
@@ -108,7 +108,7 @@ class EmployeeManagementTest extends TestCase
     {
         $administrator = $this->administrator();
         $target = User::factory()->create();
-        $target->assignRole('manager');
+        $target->assignRole('cashier');
         $dashboardPermission = Permission::query()->where('name', 'dashboard.view')->firstOrFail();
 
         $this->actingAs($administrator)->put(route('admin.users.permissions', $target), [
@@ -122,7 +122,7 @@ class EmployeeManagementTest extends TestCase
     {
         $administrator = $this->administrator();
         $employee = $this->employee(['user_id' => User::factory()->create()->id]);
-        $role = Role::query()->where('name', 'technician')->firstOrFail();
+        $role = Role::query()->where('name', 'cashier')->firstOrFail();
 
         $this->actingAs($administrator);
         $this->get(route('employees.index'))->assertOk();
@@ -135,18 +135,18 @@ class EmployeeManagementTest extends TestCase
         $this->get(route('admin.permissions.index'))->assertOk();
     }
 
-    public function test_technician_policy_only_allows_assigned_jobs(): void
+    public function test_cashier_can_view_repairs_assigned_to_any_employee(): void
     {
         $user = User::factory()->create();
         $employee = $this->employee(['user_id' => $user->id]);
         $otherEmployee = $this->employee();
-        $user->assignRole('technician');
+        $user->assignRole('cashier');
 
         $assignedJob = $this->job(null, ['technician_id' => $employee->id]);
         $unassignedJob = $this->job(null, ['technician_id' => $otherEmployee->id]);
 
         $this->assertTrue(Gate::forUser($user)->allows('view', $assignedJob));
-        $this->assertFalse(Gate::forUser($user)->allows('view', $unassignedJob));
+        $this->assertTrue(Gate::forUser($user)->allows('view', $unassignedJob));
     }
 
     public function test_employee_deactivation_disables_linked_login_without_deleting_history(): void
@@ -194,7 +194,7 @@ class EmployeeManagementTest extends TestCase
 
         $this->seed(RoleSeeder::class);
 
-        $this->assertSame(5, $roleCount);
+        $this->assertSame(2, $roleCount);
         $this->assertSame($roleCount, Role::query()->count());
         $this->assertSame($permissionCount, Permission::query()->count());
         $this->assertSame($permissionCount, $administrator->fresh()->permissions()->count());
@@ -203,32 +203,14 @@ class EmployeeManagementTest extends TestCase
     public function test_default_role_permissions_follow_the_restricted_matrix(): void
     {
         $checks = [
-            'technician' => [
-                'jobs.inspect' => true,
-                'jobs.complete' => true,
-                'settings.update' => false,
-            ],
             'cashier' => [
                 'customers.create' => true,
                 'receipts.create' => true,
                 'employees.create' => false,
                 'invoices.create' => true,
                 'payments.receive' => true,
-                'invoices.cancel' => false,
-                'payments.reverse' => false,
-            ],
-            'storekeeper' => [
-                'inventory.adjust' => true,
-                'purchases.receive' => true,
-                'suppliers.create' => false,
-                'purchases.approve' => false,
-                'backups.restore' => false,
-            ],
-            'manager' => [
-                'reports.financial' => true,
-                'purchases.approve' => true,
-                'roles.manage' => false,
-                'settings.update' => false,
+                'invoices.cancel' => true,
+                'payments.reverse' => true,
             ],
         ];
 
@@ -246,7 +228,7 @@ class EmployeeManagementTest extends TestCase
     {
         $actor = $this->administrator();
         $disabledUser = User::factory()->create();
-        $disabledUser->assignRole('manager');
+        $disabledUser->assignRole('cashier');
         app(UserAccountService::class)->setEnabled($disabledUser, false, $actor);
 
         $this->actingAs($disabledUser->fresh())

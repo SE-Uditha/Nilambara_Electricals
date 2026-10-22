@@ -27,11 +27,11 @@ class CashierRoleConsolidationTest extends TestCase
         $cashier = User::factory()->create();
         $cashier->assignRole('cashier');
 
-        $this->assertSame(['administrator', 'cashier', 'manager', 'storekeeper', 'technician'], Role::orderBy('name')->pluck('name')->all());
-        foreach (['customers.create', 'customers.update', 'receipts.create', 'receipts.print', 'jobs.view', 'job-cards.print', 'quotations.create', 'quotations.update', 'quotations.issue', 'reports.repair', 'invoices.create', 'invoices.issue', 'payments.receive', 'credit.collect'] as $permission) {
+        $this->assertSame(['administrator', 'cashier'], Role::orderBy('name')->pluck('name')->all());
+        foreach (['customers.create', 'customers.update', 'receipts.create', 'receipts.print', 'jobs.view', 'job-cards.print', 'quotations.create', 'quotations.update', 'quotations.issue', 'reports.repair', 'invoices.create', 'invoices.issue', 'payments.receive', 'credit.collect', 'customers.statement', 'jobs.assign', 'quotations.approve', 'invoices.cancel', 'payments.reverse', 'purchases.approve', 'inventory.adjust'] as $permission) {
             $this->assertTrue($cashier->can($permission), $permission);
         }
-        foreach (['roles.manage', 'employees.create', 'customers.statement', 'customers.deactivate', 'jobs.assign', 'quotations.approve', 'invoices.cancel', 'payments.reverse', 'purchases.approve', 'settings.update'] as $permission) {
+        foreach (['roles.manage', 'employees.create', 'customers.deactivate', 'settings.update'] as $permission) {
             $this->assertFalse($cashier->can($permission), $permission);
         }
         foreach (['customers.create', 'repair-receipts.create', 'quotations.create', 'invoices.create', 'payments.create'] as $route) {
@@ -45,7 +45,7 @@ class CashierRoleConsolidationTest extends TestCase
         $legacy = $this->legacyRole();
         $legacy->givePermissionTo(['reports.financial', 'audit.view']);
         $user = User::factory()->create(['username' => 'existing.frontdesk']);
-        $user->assignRole([$legacy, 'cashier', 'technician']);
+        $user->assignRole([$legacy, 'cashier', 'administrator']);
         $passwordHash = $user->password;
         $permission = Permission::findByName('audit.view');
         DB::table('permission_user')->insert(['user_id' => $user->id, 'permission_id' => $permission->id, 'model_type' => User::class, 'effect' => 'deny']);
@@ -56,7 +56,7 @@ class CashierRoleConsolidationTest extends TestCase
         $user = $user->fresh();
         $this->assertSame('existing.frontdesk', $user->username);
         $this->assertSame($passwordHash, $user->password);
-        $this->assertSame(['cashier', 'technician'], $user->roles->pluck('name')->sort()->values()->all());
+        $this->assertSame(['administrator', 'cashier'], $user->roles->pluck('name')->sort()->values()->all());
         $this->assertTrue($user->can('reports.financial'));
         $this->assertFalse($user->can('audit.view'));
         $this->assertSame(1, DB::table('role_user')->where('role_id', Role::findByName('cashier')->id)->where('user_id', $user->id)->count());
@@ -85,7 +85,7 @@ class CashierRoleConsolidationTest extends TestCase
 
         $this->assertSame(['cashier'], $user->fresh()->roles->pluck('name')->all());
         $this->assertFalse($user->fresh()->is_active);
-        $this->assertDatabaseCount('roles', 5);
+        $this->assertDatabaseCount('roles', 2);
         $this->assertDatabaseMissing('roles', ['name' => 'receptionist']);
     }
 

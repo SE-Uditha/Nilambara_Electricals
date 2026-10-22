@@ -69,8 +69,7 @@ class QuotationController extends Controller
         if (! empty($filters['preparation_status'])) {
             $query->where('preparation_status', $filters['preparation_status']);
         }
-        $this->restrictToVisibleJobs($query);
-        if (auth()->user()->hasRole('cashier') && ! auth()->user()->hasAnyRole(['administrator', 'manager'])) {
+        if (auth()->user()->hasRole('cashier') && ! auth()->user()->can('quotations.approve')) {
             $query->where('approval_status', ApprovalStatus::Approved->value)
                 ->where('preparation_status', QuotationPreparationStatus::Issued->value);
         }
@@ -451,14 +450,6 @@ class QuotationController extends Controller
             'terms_and_conditions' => $quotation->terms_and_conditions,
             'prepared_by' => $quotation->createdByUser?->name,
         ];
-    }
-
-    private function restrictToVisibleJobs($query): void
-    {
-        $user = auth()->user();
-        if ($user->hasRole('technician') && ! $user->hasAnyRole(['administrator', 'manager'])) {
-            $query->whereHas('repairJob', fn ($job) => $job->where('technician_id', $user->employee?->getKey() ?? 0));
-        }
     }
 
     private function safeMargin(mixed $value, float $fallback): float

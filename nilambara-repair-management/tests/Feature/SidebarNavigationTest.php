@@ -32,10 +32,10 @@ class SidebarNavigationTest extends TestCase
     {
         $response = $this->actingAs($this->actor('cashier'))->get(route('dashboard'))->assertOk();
         $sidebar = $this->sidebar($response->getContent());
-        foreach (['customers', 'repair_receipts', 'invoices', 'payments'] as $group) {
+        foreach (['customers', 'repair_receipts', 'invoices', 'payments', 'suppliers', 'purchases', 'inventory'] as $group) {
             $this->assertSame(1, $sidebar->query('//nav//details[@data-sidebar-group="'.$group.'"]')->length);
         }
-        foreach (['pos', 'suppliers', 'purchases', 'employees', 'roles_permissions', 'system_settings'] as $group) {
+        foreach (['pos', 'employees', 'roles_permissions', 'system_settings'] as $group) {
             $this->assertSame(0, $sidebar->query('//nav//details[@data-sidebar-group="'.$group.'"]')->length);
         }
         $this->assertSame(0, $sidebar->query('//nav//details[not(.//a)]')->length);

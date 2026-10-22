@@ -39,7 +39,7 @@ class AssignTechnicianRequest extends FormRequest
 
                 $employee = Employee::query()->with('user')->find($this->input('technician_id'));
 
-                if ($employee === null || ! $employee->is_active || ! $employee->user?->hasActiveAccount() || ! $employee->user->hasRole('technician')) {
+                if ($employee === null || ! $employee->is_active) {
                     $validator->errors()->add('technician_id', __('ui.active_technician_required'));
                 }
             },

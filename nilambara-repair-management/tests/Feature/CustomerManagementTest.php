@@ -5,8 +5,10 @@ namespace Tests\Feature;
 use App\Models\User;
 use App\Modules\AuditLogs\Models\AuditLog;
 use App\Modules\Customers\Models\Customer;
+use App\Modules\RolesPermissions\Models\Permission;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class CustomerManagementTest extends TestCase
@@ -74,6 +76,7 @@ class CustomerManagementTest extends TestCase
     public function test_customer_forms_show_only_fields_allowed_by_the_users_permissions(): void
     {
         $cashier = $this->userWithRole('cashier');
+        DB::table('permission_user')->insert(['user_id' => $cashier->id, 'permission_id' => Permission::findByName('customers.statement')->id, 'model_type' => User::class, 'effect' => 'deny']);
         $this->actingAs($cashier)->get(route('customers.create'))
             ->assertOk()
             ->assertDontSee('name="opening_balance"', false)
@@ -89,6 +92,7 @@ class CustomerManagementTest extends TestCase
     public function test_cashier_cannot_submit_financial_balance_or_inactive_status(): void
     {
         $user = $this->userWithRole('cashier');
+        DB::table('permission_user')->insert(['user_id' => $user->id, 'permission_id' => Permission::findByName('customers.statement')->id, 'model_type' => User::class, 'effect' => 'deny']);
 
         $this->actingAs($user)->post(route('customers.store'), $this->validIndividual([
             'opening_balance' => '25.00',
@@ -249,6 +253,7 @@ class CustomerManagementTest extends TestCase
     public function test_customer_statement_and_financial_fields_require_statement_permission(): void
     {
         $cashier = $this->userWithRole('cashier');
+        DB::table('permission_user')->insert(['user_id' => $cashier->id, 'permission_id' => Permission::findByName('customers.statement')->id, 'model_type' => User::class, 'effect' => 'deny']);
         $customer = $this->registerCustomer($this->userWithRole('administrator'), $this->validIndividual([
             'opening_balance' => '42.00',
             'is_active' => '1',
@@ -260,7 +265,7 @@ class CustomerManagementTest extends TestCase
         $this->actingAs($cashier)->get(route('customers.statement', $customer))
             ->assertForbidden();
 
-        $manager = $this->userWithRole('manager');
+        $manager = $this->userWithRole('cashier');
         $this->actingAs($manager)->get(route('customers.show', $customer))
             ->assertOk()
             ->assertSee('42.00');

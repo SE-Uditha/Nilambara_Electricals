@@ -3,8 +3,10 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use App\Modules\RolesPermissions\Models\Permission;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class DashboardTest extends TestCase
@@ -64,6 +66,8 @@ class DashboardTest extends TestCase
         $user->assignRole('cashier');
 
         $this->actingAs($user)->get('/reports')->assertOk();
-        $this->get(route('reports.show', 'sales'))->assertForbidden();
+        $this->get(route('reports.show', 'sales'))->assertOk();
+        DB::table('permission_user')->insert(['user_id' => $user->id, 'permission_id' => Permission::findByName('reports.view')->id, 'model_type' => User::class, 'effect' => 'deny']);
+        $this->actingAs($user->fresh())->get('/reports')->assertForbidden();
     }
 }

@@ -21,7 +21,7 @@ class QuotationPolicy
             return false;
         }
 
-        if ($user->hasRole('cashier') && ! $user->hasAnyRole(['administrator', 'manager'])) {
+        if ($user->hasRole('cashier') && ! $user->can('quotations.approve')) {
             return $quotation->approval_status === ApprovalStatus::Approved
                 && $quotation->preparation_status === QuotationPreparationStatus::Issued;
         }

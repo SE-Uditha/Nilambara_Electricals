@@ -126,9 +126,6 @@ class InventoryController
         $jobs = RepairJob::query()->whereNull('cancelled_at');
         if (! $actor->can('inventory.issue')) {
             $query->where('requested_by_user_id', $actor->id);
-            if ($actor->hasRole('technician') && ! $actor->hasAnyRole(['manager', 'administrator'])) {
-                $jobs->where('technician_id', $actor->employee?->id ?? -1);
-            }
         }
 
         return view('modules.inventory.issues', ['usages' => $query->paginate(25), 'jobs' => $jobs->orderByDesc('id')->limit(100)->get(), 'parts' => SparePart::where('is_active', true)->orderBy('name')->get(), 'locations' => StockLocation::where('is_active', true)->get()]);

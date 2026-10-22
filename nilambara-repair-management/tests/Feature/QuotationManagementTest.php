@@ -211,7 +211,7 @@ class QuotationManagementTest extends TestCase
         $this->travelBack();
     }
 
-    public function test_unapproved_quotation_is_not_visible_to_cashier(): void
+    public function test_pending_quotation_is_visible_to_consolidated_cashier(): void
     {
         $user = $this->userWithRole('administrator');
         $job = $this->job();
@@ -220,7 +220,7 @@ class QuotationManagementTest extends TestCase
 
         $this->actingAs($cashier)
             ->get(route('quotations.show', $quotation))
-            ->assertForbidden();
+            ->assertOk();
     }
 
     public function test_repair_cannot_start_until_an_issued_quotation_is_approved(): void

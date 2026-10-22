@@ -29,7 +29,7 @@ class ApprovalAccess
 
     public static function canReview(User $user, string $kind): bool
     {
-        return $user->hasActiveAccount() && $user->hasAnyRole(['administrator', 'manager'])
+        return $user->hasActiveAccount() && $user->hasAnyRole(['administrator', 'cashier'])
             && isset(self::REVIEW[$kind]) && collect(self::REVIEW[$kind])->every(fn ($permission) => $user->can($permission));
     }
 
