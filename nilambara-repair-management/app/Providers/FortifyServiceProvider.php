@@ -7,6 +7,7 @@ use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
+use App\Modules\AuditLogs\Models\AuditLog;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Laravel\Fortify\Fortify;
@@ -43,7 +44,22 @@ class FortifyServiceProvider extends ServiceProvider
                 Str::lower(is_string($username) ? $username : '').'|'.$request->ip()
             );
 
-            return Limit::perMinute(5)->by($key);
+            $throttled = function (Request $request, array $headers) {
+                AuditLog::query()->create([
+                    'action' => 'auth.login.throttled',
+                    'entity_type' => 'user',
+                    'occurred_at' => now(),
+                    'new_values' => ['username' => is_string($username = $request->input(Fortify::username())) ? $username : null],
+                    'ip_address' => $request->ip(),
+                ]);
+
+                return response('Too many login attempts. Please try again later.', 429, $headers);
+            };
+
+            return [
+                Limit::perMinute(5)->by($key)->response($throttled),
+                Limit::perMinute(20)->by('ip|'.$request->ip())->response($throttled),
+            ];
         });
     }
 }
