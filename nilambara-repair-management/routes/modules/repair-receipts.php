@@ -7,7 +7,7 @@ Route::middleware('can:receipts.view')->group(function (): void {
     Route::get('/repair-receipts', [RepairReceiptController::class, 'index'])->name('repair-receipts.index');
 });
 
-Route::middleware('can:receipts.create')->group(function (): void {
+Route::middleware(['can:jobs.create', 'can:receipts.create'])->group(function (): void {
     Route::get('/repair-receipts/create', [RepairReceiptController::class, 'create'])->name('repair-receipts.create');
     Route::post('/repair-receipts', [RepairReceiptController::class, 'store'])->name('repair-receipts.store');
 });

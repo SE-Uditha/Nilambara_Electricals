@@ -36,7 +36,7 @@ class StoreRepairReceiptRequest extends FormRequest
             'visible_damage' => ['nullable', 'string', 'max:5000'],
             'advance_payment' => ['nullable', 'numeric', 'decimal:0,2', 'min:0', new DecimalValue],
             'payment_method' => ['nullable', Rule::in(['cash', 'bank_transfer', 'cheque'])],
-            'labor_cost' => ['required', 'numeric', 'decimal:0,2', 'min:0', new DecimalValue],
+            'labor_cost' => ['nullable', 'numeric', 'decimal:0,2', 'min:0', new DecimalValue],
             'received_by_employee_id' => [
                 'bail',
                 'required',

@@ -1,19 +1,19 @@
 @extends('layouts.app')
 
-@section('title', __('ui.new_repair_receipt'))
+@section('title', __('ui.new_repair_job'))
 
 @section('content')
     <div class="mb-7">
-        <p class="mb-2 text-[10px] font-semibold tracking-[0.15em] text-teal-700 uppercase">{{ __('ui.repair_receipts') }}</p>
-        <h1 class="text-2xl font-bold tracking-tight text-slate-900">{{ __('ui.new_repair_receipt') }}</h1>
-        <p class="mt-1 text-sm text-slate-500">{{ __('ui.receipt_create_description') }}</p>
+        <p class="mb-2 text-[10px] font-semibold tracking-[0.15em] text-teal-700 uppercase">{{ __('ui.repair_jobs') }}</p>
+        <h1 class="text-2xl font-bold tracking-tight text-slate-900">{{ __('ui.new_repair_job') }}</h1>
+        <p class="mt-1 text-sm text-slate-500">{{ __('ui.job_acceptance_description') }}</p>
     </div>
 
     @if ($errors->any())
         <div role="alert" class="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{{ __('ui.review_repair_receipt_fields') }}</div>
     @endif
 
-    <form method="POST" action="{{ route('repair-receipts.store') }}" x-data="{ selectedCustomer: @js($selectedCustomer), advancePayment: @js(old('advance_payment', '0.00')), submitting: false }" x-on:customer-selected="selectedCustomer = $event.detail" x-on:submit="if (submitting) { $event.preventDefault(); return; } submitting = true">
+    <form method="POST" action="{{ route('repair-jobs.store') }}" x-data="{ selectedCustomer: @js($selectedCustomer), advancePayment: @js(old('advance_payment', '0.00')), submitting: false }" x-on:customer-selected="selectedCustomer = $event.detail" x-on:submit="if (submitting) { $event.preventDefault(); return; } submitting = true">
         @csrf
         <div class="space-y-5">
             <section class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">
@@ -138,11 +138,7 @@
                         <input type="hidden" name="advance_payment" value="0.00">
                         <p class="text-xs text-slate-500">{{ __('payments.advance_entry_restricted') }}</p>
                     @endif
-                    <div>
-                        <label class="form-label" for="labor_cost">{{ __('ui.labor_cost') }} <span class="text-red-600">*</span></label>
-                        <input id="labor_cost" name="labor_cost" type="number" min="0" step="0.01" value="{{ old('labor_cost', '0.00') }}" class="form-input" required>
-                        @error('labor_cost')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
-                    </div>
+
                 </div>
                 <p class="mt-3 text-[11px] text-slate-500">{{ __('ui.advance_payment_ledger_help') }}</p>
             </section>
@@ -162,10 +158,10 @@
             </section>
 
             <div class="flex flex-wrap justify-end gap-3">
-                <a href="{{ route('repair-receipts.index') }}" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50">{{ __('ui.cancel') }}</a>
-                <button type="submit" name="intent" value="save" x-bind:disabled="submitting" class="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 disabled:opacity-60">{{ __('ui.save_receipt') }}</button>
+                <a href="{{ route('repair-jobs.index') }}" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50">{{ __('ui.cancel') }}</a>
+                <button type="submit" name="intent" value="save" x-bind:disabled="submitting" class="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 disabled:opacity-60">{{ __('ui.accept_repair_job') }}</button>
                 @can('receipts.print')
-                    <button type="submit" name="intent" value="print" x-bind:disabled="submitting" class="rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white hover:bg-teal-800 disabled:opacity-60">{{ __('ui.save_and_print') }}</button>
+                    <button type="submit" name="intent" value="print" x-bind:disabled="submitting" class="rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white hover:bg-teal-800 disabled:opacity-60">{{ __('ui.accept_and_print_receipt') }}</button>
                 @endcan
             </div>
         </div>

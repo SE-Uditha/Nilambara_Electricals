@@ -8,7 +8,7 @@ Ask the system operator to start MySQL and the Laravel application. Open http://
 2. Open Repair Receipts and register the customer, receiving employee, unique manual job number, appliance and reported fault.
 3. Record accessories, visible damage and special instructions accurately. Enter an advance only if money was actually received and your account is authorized.
 4. Save once. The receiving record, job and job card are created together. Open the saved record before retrying after a connection interruption.
-5. Print the A5 customer receipt and A6 job card, or use their PDF actions. Reprints are marked duplicates.
+5. Print the A5 customer receipt and one-page A5 job card, or use their PDF actions. The technician completes the job card by hand and returns it to the cashier for system updates. Reprints are marked duplicates.
 
 ## Repair, bill and collect
 1. An authorized manager assigns the job. Technicians work on their assigned jobs and record inspection, repair details and status.

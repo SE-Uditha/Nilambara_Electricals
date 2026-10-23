@@ -54,7 +54,9 @@ try {
     $created = true;
     echo 'Created disposable database: '.$testDatabase.PHP_EOL;
     $testArguments = ['test', '--no-ansi', '--do-not-cache-result'];
-    if (in_array('--retirement', $argv, true)) {
+    if (in_array('--billing', $argv, true)) {
+        $testArguments[] = '--filter=FinalJobBillingTest|InvoiceManagementTest|RepairReceiptAndJobManagementTest|StockPurchasingWorkflowTest|MigrationLifecycleTest|SchemaIntegrityTest|SidebarNavigationTest';
+    } elseif (in_array('--retirement', $argv, true)) {
         $testArguments[] = '--filter=PosRemovalTest';
     } elseif (in_array('--approvals', $argv, true)) {
         $testArguments[] = '--filter=AuthorizedApprovalsTest|PaymentManagementTest|StockPurchasingWorkflowTest|SidebarNavigationTest|EmployeeManagementTest|SchemaIntegrityTest';

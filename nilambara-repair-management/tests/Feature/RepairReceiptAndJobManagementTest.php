@@ -33,6 +33,35 @@ class RepairReceiptAndJobManagementTest extends TestCase
         $this->seed(RoleSeeder::class);
     }
 
+    public function test_accepting_a_job_generates_one_receipt_and_exposes_print_pdf_and_legacy_redirects(): void
+    {
+        $cashier = $this->userWithRole('cashier');
+        $customer = $this->customer($this->customerAttributes(['customer_name' => 'Nadeesha Silva', 'address' => '12 Lake Road, Colombo', 'mobile_number' => '0771234567']));
+        $receiver = $this->employee(['name' => 'Nimal Perera']);
+        $this->actingAs($cashier)->get(route('repair-jobs.create'))->assertOk()->assertSee(__('ui.new_repair_job'));
+        $this->post(route('repair-jobs.store'), $this->receiptData($customer, $receiver, ['job_type' => 'urgent']))->assertSessionHasNoErrors();
+        $job = RepairJob::sole();
+        $receipt = RepairReceipt::sole();
+        $this->assertSame($job->id, $receipt->repair_job_id);
+        $this->get(route('repair-jobs.show', $job))->assertOk()->assertSee(route('repair-jobs.receipt.print', $job), false)->assertSee(route('repair-jobs.receipt.pdf', $job), false);
+        $this->get(route('repair-jobs.receipt.print', $job))->assertOk()->assertSee('Customer Copy')->assertSee('12 Lake Road, Colombo')->assertDontSee('Urgent')->assertDontSee(__('ui.job_type'));
+        $pdf = $this->get(route('repair-jobs.receipt.pdf', $job))->assertOk();
+        $this->assertStringStartsWith('%PDF-', $pdf->getContent());
+        $root = base_path('tmp/pdfs');
+        if (! is_dir($root)) {
+            mkdir($root, 0700, true);
+        }
+        file_put_contents($root.'/repair-receipt-preview.pdf', $pdf->getContent());
+        $this->get(route('repair-receipts.index'))->assertRedirect(route('repair-jobs.index'));
+        $this->get(route('repair-receipts.show', $receipt))->assertRedirect(route('repair-jobs.show', $job));
+        $this->assertDatabaseCount('repair_jobs', 1);
+        $this->assertDatabaseCount('repair_receipts', 1);
+        $cashier->revokePermissionTo('receipts.print');
+        DB::table('permission_user')->insert(['user_id' => $cashier->id, 'permission_id' => Permission::findByName('receipts.print')->id, 'model_type' => User::class, 'effect' => 'deny']);
+        $this->actingAs($cashier->fresh())->get(route('repair-jobs.receipt.print', $job))->assertForbidden();
+        $this->get(route('repair-jobs.receipt.pdf', $job))->assertForbidden();
+    }
+
     public function test_cashier_saves_receipt_and_creates_linked_job_history_and_a6_card(): void
     {
         $cashier = $this->userWithRole('cashier');
@@ -64,7 +93,7 @@ class RepairReceiptAndJobManagementTest extends TestCase
             'new_status' => JobStatus::Received->value,
             'changed_by_user_id' => $cashier->id,
         ]);
-        $this->assertDatabaseHas('job_cards', ['repair_job_id' => $job->id, 'paper_size' => 'A6']);
+        $this->assertDatabaseHas('job_cards', ['repair_job_id' => $job->id, 'paper_size' => 'A5']);
         $this->assertSame('Nadeesha Silva', data_get($receipt->document_snapshot, 'customer.name'));
         $this->assertSame('12 Lake Road, Colombo', data_get($receipt->document_snapshot, 'customer.address'));
         $this->assertDatabaseHas('audit_logs', [
@@ -260,7 +289,7 @@ class RepairReceiptAndJobManagementTest extends TestCase
         DB::table('permission_user')->insert(['user_id' => $cashier->id, 'permission_id' => Permission::findByName('jobs.update-status')->id, 'model_type' => User::class, 'effect' => 'deny']);
         $job = $this->job();
 
-        $this->actingAs($cashier)->get(route('repair-receipts.index'))->assertOk();
+        $this->actingAs($cashier)->get(route('repair-jobs.index'))->assertOk();
         $this->actingAs($cashier)->get(route('repair-jobs.status-search'))->assertOk();
         $this->actingAs($cashier)->post(route('repair-jobs.update-status', $job), [
             'status' => JobStatus::UnderRepair->value,
@@ -306,25 +335,53 @@ class RepairReceiptAndJobManagementTest extends TestCase
         $this->assertDatabaseCount('stock_movements', 0);
     }
 
-    public function test_job_card_print_is_two_page_a6_and_contains_writable_work_areas(): void
+    public function test_job_card_print_is_one_page_a5_with_writable_technician_and_handover_fields(): void
     {
         $administrator = $this->userWithRole('administrator');
         $job = $this->job(null, ['automatic_number' => 'JOB-TEST-10002']);
 
-        $this->actingAs($administrator)->get(route('job-cards.print', $job))
+        $response = $this->actingAs($administrator)->get(route('job-cards.print', $job))
             ->assertOk()
             ->assertSee('@page')
-            ->assertSee('size: A6')
+            ->assertSee('size: A5 portrait')
+            ->assertSee(__('ui.job_id'))
+            ->assertSee(__('ui.worksheet_job_number'))
+            ->assertSee(__('ui.worksheet_received_date'))
+            ->assertSee(__('ui.job_status'))
+            ->assertSee(__('ui.worksheet_issues_found'))
             ->assertSee(__('ui.repair_details'))
             ->assertSee(__('ui.parts_used'))
-            ->assertSee(__('ui.inspection'))
-            ->assertSee(__('ui.completion_notes'))
-            ->assertSee('writing');
+            ->assertSee(__('ui.parts_cost'))
+            ->assertSee(__('ui.total_amount'))
+            ->assertSee(__('ui.special_notes'))
+            ->assertSee(__('ui.worksheet_handover'))
+            ->assertSee(__('ui.cashier_received'));
+
+        $this->assertSame(1, substr_count($response->getContent(), '<article class="page">'));
 
         $this->assertDatabaseHas('document_print_histories', [
             'job_card_id' => JobCard::query()->where('repair_job_id', $job->id)->value('id'),
             'is_duplicate' => 0,
         ]);
+    }
+
+    public function test_job_card_is_a_blank_technician_worksheet_even_after_saved_repair_updates(): void
+    {
+        $actor = $this->userWithRole('cashier');
+        $job = $this->job(null, ['automatic_number' => 'JOB-WORKSHEET-001', 'repair_description' => 'OLD REPAIR TEXT', 'parts_cost' => '8765.43']);
+        $inspector = $this->employee(['name' => 'Saved Inspector Name']);
+        $inspection = JobInspection::create(['repair_job_id' => $job->id, 'inspected_at' => '2026-10-20 09:00:00', 'inspected_by_employee_id' => $inspector->id, 'inspection_result' => 'OLD FINDINGS', 'parts_used' => 'OLD PARTS TEXT', 'parts_quantity' => '7.000', 'repaired_by_employee_id' => $inspector->id, 'special_notes' => 'OLD COMPLETION NOTES']);
+        $this->actingAs($actor);
+        foreach (['job-cards.print', 'job-cards.duplicate'] as $route) {
+            $this->get(route($route, $job))->assertOk()->assertSee('JOB-WORKSHEET-001')->assertSee($job->item_name)->assertSee(__('ui.worksheet_issues_found'))->assertSee(__('ui.worksheet_handover'))->assertDontSee('OLD REPAIR TEXT')->assertDontSee('OLD FINDINGS')->assertDontSee('OLD PARTS TEXT')->assertDontSee('OLD COMPLETION NOTES')->assertDontSee('Saved Inspector Name')->assertDontSee('8765.43');
+        }
+        $pdf = $this->get(route('job-cards.pdf', $job))->assertOk();
+        $this->assertStringStartsWith('%PDF-', $pdf->getContent());
+        if (! is_dir(base_path('tmp/pdfs'))) { mkdir(base_path('tmp/pdfs'),0700,true); }
+        file_put_contents(base_path('tmp/pdfs/technician-worksheet-preview.pdf'), $pdf->getContent());
+        $this->assertSame('OLD COMPLETION NOTES', $inspection->fresh()->special_notes);
+        $this->assertSame('OLD REPAIR TEXT', $job->fresh()->repair_description);
+        $this->assertDatabaseHas('document_print_histories', ['job_card_id' => $job->jobCard->id]);
     }
 
     public function test_search_and_filters_return_database_paginated_jobs(): void
@@ -355,9 +412,10 @@ class RepairReceiptAndJobManagementTest extends TestCase
             ->assertSee(__('ui.amount_unavailable'));
 
         $this->actingAs($administrator)
-            ->get(route('repair-receipts.index', ['q' => 'JOB-OTHER-0002']))
+            ->get(route('repair-jobs.index', ['q' => 'JOB-OTHER-0002']))
             ->assertOk()
-            ->assertDontSee('MAN-OTHER-2');
+            ->assertSee('MAN-OTHER-2')
+            ->assertDontSee('MAN-SEARCH-1');
     }
 
     public function test_repair_job_identifiers_cannot_be_changed_after_creation(): void

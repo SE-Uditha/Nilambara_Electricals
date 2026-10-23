@@ -49,12 +49,9 @@ class JobCardController extends Controller
             'customer',
             'receivedByEmployee',
             'technician',
-            'jobInspections.inspectedByEmployee',
-            'jobInspections.repairedByEmployee',
             'jobCard',
         ]);
-        $jobCard = $job->jobCard ?? $job->jobCards()->create(['paper_size' => 'A6']);
-        $inspection = $job->jobInspections->sortByDesc('inspected_at')->first();
+        $jobCard = $job->jobCard ?? $job->jobCards()->create(['paper_size' => 'A5']);
         $template = PrintTemplate::query()
             ->where('document_type', 'job_card')
             ->where('is_active', true)
@@ -62,16 +59,9 @@ class JobCardController extends Controller
             ->first();
         $label = $template?->duplicate_copy_label ?: __('ui.duplicate_copy');
         $printedAt = now(config('business.timezone', 'Asia/Colombo'));
-        $paperSize = in_array($template?->paper_size, ['A4', 'A5', 'A6'], true) ? $template->paper_size : 'A6';
-        [$pageWidth, $pageHeight] = match ($paperSize) {
-            'A4' => [210, 297],
-            'A5' => [148, 210],
-            default => [105, 148],
-        };
-        $orientation = in_array($template?->orientation, ['portrait', 'landscape'], true) ? $template->orientation : 'portrait';
-        if ($orientation === 'landscape') {
-            [$pageWidth, $pageHeight] = [$pageHeight, $pageWidth];
-        }
+        $paperSize = 'A5';
+        $pageWidth = 148 - $this->safeMillimetres($template?->margin_left_mm, 5) - $this->safeMillimetres($template?->margin_right_mm, 5);
+        $orientation = 'portrait';
         $snapshot = [
             'automatic_number' => $job->automatic_number,
             'job_number' => $job->job_number,
@@ -80,16 +70,8 @@ class JobCardController extends Controller
             'model' => $job->model,
             'item_description' => $job->item_description,
             'reported_fault' => $job->reported_fault,
-            'repair_description' => $job->repair_description,
-            'parts_used' => $inspection?->parts_used,
-            'parts_quantity' => $inspection?->parts_quantity,
-            'parts_cost' => $job->parts_cost,
-            'inspection_date' => $inspection?->inspected_at?->toIso8601String(),
-            'inspected_by' => $inspection?->inspectedByEmployee?->name,
-            'repaired_by' => $inspection?->repairedByEmployee?->name ?: $job->technician?->name,
-            'completed_at' => $job->completed_at?->toIso8601String(),
-            'status' => $job->status->value,
-            'special_notes' => $job->special_notes,
+            'document_kind' => 'technician_worksheet',
+            'handwritten_fields' => ['status', 'issues_found', 'inspected_by', 'inspection_date', 'repaired_by', 'completion_date', 'work_performed', 'parts_used', 'parts_cost', 'total_amount', 'notes', 'signature', 'returned_to_cashier_date', 'cashier_received_by'],
             'duplicate' => $duplicate,
         ];
 
@@ -127,7 +109,7 @@ class JobCardController extends Controller
 
         return view('modules.job-cards.print', [
             'job' => $job,
-            'inspection' => $inspection,
+            'nativeWorksheetLayout' => true,
             'template' => $template,
             'duplicate' => $duplicate,
             'duplicateLabel' => $label,
@@ -135,7 +117,6 @@ class JobCardController extends Controller
             'paperSize' => $paperSize,
             'orientation' => $orientation,
             'pageWidth' => $pageWidth.'mm',
-            'pageHeight' => $pageHeight.'mm',
             'margins' => [
                 'top' => $this->safeMillimetres($template?->margin_top_mm, 5),
                 'right' => $this->safeMillimetres($template?->margin_right_mm, 5),

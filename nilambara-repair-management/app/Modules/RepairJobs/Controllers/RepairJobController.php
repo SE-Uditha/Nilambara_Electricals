@@ -13,6 +13,7 @@ use App\Modules\RepairJobs\Requests\SaveRepairInformationRequest;
 use App\Modules\RepairJobs\Requests\UpdateJobStatusRequest;
 use App\Modules\RepairJobs\Requests\UpdateRepairJobRequest;
 use App\Modules\RepairJobs\Services\RepairJobService;
+use App\Modules\RepairReceipts\Controllers\RepairReceiptController;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
@@ -23,6 +24,30 @@ use Illuminate\View\View;
 
 class RepairJobController extends Controller
 {
+    public function printReceipt(RepairJob $job): View
+    {
+        Gate::authorize('view', $job);
+        abort_unless($job->receipt, 404);
+
+        return app(RepairReceiptController::class)->print($job->receipt);
+    }
+
+    public function duplicateReceipt(RepairJob $job): View
+    {
+        Gate::authorize('view', $job);
+        abort_unless($job->receipt, 404);
+
+        return app(RepairReceiptController::class)->duplicate($job->receipt);
+    }
+
+    public function receiptPdf(RepairJob $job)
+    {
+        Gate::authorize('view', $job);
+        abort_unless($job->receipt, 404);
+
+        return app(RepairReceiptController::class)->pdf($job->receipt);
+    }
+
     public function setLabourCharge(Request $request, RepairJob $job, RepairJobService $jobs): RedirectResponse
     {
         $data = $request->validate(['labour_charge' => 'required|numeric|decimal:0,2|between:0,999999999999.99']);

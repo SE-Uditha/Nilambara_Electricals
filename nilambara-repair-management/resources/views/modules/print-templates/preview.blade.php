@@ -6,11 +6,12 @@
     @php
         $paperSizes = match ($template->document_type) {
             'quotation' => ['A4', 'A5'],
-            'job_card' => ['A6'],
+            'job_card' => ['A5'],
             'invoice' => ['A5'],
             'repair_receipt' => ['A4', 'A5', 'A6'],
             default => ['A4', 'A5', 'A6'],
         };
+        $orientations = $template->document_type === 'job_card' ? ['portrait'] : ['portrait', 'landscape'];
     @endphp
     <button type="button" onclick="window.print()" class="mb-4 rounded border px-4 py-2">Print test layout (not a transaction)</button><div class="mb-6 flex items-start justify-between gap-3">
         <div><a class="text-xs text-teal-700 hover:underline" href="{{ route('print-templates.index') }}">{{ __('print_templates.title') }}</a><h1 class="mt-2 text-2xl font-bold">{{ $template->name }} · v{{ $template->version }}</h1><p class="mt-1 text-sm text-slate-500">{{ __('print_templates.preview_note') }}</p></div>
@@ -39,7 +40,7 @@
                 <label class="form-label">{{ __('print_templates.telephone') }}<input class="form-input mt-1" name="telephone_number" maxlength="40" value="{{ old('telephone_number', $template->telephone_number) }}"></label>
                 <label class="form-label sm:col-span-2">{{ __('print_templates.address') }}<textarea class="form-input mt-1" name="business_address" rows="2" maxlength="2000">{{ old('business_address', $template->business_address) }}</textarea></label>
                 <label class="form-label">{{ __('print_templates.paper') }}<select class="form-input mt-1" name="paper_size">@foreach ($paperSizes as $size)<option value="{{ $size }}" @selected(old('paper_size', $template->paper_size) === $size)>{{ $size }}</option>@endforeach</select></label>
-                <label class="form-label">{{ __('print_templates.orientation') }}<select class="form-input mt-1" name="orientation">@foreach (['portrait', 'landscape'] as $orientation)<option value="{{ $orientation }}" @selected(old('orientation', $template->orientation) === $orientation)>{{ __('print_templates.'.$orientation) }}</option>@endforeach</select></label>
+                <label class="form-label">{{ __('print_templates.orientation') }}<select class="form-input mt-1" name="orientation">@foreach ($orientations as $orientation)<option value="{{ $orientation }}" @selected(old('orientation', $template->orientation) === $orientation)>{{ __('print_templates.'.$orientation) }}</option>@endforeach</select></label>
                 <label class="form-label">{{ __('print_templates.thermal_width') }}<input class="form-input mt-1" type="number" min="40" max="120" step="0.01" name="thermal_width_mm" value="{{ old('thermal_width_mm', $template->thermal_width_mm) }}"></label>
                 <label class="form-label">{{ __('print_templates.font_size') }}<input class="form-input mt-1" type="number" min="7" max="16" step="0.1" name="font_size_pt" required value="{{ old('font_size_pt', $template->font_size_pt) }}"></label>
                 @foreach (['top', 'right', 'bottom', 'left'] as $edge)

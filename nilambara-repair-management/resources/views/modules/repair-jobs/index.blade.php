@@ -9,9 +9,13 @@
             <h1 class="text-2xl font-bold tracking-tight text-slate-900">{{ !empty($assignedOnly) ? __('ui.my_assigned_jobs') : __('ui.repair_jobs') }}</h1>
             <p class="mt-1 text-sm text-slate-500">{{ !empty($assignedOnly) ? __('ui.assigned_jobs_description') : __('ui.repair_jobs_description') }}</p>
         </div>
-        @can('receipts.create')
-            <a href="{{ route('repair-receipts.create') }}" class="rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white hover:bg-teal-800">{{ __('ui.new_repair_receipt') }}</a>
-        @endcan
+        <div class="flex flex-wrap gap-2">
+            <a href="{{ route('repair-jobs.status-search') }}" class="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600">{{ __('ui.job_status') }}</a>
+            @can('job-cards.view')<a href="{{ route('job-cards.index') }}" class="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600">{{ __('ui.job_cards') }}</a>@endcan
+            @if (auth()->user()->can('jobs.create') && auth()->user()->can('receipts.create'))
+                <a href="{{ route('repair-jobs.create') }}" class="rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white hover:bg-teal-800">{{ __('ui.new_repair_job') }}</a>
+            @endif
+        </div>
     </div>
     @if (session('status'))
         <div role="status" class="mb-5 rounded-xl border border-teal-200 bg-teal-50 px-4 py-3 text-sm text-teal-800">{{ session('status') }}</div>
@@ -73,6 +77,9 @@
                             <td class="px-4 py-4">
                                 <div class="flex flex-wrap gap-3">
                                     <a href="{{ route('repair-jobs.show', $job) }}" class="font-semibold text-teal-700 hover:text-teal-900">{{ __('ui.view') }}</a>
+                                    @if ($job->receipt)
+                                        @can('receipts.print')<a href="{{ route('repair-jobs.receipt.print', $job) }}" class="font-semibold text-teal-700 hover:text-teal-900">{{ __('ui.print_receipt') }}</a>@endcan
+                                    @endif
                                     @can('jobs.assign', $job)<a href="{{ route('repair-jobs.assign-form', $job) }}" class="font-semibold text-slate-600 hover:text-slate-900">{{ __('ui.assign') }}</a>@endcan
                                     @can('jobs.update', $job)<a href="{{ route('repair-jobs.edit', $job) }}" class="font-semibold text-slate-600 hover:text-slate-900">{{ __('ui.edit') }}</a>@endcan
                                     @can('job-cards.print')<a href="{{ route('job-cards.print', $job) }}" class="font-semibold text-slate-600 hover:text-slate-900">{{ __('ui.job_card') }}</a>@endcan

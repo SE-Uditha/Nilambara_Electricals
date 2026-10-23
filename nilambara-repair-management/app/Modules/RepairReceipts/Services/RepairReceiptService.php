@@ -64,7 +64,7 @@ class RepairReceiptService
                 'job_type' => $data['job_type'],
                 'received_at' => $receivedAt,
                 'received_by_employee_id' => $employee->getKey(),
-                'labour_cost' => $data['labor_cost'],
+                'labour_cost' => $data['labor_cost'] ?? '0.00',
                 'total_job_amount' => '0.00',
                 'status' => JobStatus::Received->value,
                 'special_notes' => $this->nullableTrim($data['special_notes'] ?? null),
@@ -140,7 +140,7 @@ class RepairReceiptService
 
             JobCard::query()->create([
                 'repair_job_id' => $job->getKey(),
-                'paper_size' => 'A6',
+                'paper_size' => 'A5',
             ]);
 
             BusinessAudit::record(

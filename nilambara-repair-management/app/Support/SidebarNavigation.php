@@ -39,7 +39,8 @@ class SidebarNavigation
                     $item['active'] = $item['active'] || $request->routeIs(...$item['active_routes']);
                 }
             } else {
-                $item['active'] = $this->isActive($item, $request);
+                $item['active'] = $this->isActive($item, $request)
+                    || (isset($item['active_routes']) && $request->routeIs(...$item['active_routes']));
             }
             $visible[] = $item;
         }

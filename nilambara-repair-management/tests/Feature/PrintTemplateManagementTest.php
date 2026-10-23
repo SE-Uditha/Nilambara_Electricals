@@ -105,4 +105,55 @@ class PrintTemplateManagementTest extends TestCase
 
         $this->assertSame(1, PrintTemplate::query()->where('code', $template->code)->count());
     }
+
+    public function test_job_card_template_is_limited_to_a5_portrait(): void
+    {
+        $this->seed(RoleSeeder::class);
+        $user = User::factory()->create();
+        $user->assignRole('administrator');
+        $template = PrintTemplate::query()->create([
+            'code' => 'job-card-standard',
+            'version' => 1,
+            'document_type' => 'job_card',
+            'name' => 'Standard job card',
+            'paper_size' => 'A5',
+            'orientation' => 'portrait',
+            'font_size_pt' => 9,
+            'margin_top_mm' => 5,
+            'margin_right_mm' => 5,
+            'margin_bottom_mm' => 5,
+            'margin_left_mm' => 5,
+            'duplicate_copy_label' => 'Duplicate Copy',
+            'is_active' => true,
+        ]);
+
+        $this->actingAs($user);
+        $this->get(route('print-templates.preview', $template))
+            ->assertOk()
+            ->assertSee('value="A5"', false)
+            ->assertDontSee('value="A6"', false)
+            ->assertDontSee('value="landscape"', false);
+
+        $values = [
+            'name' => 'Standard job card',
+            'business_name' => '',
+            'business_address' => '',
+            'telephone_number' => '',
+            'document_title' => '',
+            'thermal_width_mm' => '',
+            'font_size_pt' => 9,
+            'margin_top_mm' => 5,
+            'margin_right_mm' => 5,
+            'margin_bottom_mm' => 5,
+            'margin_left_mm' => 5,
+            'footer' => '',
+            'duplicate_copy_label' => 'Duplicate Copy',
+        ];
+        $this->put(route('print-templates.update', $template), [...$values, 'paper_size' => 'A5', 'orientation' => 'portrait'])
+            ->assertRedirect(route('print-templates.index'));
+
+        $active = PrintTemplate::query()->where('code', $template->code)->where('is_active', true)->firstOrFail();
+        $this->put(route('print-templates.update', $active), [...$values, 'paper_size' => 'A6', 'orientation' => 'landscape'])
+            ->assertSessionHasErrors(['paper_size', 'orientation']);
+    }
 }

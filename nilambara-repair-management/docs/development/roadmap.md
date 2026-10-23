@@ -32,7 +32,7 @@ The local MySQL database already had the schema and remained unchanged by this s
 
 ## Step 5: repair receipt management, job registration, job cards, and initial job status tracking
 
-Implemented: atomic receipt/job registration with a database-generated `JOB-` reference and immutable manual job number; customer/item/receiving snapshots; optional advance payment through the existing payment/allocation/ledger records; initial `Received` history; technician assignment; inspection and repair notes; all 17 BRD statuses with append-only history; paginated job/status search; A5 receipt print/reprint; and a two-page A6 job card with print history and handwriting areas. HTML print views use the browser's print dialog; server-side PDF generation is not included.
+Implemented: atomic receipt/job registration with a database-generated `JOB-` reference and immutable manual job number; customer/item/receiving snapshots; optional advance payment through the existing payment/allocation/ledger records; initial `Received` history; technician assignment; inspection and repair notes; all 17 BRD statuses with append-only history; paginated job/status search; A5 receipt print/reprint; and a one-page A5 portrait technician worksheet with print history and cashier handover fields. HTML print views use the browser's print dialog and job cards can also be downloaded as PDF.
 
 The additive inspection-parts migration is pending until explicitly applied to the configured database. This step does not implement quotation approval, inventory deduction, final billing/totals, delivery processing, or Step 6.
 

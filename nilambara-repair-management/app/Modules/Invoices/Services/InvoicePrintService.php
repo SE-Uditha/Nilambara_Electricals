@@ -47,6 +47,7 @@ class InvoicePrintService
         $balance = $this->balances->summary($invoice);
         $data = [
             'invoice' => $invoice,
+            'pdfOutput' => $pdf,
             'document' => $document,
             'balance' => $balance,
             'template' => $template,
@@ -73,7 +74,7 @@ class InvoicePrintService
                 'bottom' => $this->safeMargin($template?->margin_bottom_mm, 7),
                 'left' => $this->safeMargin($template?->margin_left_mm, 7),
             ],
-            'fontSize' => is_numeric($template?->font_size_pt) ? max(8, min(14, (float) $template->font_size_pt)) : 10,
+            'fontSize' => is_numeric($template?->font_size_pt) ? max(8, min(14, (float) $template->font_size_pt)) : 9,
         ];
 
         DB::transaction(function () use ($invoice, $template, $duplicate, $duplicateLabel, $printedAt, $document, $balance, $pdf, $user, $paperSize, $orientation): void {

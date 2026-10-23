@@ -47,7 +47,7 @@ class PrintTemplateController
             'telephone_number' => ['nullable', 'string', 'max:40'],
             'document_title' => ['nullable', 'string', 'max:255'],
             'paper_size' => ['required', Rule::in($this->paperSizes($template))],
-            'orientation' => ['required', Rule::in(['portrait', 'landscape'])],
+            'orientation' => ['required', Rule::in($template->document_type === 'job_card' ? ['portrait'] : ['portrait', 'landscape'])],
             'thermal_width_mm' => ['nullable', 'numeric', 'between:40,120'],
             'font_size_pt' => ['required', 'numeric', 'between:7,16'],
             'margin_top_mm' => ['required', 'numeric', 'between:0,30'],
@@ -123,7 +123,7 @@ class PrintTemplateController
     private function paperSizes(PrintTemplate $template): array
     {
         return match ($template->document_type) {
-            'job_card' => ['A6'],
+            'job_card' => ['A5'],
             'invoice' => ['A5'],
             'quotation' => ['A4', 'A5'],
             'repair_receipt' => ['A4', 'A5', 'A6'],

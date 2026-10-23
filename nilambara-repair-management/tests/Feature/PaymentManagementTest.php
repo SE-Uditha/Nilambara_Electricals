@@ -141,7 +141,7 @@ class PaymentManagementTest extends TestCase
             'target_type' => 'job_advance',
             'repair_job_id' => $receipt->repair_job_id,
         ]);
-        $this->actingAs($administrator)->get(route('repair-receipts.show', $receipt))
+        $this->actingAs($administrator)->get(route('repair-jobs.show', $receipt->repair_job_id))
             ->assertOk()
             ->assertSee($payment->payment_number);
     }

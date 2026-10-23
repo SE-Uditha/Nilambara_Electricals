@@ -53,6 +53,7 @@ class MigrationLifecycleTest extends TestCase
             'audit_logs',
             'authorized_approval_requests',
             'repair_jobs',
+            'repair_job_charges',
             'repair_receipts',
             'job_status_histories',
             'job_inspections',

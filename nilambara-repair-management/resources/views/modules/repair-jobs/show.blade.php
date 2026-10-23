@@ -13,6 +13,16 @@
             <a href="{{ route('repair-jobs.index') }}" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50">{{ __('ui.back_to_jobs') }}</a>
             @can('update', $job)<a href="{{ route('repair-jobs.edit', $job) }}" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">{{ __('ui.edit_job') }}</a>@endcan
             @can('assign', $job)<a href="{{ route('repair-jobs.assign-form', $job) }}" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">{{ __('ui.assign_technician') }}</a>@endcan
+            @if (in_array($job->status->value, ['Repair Completed', 'Ready for Collection']) && ! $job->invoiceJobs()->exists())
+                @can('invoices.create')<a href="{{ route('repair-jobs.billing', $job) }}" class="rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white">Prepare Final Bill / Invoice</a>@endcan
+            @endif
+            @if ($job->receipt)
+                @can('receipts.print')
+                    <a href="{{ route('repair-jobs.receipt.print', $job) }}" class="rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white hover:bg-teal-800">{{ __('ui.print_receipt') }}</a>
+                    <a href="{{ route('repair-jobs.receipt.pdf', $job) }}" class="rounded-xl border border-teal-200 px-4 py-2.5 text-xs font-semibold text-teal-700">{{ __('ui.receipt_pdf') }}</a>
+                @endcan
+                @can('receipts.reprint')<a href="{{ route('repair-jobs.receipt.duplicate', $job) }}" class="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-700">{{ __('ui.reprint_duplicate') }}</a>@endcan
+            @endif
             @can('job-cards.print')<a href="{{ route('job-cards.print', $job) }}" class="rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white hover:bg-teal-800">{{ __('ui.print_job_card') }}</a>@endcan
         </div>
     </div>
@@ -44,8 +54,8 @@
                     <div><dt class="form-label">{{ __('ui.visible_damage') }}</dt><dd class="whitespace-pre-line text-slate-700">{{ $job->visible_damage ?: '—' }}</dd></div>
                     <div class="sm:col-span-2 xl:col-span-3"><dt class="form-label">{{ __('ui.special_notes') }}</dt><dd class="whitespace-pre-line text-slate-700">{{ $job->special_notes ?: '—' }}</dd></div>
                 </dl>
-                @if ($job->receipt && auth()->user()->can('receipts.view'))
-                    <div class="mt-5 border-t border-slate-100 pt-4"><a href="{{ route('repair-receipts.show', $job->receipt) }}" class="text-xs font-semibold text-teal-700 hover:text-teal-900">{{ __('ui.view_receipt') }} · {{ $job->receipt->receipt_number }}</a></div>
+                @if ($job->receipt && auth()->user()->can('receipts.print'))
+                    <div class="mt-5 border-t border-slate-100 pt-4"><a href="{{ route('repair-jobs.receipt.print', $job) }}" class="text-xs font-semibold text-teal-700 hover:text-teal-900">{{ __('ui.view_receipt') }} · {{ $job->receipt->receipt_number }}</a></div>
                 @endif
             </section>
 
@@ -180,7 +190,7 @@
                 <h2 class="mb-4 text-sm font-bold text-slate-900">{{ __('ui.job_financial_snapshot') }}</h2>
                 <dl class="space-y-3 text-sm">
                     <div><dt class="form-label">{{ __('ui.advance_paid') }}</dt><dd class="font-semibold text-slate-800">{{ config('business.currency') }} {{ number_format((float) $advancePaid, 2) }}</dd></div>
-                    <div><dt class="form-label">{{ __('ui.total_amount') }}</dt><dd class="text-slate-700">{{ (float) $job->total_job_amount > 0 ? config('business.currency').' '.$job->total_job_amount : __('ui.amount_unavailable') }}</dd></div>
+                    <div><dt class="form-label">{{ __('ui.total_amount') }}</dt><dd class="text-slate-700">{{ in_array($job->status->value, ['Repair Completed', 'Ready for Collection', 'Delivered']) ? config('business.currency').' '.$job->total_job_amount : __('ui.amount_unavailable') }}</dd></div>
                     <div><dt class="form-label">{{ __('ui.outstanding_balance') }}</dt><dd class="text-slate-700">{{ __('ui.amount_unavailable') }}</dd></div>
                 </dl>
                 @can('payments.view')
@@ -245,10 +255,4 @@
             </section>
         </aside>
     </div>
-    @can('invoices.create')
-    <details class="mt-5 rounded-2xl border bg-white p-5"><summary>Unquoted job selling charge</summary>
-        <p class="mt-2 text-sm text-slate-500">Use this for unquoted, unbilled jobs. Customer-approved quotation prices are transferred automatically. This selling charge is separate from employee labour cost.</p>
-        <form method="POST" action="{{ route('repair-jobs.labour-charge',$job) }}" class="mt-4 flex flex-wrap gap-3">@csrf<label>Labour selling charge (LKR)<input name="labour_charge" class="form-input w-full" value="{{ old('labour_charge',$job->labour_charge) }}" required></label><button class="rounded-xl bg-teal-700 px-4 py-2 text-white">Save charge</button></form>
-    </details>
-    @endcan
 @endsection

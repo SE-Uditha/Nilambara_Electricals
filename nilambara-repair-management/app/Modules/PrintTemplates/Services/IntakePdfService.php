@@ -36,6 +36,13 @@ class IntakePdfService
         $bold = str_replace('\\', '/', public_path('fonts/NotoSansSinhala-Bold.ttf'));
         $css = '<style>@font-face{font-family:NotoSinhala;src:url("'.$font.'") format("truetype");font-style:normal;font-weight:400}@font-face{font-family:NotoSinhala;src:url("'.$bold.'") format("truetype");font-style:normal;font-weight:700}body{font-family:NotoSinhala,"DejaVu Sans",sans-serif}.screen-actions{display:none}.document{border:0;padding:0}.preview{width:100%}.page{width:100%;min-height:0;height:auto;border:0;padding:0}.page .writing{min-height:10mm}.page .writing.large{min-height:18mm}.page .line{margin:2px 0}.page .section{margin-top:4px}.page .value{min-height:3mm}.page .print-date{position:static;margin-top:2mm}.grid,.meta,.reference{display:block}.grid>.field,.meta>div,.reference>div{display:inline-block;width:48%;vertical-align:top}.wide{width:100%!important}.business,.signature,.title-row,.doc-title{display:block}.signature>div{display:inline-block;width:46%}.business img{float:left;margin-right:10px}</style>';
         $css .= '<style>.document{line-height:1.15}.document .section{margin-top:8px}.document .section h3{margin-bottom:3px}.document .reference{font-size:9pt;padding:7px}.document .signature{margin-top:16px}.document .print-date{margin-top:8px}</style>';
+        if (($data['nativeReceiptLayout'] ?? false) || ($data['nativeWorksheetLayout'] ?? false)) {
+            $family = app()->getLocale() === 'si' ? 'NotoSinhala,"DejaVu Sans",sans-serif' : '"DejaVu Sans",NotoSinhala,sans-serif';
+            $css = '<style>@font-face{font-family:NotoSinhala;src:url("'.$font.'") format("truetype");font-weight:400}@font-face{font-family:NotoSinhala;src:url("'.$bold.'") format("truetype");font-weight:700}body{font-family:'.$family.';background:white}.screen-actions{display:none}.document{padding:0;max-width:none}</style>';
+        }
+        if ($data['nativeWorksheetLayout'] ?? false) {
+            $css .= '<style>.page{width:100%;border:0;padding:2mm}.business{display:block;min-height:11mm}.business img{float:left;max-width:14mm;max-height:11mm;margin-right:5px}.title-row{display:block}.meta,.two-col{display:block}.meta>div,.two-col>div{display:inline-block;width:48%;vertical-align:top}.line{display:block;margin:2px 0}.line strong{display:block}.line span{display:block;width:100%;min-height:4mm}.print-date{left:2mm;right:2mm;bottom:1mm}</style>';
+        }
         $html = str_replace('</head>', $css.'</head>', $html);
 
         return Pdf::loadHTML($html)->setOptions(['isRemoteEnabled' => false])->setPaper(strtolower($data['paperSize']), $data['orientation'])->download($filename);

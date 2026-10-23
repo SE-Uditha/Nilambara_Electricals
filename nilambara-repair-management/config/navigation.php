@@ -14,12 +14,9 @@ return [
                 ['label' => 'customers', 'icon' => 'users', 'route' => 'customers.index', 'permission' => 'customers.view'],
                 ['label' => 'register_customer', 'icon' => 'users', 'route' => 'customers.create', 'permission' => 'customers.create'],
             ]],
-            ['label' => 'repair_receipts', 'icon' => 'receipt', 'active_routes' => ['repair-receipts.*'], 'children' => [
-                ['label' => 'new_repair_receipt', 'icon' => 'receipt', 'route' => 'repair-receipts.create', 'permission' => 'receipts.create'],
-                ['label' => 'repair_receipts', 'icon' => 'receipt', 'route' => 'repair-receipts.index', 'permission' => 'receipts.view'],
-            ]],
-            ['label' => 'repair_jobs', 'icon' => 'tool', 'active_routes' => ['repair-jobs.*', 'job-cards.*'], 'children' => [
-                ['label' => 'repair_jobs', 'icon' => 'tool', 'route' => 'repair-jobs.index', 'permission' => 'jobs.view'],
+            ['label' => 'repair_jobs', 'icon' => 'tool', 'active_routes' => ['repair-jobs.*', 'repair-receipts.*', 'job-cards.*'], 'children' => [
+                ['label' => 'new_repair_job', 'icon' => 'receipt', 'route' => 'repair-jobs.create', 'permission' => 'receipts.create'],
+                ['label' => 'all_repair_jobs', 'icon' => 'tool', 'route' => 'repair-jobs.index', 'permission' => 'jobs.view'],
                 ['label' => 'job_cards', 'icon' => 'clipboard', 'route' => 'job-cards.index', 'permission' => 'job-cards.view'],
                 ['label' => 'job_status', 'icon' => 'activity', 'route' => 'repair-jobs.status-search', 'permission' => 'jobs.view'],
             ]],

@@ -1,6 +1,6 @@
 # Repair receipts
 
-Step 5 implements repair receiving at `/repair-receipts`. A receipt submission creates the repair job and receiving document together; the database transaction also writes the initial `Received` status event and creates its A6 job card. If an optional advance is entered, its payment, job allocation, and customer-ledger entry are part of the same transaction.
+Step 5 implements repair receiving at `/repair-receipts`. A receipt submission creates the repair job and receiving document together; the database transaction also writes the initial `Received` status event and creates its A5 job card. If an optional advance is entered, its payment, job allocation, and customer-ledger entry are part of the same transaction.
 
 ## Registration and identifiers
 
@@ -22,4 +22,3 @@ The print view defaults to A5 and can use an active receipt print template for p
 - `receipts.reprint`: prepare a duplicate.
 
 Job-level visibility policy still applies to linked job data. Tests use isolated SQLite and do not create real customer or repair records in the configured database.
-

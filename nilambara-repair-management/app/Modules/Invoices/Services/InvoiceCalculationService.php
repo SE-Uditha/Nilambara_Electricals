@@ -49,7 +49,12 @@ class InvoiceCalculationService
 
         $lines = [];
         $partsDetails = [];
-        $labour = $this->money((string) $job->labour_charge);
+        $custom = $job->billingCharges()->whereNull('removed_at')->orderBy('line_number')->get();
+        $customTotal = $custom->reduce(fn (BigDecimal $sum, $line) => $sum->plus($line->line_total), BigDecimal::zero());
+        $labour = $this->money((string) $job->labour_charge)->minus($customTotal);
+        foreach ($custom as $charge) {
+            $lines[] = $this->line($charge->description, 'service', $charge->quantity, $charge->unit_price, null, null);
+        }
         $parts = $this->money((string) $job->parts_charge);
 
         if ($labour->isGreaterThan(0)) {

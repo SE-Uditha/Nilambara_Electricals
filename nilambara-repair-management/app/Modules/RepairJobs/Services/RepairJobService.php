@@ -30,6 +30,8 @@ class RepairJobService
             }
             Validator::make(['labour_charge' => $amount], ['labour_charge' => 'required|numeric|decimal:0,2|between:0,999999999999.99'])->validate();
             $old = $job->only(['labour_charge', 'parts_charge', 'total_job_amount']);
+            $customTotal = $job->billingCharges()->whereNull('removed_at')->get()->reduce(fn (BigDecimal $sum, $line) => $sum->plus($line->line_total), BigDecimal::zero());
+            $amount = (string) BigDecimal::of($amount)->plus($customTotal)->toScale(2);
             $job->labour_charge = $amount;
             $job->total_job_amount = (string) BigDecimal::of($amount)->plus($job->parts_charge)->toScale(2);
             $job->save();

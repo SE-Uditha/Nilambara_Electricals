@@ -27,6 +27,7 @@
         action="{{ $editing ? route('invoices.update', $invoice) : route('invoices.store') }}"
         class="space-y-5"
         id="invoice-form"
+        data-billing-url="{{ route('repair-jobs.billing', ['job' => '__JOB__']) }}"
         data-customer-search="{{ route('customers.search') }}"
         data-jobs-url="{{ route('invoices.jobs', ['customer' => '__CUSTOMER__']) }}">
         @csrf
@@ -216,6 +217,11 @@
                 hidden.value = id;
                 card.append(hidden);
                 if (!fixed) {
+                    const editBill = document.createElement('a');
+                    editBill.href = form.dataset.billingUrl.replace('__JOB__', encodeURIComponent(id));
+                    editBill.className = 'mt-2 block text-xs font-semibold text-teal-800 underline';
+                    editBill.textContent = 'Prepare bill: spare parts and custom charges';
+                    card.append(editBill);
                     const remove = document.createElement('button');
                     remove.type = 'button';
                     remove.className = 'mt-2 text-xs font-semibold text-red-700 hover:underline';

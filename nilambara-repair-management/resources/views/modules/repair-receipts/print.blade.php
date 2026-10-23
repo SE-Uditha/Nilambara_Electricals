@@ -7,95 +7,87 @@
     <style>
         @page { size: {{ $paperSize }} {{ $orientation }}; margin: {{ $margins['top'] }}mm {{ $margins['right'] }}mm {{ $margins['bottom'] }}mm {{ $margins['left'] }}mm; }
         * { box-sizing: border-box; }
-        body { margin: 0; color: #17252d; font-family: Arial, sans-serif; font-size: {{ $fontSize }}pt; line-height: 1.35; }
-        .screen-actions { display: flex; gap: 10px; justify-content: flex-end; margin: 0 auto 16px; max-width: 700px; }
-        .screen-actions a, .screen-actions button { padding: 9px 14px; border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; color: #17252d; font-size: 12px; text-decoration: none; cursor: pointer; }
-        .document { max-width: 700px; margin: auto; border: 1px solid #d9e0e5; padding: 20px; }
-        .business { display: flex; align-items: center; gap: 14px; border-bottom: 2px solid #0f766e; padding-bottom: 12px; }
-        .business img { max-width: 72px; max-height: 55px; object-fit: contain; }
-        .business h1 { margin: 0 0 3px; font-size: 16pt; }
-        .business p { margin: 2px 0; color: #52616b; }
-        .doc-title { display: flex; justify-content: space-between; align-items: center; margin: 13px 0; }
-        .doc-title h2 { margin: 0; font-size: 13pt; letter-spacing: .04em; }
-        .duplicate { padding: 5px 9px; border: 2px solid #b91c1c; color: #b91c1c; font-weight: 700; letter-spacing: .08em; }
-        .reference { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 18px; padding: 10px; background: #f1f5f6; font-size: 10pt; }
-        .section { margin-top: 13px; }
-        .section h3 { margin: 0 0 6px; border-bottom: 1px solid #cbd5e1; padding-bottom: 3px; font-size: 9pt; text-transform: uppercase; letter-spacing: .06em; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 18px; }
-        .field { min-height: 17px; white-space: pre-wrap; overflow-wrap: anywhere; }
-        .field strong { display: inline-block; min-width: 112px; }
-        .wide { grid-column: 1 / -1; }
-        .signature { display: flex; justify-content: space-between; gap: 24px; margin-top: 24px; }
-        .signature div { width: 48%; border-top: 1px solid #475569; padding-top: 4px; text-align: center; }
-        .print-date { margin-top: 13px; border-top: 1px solid #cbd5e1; padding-top: 6px; color: #52616b; font-size: 8pt; }
-        @media print { .screen-actions { display: none; } .document { max-width: none; border: 0; padding: 0; } }
+        body { margin: 0; color: #182c38; font-family: Arial, sans-serif; font-size: {{ $fontSize }}pt; line-height: 1.15; background: #eef2f4; }
+        .screen-actions { max-width: 700px; margin: 16px auto; text-align: right; }
+        .screen-actions a, .screen-actions button { display: inline-block; margin-left: 6px; padding: 9px 14px; border: 1px solid #cbd5e1; border-radius: 6px; background: white; color: #0f766e; font: inherit; font-size: 10pt; text-decoration: none; cursor: pointer; }
+        .document { max-width: 700px; margin: auto; padding: 24px; background: white; border-top: 5px solid #0f766e; }
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        td { vertical-align: top; overflow-wrap: anywhere; word-wrap: break-word; }
+        .business { border-bottom: 1px solid #cbd5e1; padding-bottom: 10px; }
+        .business h1 { font-size: 13pt; margin: 0 0 4px; color: #115e59; }
+        .business p { margin: 2px 0; color: #475569; font-size: 8.5pt; }
+        .logo { width: 76px; }
+        .logo img { max-width: 50px; max-height: 44px; }
+        .heading { margin: 8px 0; }
+        .heading h2 { font-size: 13pt; margin: 0 0 4px; text-transform: uppercase; }
+        .copy { color: #64748b; font-size: 8pt; }
+        .reference { text-align: right; width: 42%; }
+        .reference strong { color: #0f766e; font-size: 12pt; }
+        .duplicate { display: inline-block; border: 2px solid #b91c1c; color: #b91c1c; padding: 3px 7px; font-weight: bold; }
+        .section { margin-top: 6px; }
+        .section h3 { margin: 0; padding: 4px 6px; background: #edf5f4; border-bottom: 1px solid #c7dcd8; color: #115e59; font-size: 8.5pt; text-transform: uppercase; }
+        .details td { padding: 2px 6px; border-bottom: 1px solid #e2e8f0; }
+        .label { color: #64748b; font-size: 7.5pt; display: block; margin-bottom: 0; }
+        .value { white-space: pre-wrap; }
+        .money { text-align: right; white-space: nowrap; font-weight: bold; color: #115e59; }
+        .collection-note { margin: 8px 0 0; padding: 7px; border-left: 3px solid #0f766e; background: #f8fafc; font-size: 8pt; }
+        .signatures { margin-top: 18px; }
+        .signatures td { width: 50%; text-align: center; padding: 0 10px; }
+        .signature-line { border-top: 1px solid #64748b; padding-top: 5px; font-size: 8pt; }
+        .print-date { border-top: 1px solid #cbd5e1; margin-top: 8px; padding-top: 6px; color: #64748b; text-align: center; font-size: 7pt; }
+        tr, .signatures, .collection-note { page-break-inside: avoid; }
+        h3 { page-break-after: avoid; }
+        @media print { body { background: white; } .screen-actions { display: none; } .document { max-width: none; padding: 0; } }
     </style>
 </head>
 <body>
     <nav class="screen-actions" aria-label="{{ __('ui.print_actions') }}">
-        <a href="{{ route('repair-receipts.show', $receipt) }}">{{ __('ui.back') }}</a>
+        <a href="{{ route('repair-jobs.show', $receipt->repair_job_id) }}">{{ __('ui.back_to_jobs') }}</a>
         <button type="button" onclick="window.print()">{{ __('ui.print') }}</button>
-        <a href="{{ route('repair-receipts.pdf',['receipt'=>$receipt,'duplicate'=>$duplicate ? 1 : 0]) }}">PDF</a>
+        <a href="{{ route('repair-jobs.receipt.pdf', ['job' => $receipt->repair_job_id, 'duplicate' => $duplicate ? 1 : 0]) }}">PDF</a>
     </nav>
     <main class="document">
         <header class="business">
-            @if (config('business.printing.show_logo', true) && $logoUrl)<img src="{{ $logoUrl }}" alt="{{ $businessName }}">@endif
-            <div>
-                <h1>{{ $businessName }}</h1>
-                @if ($businessAddress)<p>{{ $businessAddress }}</p>@endif
-                @if ($businessTelephone)<p>{{ $businessTelephone }}</p>@endif
-            </div>
+            <table><tr>
+                @if (config('business.printing.show_logo', true) && $logoUrl)<td class="logo" style="width:20%"><img src="{{ $logoUrl }}" alt="{{ $businessName }}"></td>@endif
+                <td style="width:80%"><h1>{{ $businessName }}</h1>@if ($businessAddress)<p>{{ $businessAddress }}</p>@endif @if ($businessTelephone)<p>{{ $businessTelephone }}</p>@endif</td>
+            </tr></table>
         </header>
-        <div class="doc-title">
-            <h2>{{ $documentTitle }}</h2>
-            @if ($duplicate)<span class="duplicate">{{ $duplicateLabel }}</span>@endif
-        </div>
-        <div class="reference">
-            <div><strong>{{ __('ui.job_reference') }}:</strong> {{ data_get($snapshot, 'job_reference', $receipt->receipt_number) }}</div>
-            <div><strong>{{ __('ui.manual_job_number') }}:</strong> {{ data_get($snapshot, 'manual_job_number', '—') }}</div>
-            <div><strong>{{ __('ui.received_date') }}:</strong> {{ $receipt->issued_at->timezone(config('business.timezone'))->format(config('business.date_format')) }}</div>
-            <div><strong>{{ __('ui.received_time') }}:</strong> {{ $receipt->issued_at->timezone(config('business.timezone'))->format(config('business.time_format')) }}</div>
-        </div>
+        <table class="heading"><tr>
+            <td><h2>{{ $documentTitle }}</h2><span class="copy">{{ __('ui.customer_copy') }}</span>@if ($duplicate)<br><span class="duplicate">{{ $duplicateLabel }}</span>@endif</td>
+            <td class="reference"><strong>{{ $receipt->receipt_number }}</strong><br><span class="copy">{{ $receipt->issued_at->timezone(config('business.timezone'))->format(config('business.date_format').' / '.config('business.time_format')) }}</span></td>
+        </tr></table>
+        <table class="details"><tr>
+            <td><span class="label">{{ __('ui.job_reference') }}</span><strong>{{ data_get($snapshot, 'job_reference', $receipt->receipt_number) }}</strong></td>
+            <td><span class="label">{{ __('ui.manual_job_number') }}</span><strong>{{ data_get($snapshot, 'manual_job_number') ?: '—' }}</strong></td>
+        </tr></table>
         <section class="section">
             <h3>{{ __('ui.customer_information') }}</h3>
-            <div class="grid">
-                <div class="field wide"><strong>{{ __('ui.customer_name') }}:</strong> {{ data_get($snapshot, 'customer.name', '—') }}</div>
-                <div class="field wide"><strong>{{ __('ui.address') }}:</strong> {{ data_get($snapshot, 'customer.address', '—') }}</div>
-                <div class="field"><strong>{{ __('ui.mobile_number') }}:</strong> {{ data_get($snapshot, 'customer.mobile_number', '—') }}</div>
-                <div class="field"><strong>{{ __('ui.contact_person') }}:</strong> {{ data_get($snapshot, 'customer.contact_person') ?: '—' }}</div>
-            </div>
+            <table class="details">
+                <tr><td><span class="label">{{ __('ui.customer_name') }}</span><span class="value">{{ data_get($snapshot, 'customer.name') ?: '—' }}</span></td><td><span class="label">{{ __('ui.mobile_number') }}</span><span class="value">{{ data_get($snapshot, 'customer.mobile_number') ?: '—' }}</span></td></tr>
+                <tr><td colspan="2"><span class="label">{{ __('ui.address') }}</span><span class="value">{{ data_get($snapshot, 'customer.address') ?: '—' }}</span></td></tr>
+                @if (data_get($snapshot, 'customer.contact_person'))<tr><td colspan="2"><span class="label">{{ __('ui.contact_person') }}</span><span class="value">{{ data_get($snapshot, 'customer.contact_person') }}</span></td></tr>@endif
+            </table>
         </section>
         <section class="section">
             <h3>{{ __('ui.appliance_information') }}</h3>
-            <div class="grid">
-                <div class="field"><strong>{{ __('ui.item_name') }}:</strong> {{ data_get($snapshot, 'item.name', '—') }}</div>
-                <div class="field"><strong>{{ __('ui.brand_model') }}:</strong> {{ trim((string) data_get($snapshot, 'item.brand').' '.(string) data_get($snapshot, 'item.model')) ?: '—' }}</div>
-                <div class="field wide"><strong>{{ __('ui.item_description') }}:</strong> {{ data_get($snapshot, 'item.description') ?: '—' }}</div>
-                <div class="field wide"><strong>{{ __('ui.reported_fault') }}:</strong> {{ data_get($snapshot, 'item.reported_fault') ?: '—' }}</div>
-                <div class="field wide"><strong>{{ __('ui.accessories_received') }}:</strong> {{ data_get($snapshot, 'item.accessories_received') ?: '—' }}</div>
-                <div class="field wide"><strong>{{ __('ui.physical_condition') }}:</strong> {{ data_get($snapshot, 'item.physical_condition') ?: '—' }}</div>
-                <div class="field wide"><strong>{{ __('ui.visible_damage') }}:</strong> {{ data_get($snapshot, 'item.visible_damage') ?: '—' }}</div>
-            </div>
+            <table class="details">
+                <tr><td><span class="label">{{ __('ui.item_name') }}</span><span class="value">{{ data_get($snapshot, 'item.name') ?: '—' }}</span></td><td><span class="label">{{ __('ui.brand_model') }}</span><span class="value">{{ trim((string) data_get($snapshot, 'item.brand').' '.(string) data_get($snapshot, 'item.model')) ?: '—' }}</span></td></tr>
+                @foreach (['description' => 'item_description', 'reported_fault' => 'reported_fault', 'accessories_received' => 'accessories_received', 'physical_condition' => 'physical_condition', 'visible_damage' => 'visible_damage'] as $key => $label)
+                    @if (data_get($snapshot, 'item.'.$key))<tr><td style="width:38%"><span class="label">{{ __('ui.'.$label) }}</span></td><td class="value">{{ data_get($snapshot, 'item.'.$key) }}</td></tr>@endif
+                @endforeach
+            </table>
         </section>
+        @if (\Brick\Math\BigDecimal::of((string) data_get($snapshot, 'advance_payment', '0.00'))->isGreaterThan(0))
         <section class="section">
-            <h3>{{ __('ui.payment_information') }}</h3>
-            <div class="grid">
-                <div class="field"><strong>{{ __('ui.advance_payment') }}:</strong> {{ config('business.currency') }} {{ data_get($snapshot, 'advance_payment', '0.00') }}</div>
-                @if (data_get($snapshot, 'advance_payment_number'))<div class="field"><strong>{{ __('payments.number') }}:</strong> {{ data_get($snapshot, 'advance_payment_number') }}</div>@endif
-                <div class="field"><strong>{{ __('ui.labor_cost') }}:</strong> {{ config('business.currency') }} {{ data_get($snapshot, 'labor_cost', '0.00') }}</div>
-            </div>
+            <h3>{{ __('ui.advance_payment') }}</h3>
+            <table class="details"><tr><td>{{ __('ui.advance_payment') }}@if (data_get($snapshot, 'advance_payment_number'))<br><span class="label">{{ data_get($snapshot, 'advance_payment_number') }}</span>@endif</td><td class="money">{{ config('business.currency') }} {{ data_get($snapshot, 'advance_payment') }}</td></tr></table>
         </section>
-        <section class="section">
-            <div class="grid">
-                <div class="field"><strong>{{ __('ui.received_by') }}:</strong> {{ data_get($snapshot, 'received_by', '—') }}</div>
-                <div class="field wide"><strong>{{ __('ui.special_notes') }}:</strong> {{ data_get($snapshot, 'special_notes') ?: '—' }}</div>
-            </div>
-        </section>
-        <div class="signature">
-            <div>{{ __('ui.customer_signature') }}</div>
-            <div>{{ __('ui.received_by') }}</div>
-        </div>
-        <footer class="print-date">{{ $footerText ?: __('ui.print_date') }}: {{ $printTime->format(config('business.date_format').' '.config('business.time_format')) }} · {{ config('business.timezone') }}</footer>
+        @endif
+        @if (data_get($snapshot, 'special_notes'))<section class="section"><h3>{{ __('ui.special_notes') }}</h3><table class="details"><tr><td class="value">{{ data_get($snapshot, 'special_notes') }}</td></tr></table></section>@endif
+        <p class="collection-note">{{ __('ui.receipt_collection_note') }}</p>
+        <table class="signatures"><tr><td><div class="signature-line">{{ __('ui.customer_signature') }}</div></td><td><div class="signature-line">{{ data_get($snapshot, 'received_by') ?: '—' }}<br>{{ __('ui.received_by') }}</div></td></tr></table>
+        <footer class="print-date">@if ($footerText){{ $footerText }}<br>@endif {{ __('ui.print_date') }}: {{ $printTime->format(config('business.date_format').' '.config('business.time_format')) }} · {{ config('business.timezone') }}</footer>
     </main>
 @include('components.document-layout-settings')
 </body>

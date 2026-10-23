@@ -9,7 +9,7 @@ class Step11TemplateSeeder extends Seeder
 {
     public function run(): void
     {
-        foreach (['repair_receipt' => ['Repair Receipt', 'A5'], 'job_card' => ['Repair Job Card', 'A6'],
+        foreach (['repair_receipt' => ['Repair Receipt', 'A5'], 'job_card' => ['Repair Job Card', 'A5'],
             'quotation' => ['Quotation', 'A4'], 'invoice' => ['Repair Invoice', 'A5'],
             'customer_statement' => ['Customer Statement', 'A4'], 'payment_receipt' => ['Payment Receipt', 'A5'],
             'purchase' => ['Purchase Document', 'A4']] as $type => [$name,$paper]) {

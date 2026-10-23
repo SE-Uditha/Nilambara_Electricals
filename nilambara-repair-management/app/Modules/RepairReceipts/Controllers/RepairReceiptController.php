@@ -2,11 +2,9 @@
 
 namespace App\Modules\RepairReceipts\Controllers;
 
-use App\Enums\JobStatus;
 use App\Http\Controllers\Controller;
 use App\Modules\Customers\Models\Customer;
 use App\Modules\Employees\Models\Employee;
-use App\Modules\Payments\Models\PaymentAllocation;
 use App\Modules\PrintTemplates\Models\DocumentPrintHistory;
 use App\Modules\PrintTemplates\Models\PrintTemplate;
 use App\Modules\PrintTemplates\Services\IntakePdfService;
@@ -18,69 +16,13 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class RepairReceiptController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request): RedirectResponse
     {
-        $filters = $request->validate([
-            'q' => ['nullable', 'string', 'max:120'],
-            'date_from' => ['nullable', 'date'],
-            'date_to' => ['nullable', 'date', 'after_or_equal:date_from'],
-            'job_type' => ['nullable', 'in:normal,special,urgent'],
-            'status' => ['nullable', Rule::enum(JobStatus::class)],
-            'received_by' => ['nullable', 'integer', 'exists:employees,id'],
-        ]);
-
-        $query = RepairReceipt::query()
-            ->with(['repairJob.customer', 'repairJob.receivedByEmployee', 'repairJob.technician'])
-            ->orderByDesc('issued_at')
-            ->orderByDesc('id');
-
-        if (($search = trim((string) ($filters['q'] ?? ''))) !== '') {
-            $query->where(function ($builder) use ($search): void {
-                $like = '%'.$search.'%';
-                $builder->where('receipt_number', 'like', $like)
-                    ->orWhereHas('repairJob', function ($job) use ($like): void {
-                        $job->where('job_number', 'like', $like)
-                            ->orWhere('automatic_number', 'like', $like)
-                            ->orWhere('item_name', 'like', $like)
-                            ->orWhereHas('customer', function ($customer) use ($like): void {
-                                $customer->where('customer_name', 'like', $like)
-                                    ->orWhere('company_name', 'like', $like)
-                                    ->orWhere('mobile_number', 'like', $like);
-                            });
-                    });
-            });
-        }
-
-        if (! empty($filters['date_from'])) {
-            $query->whereDate('issued_at', '>=', $filters['date_from']);
-        }
-
-        if (! empty($filters['date_to'])) {
-            $query->whereDate('issued_at', '<=', $filters['date_to']);
-        }
-
-        if (! empty($filters['job_type'])) {
-            $query->whereHas('repairJob', fn ($job) => $job->where('job_type', $filters['job_type']));
-        }
-
-        if (! empty($filters['status'])) {
-            $query->whereHas('repairJob', fn ($job) => $job->where('status', $filters['status']));
-        }
-
-        if (! empty($filters['received_by'])) {
-            $query->whereHas('repairJob', fn ($job) => $job->where('received_by_employee_id', $filters['received_by']));
-        }
-
-        return view('modules.repair-receipts.index', [
-            'receipts' => $query->paginate(20)->withQueryString(),
-            'employees' => Employee::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']),
-            'statuses' => JobStatus::cases(),
-        ]);
+        return redirect()->route('repair-jobs.index', $request->only(['q', 'date_from', 'date_to', 'status']));
     }
 
     public function create(): View
@@ -93,7 +35,7 @@ class RepairReceiptController extends Controller
                 ->first();
         }
 
-        return view('modules.repair-receipts.create', [
+        return view('modules.repair-jobs.create', [
             'employees' => Employee::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']),
             'selectedCustomer' => $selectedCustomer === null ? null : [
                 'id' => $selectedCustomer->getKey(),
@@ -116,38 +58,19 @@ class RepairReceiptController extends Controller
         $receipt = $receipts->register($request->validated(), $request->user());
 
         if ($request->validated('intent') === 'print' && $request->user()->can('receipts.print')) {
-            return redirect()->route('repair-receipts.print', $receipt)
-                ->with('status', __('ui.repair_receipt_saved'));
+            return redirect()->route('repair-jobs.receipt.print', $receipt->repair_job_id)
+                ->with('status', __('ui.repair_job_accepted'));
         }
 
-        return redirect()->route('repair-receipts.show', $receipt)
-            ->with('status', __('ui.repair_receipt_saved'));
+        return redirect()->route('repair-jobs.show', $receipt->repair_job_id)
+            ->with('status', __('ui.repair_job_accepted'));
     }
 
-    public function show(RepairReceipt $receipt): View
+    public function show(RepairReceipt $receipt): RedirectResponse
     {
-        $receipt->load([
-            'customer',
-            'repairJob.customer',
-            'repairJob.receivedByEmployee',
-            'repairJob.technician',
-            'repairJob.jobStatusHistories' => fn ($history) => $history->orderByDesc('changed_at')->orderByDesc('id'),
-        ]);
         Gate::authorize('view', $receipt->repairJob);
 
-        $advancePayments = auth()->user()->can('payments.view')
-            ? PaymentAllocation::query()
-                ->with(['payment.receivedByEmployee', 'releases'])
-                ->where('repair_job_id', $receipt->repair_job_id)
-                ->where('target_type', 'job_advance')
-                ->orderBy('allocated_at')
-                ->get()
-            : collect();
-
-        return view('modules.repair-receipts.show', [
-            'receipt' => $receipt,
-            'advancePayments' => $advancePayments,
-        ]);
+        return redirect()->route('repair-jobs.show', $receipt->repair_job_id);
     }
 
     public function print(RepairReceipt $receipt): View
@@ -222,6 +145,7 @@ class RepairReceiptController extends Controller
         });
 
         return view('modules.repair-receipts.print', [
+            'nativeReceiptLayout' => true,
             'receipt' => $receipt,
             'snapshot' => $snapshot,
             'duplicate' => $duplicate,

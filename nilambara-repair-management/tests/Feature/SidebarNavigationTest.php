@@ -32,13 +32,24 @@ class SidebarNavigationTest extends TestCase
     {
         $response = $this->actingAs($this->actor('cashier'))->get(route('dashboard'))->assertOk();
         $sidebar = $this->sidebar($response->getContent());
-        foreach (['customers', 'repair_receipts', 'invoices', 'payments', 'suppliers', 'purchases', 'inventory'] as $group) {
+        foreach (['customers', 'repair_jobs', 'invoices', 'payments', 'suppliers', 'purchases', 'inventory'] as $group) {
             $this->assertSame(1, $sidebar->query('//nav//details[@data-sidebar-group="'.$group.'"]')->length);
         }
-        foreach (['pos', 'employees', 'roles_permissions', 'system_settings'] as $group) {
+        foreach (['repair_receipts', 'pos', 'employees', 'roles_permissions', 'system_settings'] as $group) {
             $this->assertSame(0, $sidebar->query('//nav//details[@data-sidebar-group="'.$group.'"]')->length);
         }
         $this->assertSame(0, $sidebar->query('//nav//details[not(.//a)]')->length);
+        $this->assertSame(1, $sidebar->query('//nav//a[@href="'.route('repair-jobs.index').'"]')->length);
+        $this->assertSame(0, $sidebar->query('//nav//a[@href="'.route('repair-receipts.index').'"]')->length);
+    }
+
+    public function test_repair_jobs_stays_selected_when_accepting_a_job(): void
+    {
+        $response = $this->actingAs($this->actor('cashier'))->get(route('repair-jobs.create'))->assertOk();
+        $selected = $this->sidebar($response->getContent())->query('//nav//a[@aria-current="page"]');
+        $this->assertSame(1, $selected->length);
+        $this->assertSame(route('repair-jobs.create'), $selected->item(0)->getAttribute('href'));
+        $this->assertSame(1, $this->sidebar($response->getContent())->query('//nav//details[@data-sidebar-group="repair_jobs"][@open]')->length);
     }
 
     public function test_filtered_invoice_marks_only_its_shortcut_active_and_opens_the_parent(): void

@@ -82,10 +82,10 @@ class InvoiceController extends Controller
     public function create(Request $request): View
     {
         Gate::authorize('create', Invoice::class);
-        $selectedCustomer = $request->old('customer_id')
-            ? Customer::query()->whereKey($request->old('customer_id'))->where('is_active', true)->first()
+        $selectedCustomer = $request->old('customer_id', $request->query('customer_id'))
+            ? Customer::query()->whereKey($request->old('customer_id', $request->query('customer_id')))->where('is_active', true)->first()
             : null;
-        $oldJobIds = array_values(array_unique(array_map('intval', (array) $request->old('repair_job_ids', []))));
+        $oldJobIds = array_values(array_unique(array_map('intval', (array) $request->old('repair_job_ids', $request->query('repair_job_ids', [])))));
         $selectedJobs = $selectedCustomer === null || $oldJobIds === [] ? collect() : RepairJob::query()
             ->where('customer_id', $selectedCustomer->getKey())
             ->whereIn('id', $oldJobIds)

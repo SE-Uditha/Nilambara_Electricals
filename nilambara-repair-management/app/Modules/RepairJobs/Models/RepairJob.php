@@ -62,6 +62,11 @@ class RepairJob extends BusinessModel
 
     protected bool $preserveRecord = true;
 
+    public function billingCharges(): HasMany
+    {
+        return $this->hasMany(RepairJobCharge::class);
+    }
+
     protected function casts(): array
     {
         return [
