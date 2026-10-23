@@ -87,7 +87,6 @@ class RoleSeeder extends Seeder
                 'credit.view',
                 'customers.create',
                 'customers.statement',
-                'customers.update',
                 'customers.view',
                 'dashboard.view',
                 'inventory.adjust',

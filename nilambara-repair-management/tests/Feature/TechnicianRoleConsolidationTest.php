@@ -23,13 +23,51 @@ class TechnicianRoleConsolidationTest extends TestCase
         $job = $this->job();
         $disabled = User::factory()->create(['is_active' => false]);
         foreach ([null, $disabled->id] as $loginId) {
-            $employee = $this->employee(['user_id' => $loginId, 'is_active' => true]);
+            $employee = $this->employee(['user_id' => $loginId, 'is_active' => true, 'job_title' => 'Technician']);
             $this->actingAs($cashier)->get(route('repair-jobs.assign-form', $job))->assertOk()->assertSee($employee->name);
             $this->post(route('repair-jobs.assign', $job), ['technician_id' => $employee->id])->assertRedirect()->assertSessionHasNoErrors();
             $this->assertSame($employee->id, $job->fresh()->technician_id);
         }
-        $inactive = $this->employee(['is_active' => false]);
+        $inactive = $this->employee(['is_active' => false, 'job_title' => 'Technician']);
         $this->post(route('repair-jobs.assign', $job), ['technician_id' => $inactive->id])->assertSessionHasErrors('technician_id');
+    }
+
+    public function test_only_technicians_are_assignable_and_a_technician_can_be_added_from_assign_page(): void
+    {
+        $this->seed(RoleSeeder::class);
+        $cashier = User::factory()->create();
+        $cashier->assignRole('cashier');
+        $job = $this->job();
+        $other = $this->employee(['job_title' => 'Accountant', 'name' => 'Zed Accountant']);
+        $technician = $this->employee(['job_title' => 'technician', 'name' => 'Amal Technician']);
+
+        $this->actingAs($cashier)->get(route('repair-jobs.assign-form', $job))
+            ->assertOk()->assertSee($technician->name)->assertDontSee($other->name);
+        $this->post(route('repair-jobs.assign', $job), ['technician_id' => $other->id])->assertSessionHasErrors('technician_id');
+        $this->assertNull($job->fresh()->technician_id);
+
+        $this->post(route('repair-jobs.technicians.store', $job), ['name' => 'New Tech', 'mobile_number' => '0771234567'])
+            ->assertRedirect(route('repair-jobs.assign-form', $job))->assertSessionHasNoErrors();
+        $created = \App\Modules\Employees\Models\Employee::query()->where('name', 'New Tech')->firstOrFail();
+        $this->assertSame('Technician', $created->job_title);
+        $this->assertTrue($created->is_active);
+        $this->get(route('repair-jobs.assign-form', $job))->assertSee('New Tech');
+
+        $busy = $this->job(null, ['technician_id' => $technician->id]);
+        $closed = $this->job(null, ['technician_id' => $technician->id, 'status' => \App\Enums\JobStatus::Delivered->value]);
+        $this->get(route('repair-jobs.assign-form', $job))
+            ->assertSee($busy->automatic_number)->assertDontSee($closed->automatic_number)->assertSee('1 open job');
+
+        $this->put(route('repair-jobs.technicians.update', [$job, $created]), ['name' => 'Renamed Tech', 'mobile_number' => '0779999999'])
+            ->assertRedirect(route('repair-jobs.assign-form', $job))->assertSessionHasNoErrors();
+        $this->assertSame('Renamed Tech', $created->fresh()->name);
+
+        $this->delete(route('repair-jobs.technicians.destroy', [$job, $created]))->assertRedirect(route('repair-jobs.assign-form', $job));
+        $this->assertFalse($created->fresh()->is_active);
+        $this->get(route('repair-jobs.assign-form', $job))->assertDontSee('Renamed Tech');
+
+        $this->put(route('repair-jobs.technicians.update', [$job, $other]), ['name' => 'Hacked'])->assertForbidden();
+        $this->delete(route('repair-jobs.technicians.destroy', [$job, $other]))->assertForbidden();
     }
 
     public function test_migration_unions_grants_disables_extra_logins_and_preserves_history_and_denials(): void

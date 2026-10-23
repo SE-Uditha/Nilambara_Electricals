@@ -25,6 +25,11 @@ Route::middleware('can:jobs.view')->group(function (): void {
     Route::get('/repair-jobs/{job}', [RepairJobController::class, 'show'])->name('repair-jobs.show');
 });
 
+Route::middleware('can:jobs.view')->group(function (): void {
+    Route::get('/repair-jobs/{job}/request-edit', [RepairJobController::class, 'requestEdit'])->name('repair-jobs.request-edit');
+    Route::post('/repair-jobs/{job}/request-edit', [RepairJobController::class, 'storeEditRequest'])->name('repair-jobs.request-edit.store');
+});
+
 Route::middleware('can:jobs.update')->group(function (): void {
     Route::get('/repair-jobs/{job}/edit', [RepairJobController::class, 'edit'])->name('repair-jobs.edit');
     Route::put('/repair-jobs/{job}', [RepairJobController::class, 'update'])->name('repair-jobs.update');
@@ -33,6 +38,9 @@ Route::middleware('can:jobs.update')->group(function (): void {
 Route::middleware('can:jobs.assign')->group(function (): void {
     Route::get('/repair-jobs/{job}/assign', [RepairJobController::class, 'assignForm'])->name('repair-jobs.assign-form');
     Route::post('/repair-jobs/{job}/assign', [RepairJobController::class, 'assign'])->name('repair-jobs.assign');
+    Route::post('/repair-jobs/{job}/technicians', [RepairJobController::class, 'storeTechnician'])->name('repair-jobs.technicians.store');
+    Route::put('/repair-jobs/{job}/technicians/{technician}', [RepairJobController::class, 'updateTechnician'])->name('repair-jobs.technicians.update');
+    Route::delete('/repair-jobs/{job}/technicians/{technician}', [RepairJobController::class, 'destroyTechnician'])->name('repair-jobs.technicians.destroy');
 });
 
 Route::post('/repair-jobs/{job}/inspection', [RepairJobController::class, 'inspect'])

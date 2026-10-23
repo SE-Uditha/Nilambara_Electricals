@@ -73,6 +73,9 @@
                                     @can('customers.update')
                                         <a href="{{ route('customers.edit', $customer) }}" class="font-semibold text-slate-600 hover:text-slate-900">{{ __('ui.edit') }}</a>
                                     @endcan
+                                    @if (\App\Modules\Approvals\Services\ApprovalAccess::canRequestChange(auth()->user(), 'customer_update'))
+                                        <a href="{{ route('customers.request-edit', $customer) }}" class="font-semibold text-amber-700 hover:text-amber-900">{{ __('ui.request_edit') }}</a>
+                                    @endif
                                 </div>
                             </td>
                         </tr>

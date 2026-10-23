@@ -4,7 +4,11 @@ namespace App\Modules\Approvals\Services;
 
 use App\Models\User;
 use App\Modules\Approvals\Models\ApprovalRequest;
+use App\Modules\Customers\Models\Customer;
+use App\Modules\Customers\Services\CustomerService;
 use App\Modules\Inventory\Models\StockLocation;
+use App\Modules\RepairJobs\Models\RepairJob;
+use App\Modules\RepairJobs\Services\RepairJobService;
 use App\Modules\Inventory\Services\StockWorkflowService;
 use App\Modules\Payments\Models\Payment;
 use App\Modules\Payments\Services\PaymentService;
@@ -58,6 +62,83 @@ class ApprovalService
         }, 3);
     }
 
+    public const CHANGE_FIELDS = [
+        'customer_update' => ['customer_type', 'customer_name', 'company_name', 'contact_person', 'address', 'mobile_number', 'alternate_phone', 'email', 'special_notes'],
+        'job_update' => ['job_type', 'item_name', 'brand', 'model', 'item_description', 'reported_fault', 'accessories_received', 'physical_condition', 'visible_damage', 'special_notes'],
+    ];
+
+    /**
+     * Stores an edit proposed by a user without direct edit rights so an administrator can approve it.
+     *
+     * @param  array<string, mixed>  $changes
+     */
+    public function submitChange(string $kind, Customer|RepairJob $subject, array $changes, string $reason, string $key, User $actor): ApprovalRequest
+    {
+        abort_unless(ApprovalAccess::canRequestChange($actor, $kind), 403);
+
+        $fields = self::CHANGE_FIELDS[$kind];
+        $proposed = [];
+        foreach ($fields as $field) {
+            $value = $changes[$field] ?? null;
+            $proposed[$field] = is_string($value) ? (trim($value) === '' ? null : trim($value)) : $value;
+        }
+
+        $payload = [
+            'subject_id' => $subject->getKey(),
+            'subject_label' => $subject instanceof Customer ? $subject->customer_code.' · '.$subject->display_name : $subject->automatic_number,
+            'original' => $this->snapshot($subject, $fields),
+            'changes' => $proposed,
+            'idempotency_key' => $key,
+            'reason' => $reason,
+        ];
+        $hash = hash('sha256', json_encode($payload, JSON_THROW_ON_ERROR));
+
+        return DB::transaction(function () use ($kind, $key, $actor, $payload, $hash, $reason): ApprovalRequest {
+            if ($old = ApprovalRequest::where('source_key', $key)->first()) {
+                if ((int) $old->requested_by_user_id !== (int) $actor->id || $old->kind !== $kind) {
+                    throw ValidationException::withMessages(['idempotency_key' => 'This request key is already used for different details.']);
+                }
+
+                return $old;
+            }
+            $approval = ApprovalRequest::create([
+                'source_key' => $key, 'kind' => $kind, 'status' => 'pending',
+                'requested_by_user_id' => $actor->id, 'reason' => $reason, 'payload' => $payload, 'payload_hash' => $hash,
+            ]);
+            BusinessAudit::record($actor, 'approval.requested', ApprovalRequest::class, $approval->id, newValues: ['kind' => $kind, 'reason' => $reason]);
+
+            return $approval;
+        }, 3);
+    }
+
+    /** @param  list<string>  $fields */
+    private function snapshot(Customer|RepairJob $subject, array $fields): array
+    {
+        return json_decode(json_encode($subject->only($fields)), true);
+    }
+
+    private function applyChange(ApprovalRequest $approval, User $actor): void
+    {
+        $payload = $approval->payload;
+        $fields = self::CHANGE_FIELDS[$approval->kind];
+
+        if ($approval->kind === 'customer_update') {
+            $subject = Customer::query()->whereKey($payload['subject_id'])->lockForUpdate()->firstOrFail();
+        } else {
+            $subject = RepairJob::query()->whereKey($payload['subject_id'])->lockForUpdate()->firstOrFail();
+        }
+
+        if ($this->snapshot($subject, $fields) != $payload['original']) {
+            throw ValidationException::withMessages(['decision' => 'This record changed after the edit was requested. Reject it and ask for a fresh request.']);
+        }
+
+        if ($approval->kind === 'customer_update') {
+            app(CustomerService::class)->update($subject, $payload['changes'], $actor);
+        } else {
+            app(RepairJobService::class)->updateDetails($subject, $payload['changes'], $actor);
+        }
+    }
+
     public function decide(ApprovalRequest $approval, string $decision, string $comment, User $actor): ApprovalRequest
     {
         $this->validateDecision($decision, $comment);
@@ -88,6 +169,7 @@ class ApprovalService
                     'payment_refund', 'payment_reversal' => app(PaymentService::class)->reverse(Payment::findOrFail($approval->payment_id), $data + ['reversal_type' => $approval->kind === 'payment_refund' ? 'refund' : 'reversal'], $actor),
                     'stock_adjustment' => app(StockWorkflowService::class)->adjust($data, $actor),
                     'stock_count' => app(StockWorkflowService::class)->count($data, $actor),
+                    'customer_update', 'job_update' => $this->applyChange($approval, $actor),
                     default => throw ValidationException::withMessages(['kind' => 'Unsupported request type.']),
                 };
             }

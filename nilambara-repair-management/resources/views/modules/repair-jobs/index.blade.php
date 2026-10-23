@@ -82,7 +82,8 @@
                                     @endif
                                     @can('jobs.assign', $job)<a href="{{ route('repair-jobs.assign-form', $job) }}" class="font-semibold text-slate-600 hover:text-slate-900">{{ __('ui.assign') }}</a>@endcan
                                     @can('jobs.update', $job)<a href="{{ route('repair-jobs.edit', $job) }}" class="font-semibold text-slate-600 hover:text-slate-900">{{ __('ui.edit') }}</a>@endcan
-                                    @can('job-cards.print')<a href="{{ route('job-cards.print', $job) }}" class="font-semibold text-slate-600 hover:text-slate-900">{{ __('ui.job_card') }}</a>@endcan
+                                                                        @if (\App\Modules\Approvals\Services\ApprovalAccess::canRequestChange(auth()->user(), 'job_update'))<a href="{{ route('repair-jobs.request-edit', $job) }}" class="font-semibold text-amber-700 hover:text-amber-900">{{ __('ui.request_edit') }}</a>@endif
+                                                                        @can('job-cards.print')<a href="{{ route('job-cards.print', $job) }}" class="font-semibold text-slate-600 hover:text-slate-900">{{ __('ui.job_card') }}</a>@endcan
                                 </div>
                             </td>
                         </tr>

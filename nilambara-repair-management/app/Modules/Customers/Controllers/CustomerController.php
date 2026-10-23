@@ -3,8 +3,11 @@
 namespace App\Modules\Customers\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Approvals\Services\ApprovalAccess;
+use App\Modules\Approvals\Services\ApprovalService;
 use App\Modules\Customers\Models\Customer;
 use App\Modules\Customers\Requests\StoreCustomerRequest;
+use App\Modules\Customers\Requests\RequestCustomerEditRequest;
 use App\Modules\Customers\Requests\UpdateCustomerRequest;
 use App\Modules\Customers\Services\CustomerService;
 use App\Modules\Customers\Services\CustomerStatementService;
@@ -139,6 +142,23 @@ class CustomerController extends Controller
 
         return redirect()->route('customers.show', $customer)
             ->with('status', __('ui.customer_updated'));
+    }
+
+    public function requestEdit(Request $request, Customer $customer): View
+    {
+        Gate::authorize('view', $customer);
+        abort_unless(ApprovalAccess::canRequestChange($request->user(), 'customer_update'), 403);
+
+        return view('modules.customers.edit', ['customer' => $customer, 'requestMode' => true]);
+    }
+
+    public function storeEditRequest(RequestCustomerEditRequest $request, Customer $customer, ApprovalService $approvals): RedirectResponse
+    {
+        Gate::authorize('view', $customer);
+        $data = $request->validated();
+        $approvals->submitChange('customer_update', $customer, $data, $data['reason'], $data['idempotency_key'], $request->user());
+
+        return redirect()->route('customers.show', $customer)->with('status', __('ui.edit_request_submitted'));
     }
 
     public function activate(Request $request, Customer $customer, CustomerService $customers): RedirectResponse

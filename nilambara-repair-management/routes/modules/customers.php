@@ -35,6 +35,14 @@ Route::get('/customers/{customer}/edit', [CustomerController::class, 'edit'])
     ->middleware('can:customers.update')
     ->name('customers.edit');
 
+Route::get('/customers/{customer}/request-edit', [CustomerController::class, 'requestEdit'])
+    ->middleware('can:customers.view')
+    ->name('customers.request-edit');
+
+Route::post('/customers/{customer}/request-edit', [CustomerController::class, 'storeEditRequest'])
+    ->middleware('can:customers.view')
+    ->name('customers.request-edit.store');
+
 Route::put('/customers/{customer}', [CustomerController::class, 'update'])
     ->middleware('can:customers.update')
     ->name('customers.update');

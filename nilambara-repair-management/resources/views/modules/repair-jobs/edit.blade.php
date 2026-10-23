@@ -8,9 +8,11 @@
         <h1 class="text-2xl font-bold tracking-tight text-slate-900">{{ __('ui.edit_repair_job') }} · {{ $job->automatic_number }}</h1>
         <p class="mt-1 text-sm text-slate-500">{{ __('ui.immutable_identifiers_notice') }}</p>
     </div>
-    <form method="POST" action="{{ route('repair-jobs.update', $job) }}" class="max-w-4xl space-y-5">
+    <form method="POST" action="{{ ($requestMode ?? false) ? route('repair-jobs.request-edit.store', $job) : route('repair-jobs.update', $job) }}" class="max-w-4xl space-y-5">
         @csrf
-        @method('PUT')
+        @unless ($requestMode ?? false)
+            @method('PUT')
+        @endunless
         <section class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">
             <div class="grid gap-4 sm:grid-cols-2">
                 <div><label class="form-label" for="automatic_number">{{ __('ui.job_reference') }}</label><input id="automatic_number" value="{{ $job->automatic_number }}" class="form-input bg-slate-50" readonly></div>
@@ -29,6 +31,15 @@
                 <div class="sm:col-span-2"><label class="form-label" for="special_notes">{{ __('ui.special_notes') }}</label><textarea id="special_notes" name="special_notes" rows="3" class="form-input">{{ old('special_notes', $job->special_notes) }}</textarea></div>
             </div>
         </section>
-        <div class="flex justify-end gap-3"><a href="{{ route('repair-jobs.show', $job) }}" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-600">{{ __('ui.cancel') }}</a><button class="rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white">{{ __('ui.save_changes') }}</button></div>
+        @if ($requestMode ?? false)
+            <section class="rounded-2xl border border-amber-200 bg-amber-50 p-5 sm:p-7">
+                <p class="text-xs text-amber-900">{{ __('ui.edit_request_notice') }}</p>
+                <input type="hidden" name="idempotency_key" value="{{ old('idempotency_key', (string) \Illuminate\Support\Str::uuid()) }}">
+                <label class="form-label mt-4" for="reason">{{ __('ui.edit_request_reason') }} <span class="text-red-600">*</span></label>
+                <textarea id="reason" name="reason" rows="3" required minlength="5" maxlength="2000" class="form-input">{{ old('reason') }}</textarea>
+                @error('reason')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+            </section>
+        @endif
+        <div class="flex justify-end gap-3"><a href="{{ route('repair-jobs.show', $job) }}" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-600">{{ __('ui.cancel') }}</a><button class="rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white">{{ ($requestMode ?? false) ? __('ui.submit_edit_request') : __('ui.save_changes') }}</button></div>
     </form>
 @endsection

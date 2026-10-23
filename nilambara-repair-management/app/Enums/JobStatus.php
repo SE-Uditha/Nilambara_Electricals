@@ -26,4 +26,16 @@ enum JobStatus: string
     {
         return $this->value;
     }
+
+    /** Statuses at which a job is ready to be billed from Payments / Invoices. */
+    public static function billable(): array
+    {
+        return [self::RepairCompleted, self::ReadyForCollection, self::CustomerContactFailedAfterReady, self::UnableToRepair, self::Cancelled];
+    }
+
+    /** @return list<string> */
+    public static function billableValues(): array
+    {
+        return array_map(fn (self $status): string => $status->value, self::billable());
+    }
 }

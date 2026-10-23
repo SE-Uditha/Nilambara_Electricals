@@ -93,11 +93,20 @@
         </div>
     </section>
 
+    @if ($requestMode ?? false)
+        <section class="rounded-2xl border border-amber-200 bg-amber-50 p-5 sm:p-7">
+            <p class="text-xs text-amber-900">{{ __('ui.edit_request_notice') }}</p>
+            <input type="hidden" name="idempotency_key" value="{{ old('idempotency_key', (string) \Illuminate\Support\Str::uuid()) }}">
+            <label for="reason" class="mt-4 mb-2 block text-xs font-semibold text-slate-700">{{ __('ui.edit_request_reason') }} <span class="text-red-600">*</span></label>
+            <textarea id="reason" name="reason" rows="3" required minlength="5" maxlength="2000" class="form-input @error('reason') has-error @enderror">{{ old('reason') }}</textarea>
+            @error('reason')<p role="alert" class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+        </section>
+    @endif
     @if ($errors->any())
         <div role="alert" class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{{ __('ui.review_customer_fields') }}</div>
     @endif
     <div class="flex flex-wrap justify-end gap-3">
         <a href="{{ $customer ? route('customers.show', $customer) : route('customers.index') }}" class="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50">{{ __('ui.cancel') }}</a>
-        <button type="submit" class="rounded-xl bg-teal-700 px-5 py-2.5 text-xs font-semibold text-white hover:bg-teal-800">{{ $customer ? __('ui.save_changes') : __('ui.register_customer') }}</button>
+        <button type="submit" class="rounded-xl bg-teal-700 px-5 py-2.5 text-xs font-semibold text-white hover:bg-teal-800">{{ $customer ? (($requestMode ?? false) ? __('ui.submit_edit_request') : __('ui.save_changes')) : __('ui.register_customer') }}</button>
     </div>
 </form>

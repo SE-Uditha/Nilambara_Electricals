@@ -12,8 +12,9 @@
         <div class="flex flex-wrap gap-2">
             <a href="{{ route('repair-jobs.index') }}" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50">{{ __('ui.back_to_jobs') }}</a>
             @can('update', $job)<a href="{{ route('repair-jobs.edit', $job) }}" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">{{ __('ui.edit_job') }}</a>@endcan
-            @can('assign', $job)<a href="{{ route('repair-jobs.assign-form', $job) }}" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">{{ __('ui.assign_technician') }}</a>@endcan
-            @if (in_array($job->status->value, ['Repair Completed', 'Ready for Collection']) && ! $job->invoiceJobs()->exists())
+                        @if (\App\Modules\Approvals\Services\ApprovalAccess::canRequestChange(auth()->user(), 'job_update'))<a href="{{ route('repair-jobs.request-edit', $job) }}" class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-xs font-semibold text-amber-900 hover:bg-amber-100">{{ __('ui.request_edit') }}</a>@endif
+                        @can('assign', $job)<a href="{{ route('repair-jobs.assign-form', $job) }}" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">{{ __('ui.assign_technician') }}</a>@endcan
+            @if (in_array($job->status, \App\Enums\JobStatus::billable(), true) && ! $job->invoiceJobs()->exists())
                 @can('invoices.create')<a href="{{ route('repair-jobs.billing', $job) }}" class="rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white">Prepare Final Bill / Invoice</a>@endcan
             @endif
             @if ($job->receipt)

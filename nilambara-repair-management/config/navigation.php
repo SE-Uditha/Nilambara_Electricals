@@ -29,18 +29,18 @@ return [
     [
         'label' => 'sales_finance',
         'items' => [
+            ['label' => 'payments', 'icon' => 'wallet', 'active_routes' => ['payments.*', 'credit-invoices.*'], 'children' => [
+                ['label' => 'payments', 'icon' => 'wallet', 'route' => 'payments.index', 'permission' => 'payments.view'],
+                ['label' => 'record_payment', 'icon' => 'wallet', 'route' => 'payments.create', 'permission' => 'payments.receive'],
+                ['label' => 'credit_management', 'icon' => 'credit', 'route' => 'credit-invoices.index', 'permission' => 'credit.view'],
+                ['label' => 'cash_summary', 'icon' => 'wallet', 'route' => 'reports.show', 'route_parameters' => ['report' => 'cash-summary'], 'permission' => 'reports.view', 'roles' => ['administrator', 'cashier']],
+            ]],
             ['label' => 'invoices', 'icon' => 'invoice', 'active_routes' => ['invoices.*'], 'children' => [
                 ['label' => 'all_invoices', 'icon' => 'invoice', 'route' => 'invoices.index', 'inactive_when_query' => ['status', 'payment_status'], 'permission' => 'invoices.view'],
                 ['label' => 'draft_invoices', 'icon' => 'document', 'route' => 'invoices.index', 'route_parameters' => ['status' => 'draft'], 'permission' => 'invoices.view'],
                 ['label' => 'issued_invoices', 'icon' => 'document', 'route' => 'invoices.index', 'route_parameters' => ['status' => 'finalized'], 'permission' => 'invoices.view'],
                 ['label' => 'outstanding_invoices', 'icon' => 'wallet', 'route' => 'invoices.index', 'route_parameters' => ['payment_status' => 'outstanding'], 'permission' => 'invoices.view'],
                 ['label' => 'create_invoice', 'icon' => 'invoice', 'route' => 'invoices.create', 'permission' => 'invoices.create'],
-            ]],
-            ['label' => 'payments', 'icon' => 'wallet', 'active_routes' => ['payments.*', 'credit-invoices.*'], 'children' => [
-                ['label' => 'payments', 'icon' => 'wallet', 'route' => 'payments.index', 'permission' => 'payments.view'],
-                ['label' => 'record_payment', 'icon' => 'wallet', 'route' => 'payments.create', 'permission' => 'payments.receive'],
-                ['label' => 'credit_management', 'icon' => 'credit', 'route' => 'credit-invoices.index', 'permission' => 'credit.view'],
-                ['label' => 'cash_summary', 'icon' => 'wallet', 'route' => 'reports.show', 'route_parameters' => ['report' => 'cash-summary'], 'permission' => 'reports.view', 'roles' => ['administrator', 'cashier']],
             ]],
         ],
     ],

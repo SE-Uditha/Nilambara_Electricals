@@ -76,7 +76,13 @@ class InvoiceController extends Controller
             $invoice->setAttribute('payment_summary', $balances->summary($invoice));
         }
 
-        return view('modules.invoices.index', ['invoices' => $invoices]);
+        $readyBills = ! $request->user()->can('invoices.create') ? collect() : RepairJob::query()->with('customer')
+            ->whereIn('status', JobStatus::billableValues())
+            ->whereDoesntHave('invoiceJobs')
+            ->where('total_job_amount', '>', 0)
+            ->orderByDesc('updated_at')->limit(50)->get();
+
+        return view('modules.invoices.index', ['invoices' => $invoices, 'billingJobs' => $readyBills, 'billingQueueTitle' => 'Saved bills ready to invoice', 'billingQueueHelp' => 'Bills prepared from Payments that have no invoice yet. Create the invoice to bill the customer.']);
     }
 
     public function create(Request $request): View
@@ -89,8 +95,7 @@ class InvoiceController extends Controller
         $selectedJobs = $selectedCustomer === null || $oldJobIds === [] ? collect() : RepairJob::query()
             ->where('customer_id', $selectedCustomer->getKey())
             ->whereIn('id', $oldJobIds)
-            ->whereIn('status', [JobStatus::RepairCompleted->value, JobStatus::ReadyForCollection->value])
-            ->whereNull('cancelled_at')
+            ->whereIn('status', JobStatus::billableValues())
             ->whereDoesntHave('invoiceJobs')
             ->get()
             ->map(fn (RepairJob $job): array => [
@@ -116,8 +121,7 @@ class InvoiceController extends Controller
         Gate::authorize('view', $customer);
         $jobs = RepairJob::query()
             ->where('customer_id', $customer->getKey())
-            ->whereIn('status', [JobStatus::RepairCompleted->value, JobStatus::ReadyForCollection->value])
-            ->whereNull('cancelled_at')
+            ->whereIn('status', JobStatus::billableValues())
             ->whereDoesntHave('invoiceJobs')
             ->with(['quotations' => fn ($query) => $query
                 ->where('preparation_status', 'issued')

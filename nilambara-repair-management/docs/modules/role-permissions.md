@@ -35,7 +35,7 @@ The migration preserves the existing identifiers and display data: role `code` r
 | Role | Default access | Important restrictions |
 | --- | --- | --- |
 | Administrator | Every catalog permission. The role always receives all current permissions. | Cannot remove its final essential administration capabilities; an Administrator account cannot receive individual permission overrides. |
-| Cashier | Customer intake, receipts, job assignment, inspection, repair notes/status/completion, quotation preparation/approval, invoicing/cancellation, collection/refunds/reversals, customer statements, inventory, suppliers, purchasing/receiving/approval and financial/stock reports. | No user/role administration, settings or backup restore by default. Explicit permission denials still apply; users cannot decide their own manual approval requests. |
+| Cashier | Customer and repair-job intake and viewing (create and view only), receipts, job assignment, inspection, repair notes/status/completion, quotation preparation/approval, invoicing/cancellation, collection/refunds/reversals, customer statements, inventory, suppliers, purchasing/receiving/approval and financial/stock reports. | No direct editing, activation or deactivation of customers or repair-job details (`customers.update`, `customers.deactivate`, `jobs.update` are Administrator-only). No user/role administration, settings or backup restore by default. Explicit permission denials still apply; users cannot decide their own manual approval requests. |
 
 `rolePermissions` in `RoleSeeder` defines the two current roles: Administrator and Cashier. Cashier combines the previous cashier, manager, storekeeper and technician defaults.
 
@@ -52,6 +52,10 @@ The migration preserves the existing identifiers and display data: role `code` r
 
 Cashiers now perform operational management and stock duties. Administrators retain system administration. Manual approval requests still require a different authorized Cashier or Administrator to decide them.
 
+
+## Edit approval workflow (2026-10-24)
+
+Administrators have full CRUD on customers and repair jobs. Users who can view but not edit (Cashier) see **Request edit** instead of **Edit**. The form requires a reason and creates a pending approval of kind `customer_update` or `job_update` holding the current and proposed values. Only an administrator (holder of `customers.update` / `jobs.update`) can approve; approval applies the change through the normal service (with audit logging) unless the record changed since the request, in which case it is blocked. Rejection leaves the record untouched. Migration `2026_10_24_100000_revoke_cashier_customer_update.php` removes `customers.update` from existing Cashier roles.
 
 ## Cashier consolidation (2026-10-21)
 

@@ -3,6 +3,7 @@
 namespace App\Modules\Payments\Controllers;
 
 use App\Enums\DocumentStatus;
+use App\Enums\JobStatus;
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentTerms;
 use App\Http\Controllers\Controller;
@@ -82,7 +83,19 @@ class PaymentController extends Controller
             $payment->setAttribute('balance_summary', $balances->summary($payment));
         }
 
-        return view('modules.payments.index', ['payments' => $payments]);
+        return view('modules.payments.index', ['payments' => $payments, 'billingJobs' => $this->billingQueue($request)]);
+    }
+
+    private function billingQueue(Request $request)
+    {
+        if (! $request->user()->can('invoices.create')) {
+            return collect();
+        }
+
+        return RepairJob::query()->with('customer')
+            ->whereIn('status', JobStatus::billableValues())
+            ->whereDoesntHave('invoiceJobs')
+            ->orderByDesc('updated_at')->limit(50)->get();
     }
 
     public function create(Request $request, InvoiceBalanceService $balances, bool $creditCollection = false): View

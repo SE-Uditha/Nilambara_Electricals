@@ -16,6 +16,8 @@
 
     @if (session('status'))<div role="status" class="mb-5 rounded-xl border border-teal-200 bg-teal-50 px-4 py-3 text-sm text-teal-800">{{ session('status') }}</div>@endif
 
+    @include('modules.repair-jobs.billing-queue')
+
     <form method="GET" class="mb-5 grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 md:grid-cols-3 xl:grid-cols-6">
         <input name="q" value="{{ request('q') }}" placeholder="{{ __('payments.search_hint') }}" class="form-input md:col-span-2">
         <input name="date_from" type="date" value="{{ request('date_from') }}" class="form-input" aria-label="{{ __('payments.date_from') }}">

@@ -14,6 +14,9 @@
             @can('customers.update')
                 <a href="{{ route('customers.edit', $customer) }}" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">{{ __('ui.edit_customer') }}</a>
             @endcan
+            @if (\App\Modules\Approvals\Services\ApprovalAccess::canRequestChange(auth()->user(), 'customer_update'))
+                <a href="{{ route('customers.request-edit', $customer) }}" class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-xs font-semibold text-amber-900 hover:bg-amber-100">{{ __('ui.request_edit') }}</a>
+            @endif
             @if ($customer->is_active)
                 @can('customers.deactivate')
                     <form method="POST" action="{{ route('customers.deactivate', $customer) }}" data-confirm="{{ __('ui.confirm_deactivate_customer') }}" onsubmit="return confirm(this.dataset.confirm)">

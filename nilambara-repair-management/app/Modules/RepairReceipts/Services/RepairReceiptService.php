@@ -115,7 +115,7 @@ class RepairReceiptService
                 ],
                 'advance_payment' => $this->currency($data['advance_payment'] ?? '0'),
                 'advance_payment_number' => $advancePayment?->payment_number,
-                'labor_cost' => $this->currency($data['labor_cost']),
+                'labor_cost' => $this->currency($data['labor_cost'] ?? '0.00'),
                 'received_by' => $employee->name,
                 'special_notes' => $job->special_notes,
             ];

@@ -191,7 +191,7 @@ class CustomerManagementTest extends TestCase
 
     public function test_customer_can_be_updated_without_changing_id_or_opening_balance(): void
     {
-        $user = $this->userWithRole('cashier');
+        $user = $this->userWithRole('administrator');
         $customer = $this->registerCustomer($this->userWithRole('administrator'), $this->validIndividual([
             'opening_balance' => '75.00',
             'is_active' => '1',

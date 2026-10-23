@@ -5,9 +5,14 @@ namespace App\Modules\RepairJobs\Controllers;
 use App\Enums\JobStatus;
 use App\Http\Controllers\Controller;
 use App\Modules\Employees\Models\Employee;
+use App\Modules\Employees\Services\EmployeeRegistrationService;
+use App\Rules\PhoneNumber;
 use App\Modules\Payments\Models\PaymentAllocation;
 use App\Modules\RepairJobs\Models\RepairJob;
 use App\Modules\RepairJobs\Requests\AssignTechnicianRequest;
+use App\Modules\RepairJobs\Requests\RequestRepairJobEditRequest;
+use App\Modules\Approvals\Services\ApprovalAccess;
+use App\Modules\Approvals\Services\ApprovalService;
 use App\Modules\RepairJobs\Requests\SaveJobInspectionRequest;
 use App\Modules\RepairJobs\Requests\SaveRepairInformationRequest;
 use App\Modules\RepairJobs\Requests\UpdateJobStatusRequest;
@@ -147,14 +152,91 @@ class RepairJobController extends Controller
         return redirect()->route('repair-jobs.show', $job)->with('status', __('ui.repair_job_updated'));
     }
 
+    public function requestEdit(Request $request, RepairJob $job): View
+    {
+        Gate::authorize('view', $job);
+        abort_unless(ApprovalAccess::canRequestChange($request->user(), 'job_update'), 403);
+
+        return view('modules.repair-jobs.edit', ['job' => $job, 'requestMode' => true]);
+    }
+
+    public function storeEditRequest(RequestRepairJobEditRequest $request, RepairJob $job, ApprovalService $approvals): RedirectResponse
+    {
+        Gate::authorize('view', $job);
+        $data = $request->validated();
+        $approvals->submitChange('job_update', $job, $data, $data['reason'], $data['idempotency_key'], $request->user());
+
+        return redirect()->route('repair-jobs.show', $job)->with('status', __('ui.edit_request_submitted'));
+    }
+
     public function assignForm(RepairJob $job): View
     {
         Gate::authorize('assign', $job);
 
         return view('modules.repair-jobs.assign', [
             'job' => $job->load('technician'),
-            'technicians' => $this->technicians(),
+            'technicians' => Employee::query()->activeTechnicians()->orderBy('name')
+                ->with(['technicianRepairJobs' => fn ($query) => $query
+                    ->whereNotIn('status', [JobStatus::Delivered->value, JobStatus::Cancelled->value, JobStatus::UnableToRepair->value])
+                    ->with('customer')
+                    ->latest('id')])
+                ->get(['id', 'name', 'employee_code', 'mobile_number', 'user_id']),
         ]);
+    }
+
+    public function updateTechnician(Request $request, RepairJob $job, Employee $technician): RedirectResponse
+    {
+        Gate::authorize('assign', $job);
+        $this->authorizeManagedTechnician($technician);
+
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'mobile_number' => ['nullable', 'string', 'max:30', new PhoneNumber],
+        ]);
+
+        app(EmployeeRegistrationService::class)->update($technician, $data, $request->user());
+
+        return redirect()->route('repair-jobs.assign-form', $job)->with('status', __('ui.technician_updated'));
+    }
+
+    public function destroyTechnician(Request $request, RepairJob $job, Employee $technician): RedirectResponse
+    {
+        Gate::authorize('assign', $job);
+        $this->authorizeManagedTechnician($technician);
+
+        // Employee records are retained for history, so removal deactivates the technician.
+        app(EmployeeRegistrationService::class)->update($technician, ['is_active' => false], $request->user());
+
+        return redirect()->route('repair-jobs.assign-form', $job)->with('status', __('ui.technician_removed'));
+    }
+
+    private function authorizeManagedTechnician(Employee $technician): void
+    {
+        abort_unless(
+            $technician->user_id === null && Employee::query()->activeTechnicians()->whereKey($technician->getKey())->exists(),
+            403,
+        );
+    }
+
+    public function storeTechnician(Request $request, RepairJob $job): RedirectResponse
+    {
+        Gate::authorize('assign', $job);
+
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'mobile_number' => ['nullable', 'string', 'max:30', new PhoneNumber],
+        ]);
+
+        $technician = app(EmployeeRegistrationService::class)->register([
+            'name' => $data['name'],
+            'mobile_number' => $data['mobile_number'] ?? null,
+            'job_title' => Employee::TECHNICIAN_TITLE,
+            'is_active' => true,
+        ], $request->user());
+
+        return redirect()->route('repair-jobs.assign-form', $job)
+            ->withInput(['technician_id' => $technician->getKey()])
+            ->with('status', __('ui.technician_created'));
     }
 
     public function assign(AssignTechnicianRequest $request, RepairJob $job, RepairJobService $jobs): RedirectResponse

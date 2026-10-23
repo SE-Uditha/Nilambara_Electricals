@@ -19,7 +19,7 @@ class JobBillingService
     {
         Gate::forUser($actor)->authorize('view', $job);
         Gate::forUser($actor)->authorize('invoices.create');
-        if (! in_array($job->status, [JobStatus::RepairCompleted, JobStatus::ReadyForCollection], true) || $job->cancelled_at || $job->invoiceJobs()->exists()) {
+        if (! in_array($job->status, JobStatus::billable(), true) || $job->invoiceJobs()->exists()) {
             throw ValidationException::withMessages(['billing' => 'Prepare the final bill only after work is completed and before an invoice exists.']);
         }
     }

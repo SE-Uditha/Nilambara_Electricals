@@ -259,7 +259,7 @@ class RepairReceiptAndJobManagementTest extends TestCase
     {
         $administrator = $this->userWithRole('administrator');
         $technician = $this->userWithRole('cashier');
-        $technicianEmployee = $this->employee(['user_id' => $technician->id]);
+        $technicianEmployee = $this->employee(['user_id' => $technician->id, 'job_title' => 'Technician']);
         $job = $this->job();
 
         $this->actingAs($administrator)
@@ -295,7 +295,7 @@ class RepairReceiptAndJobManagementTest extends TestCase
             'status' => JobStatus::UnderRepair->value,
         ])->assertForbidden();
         $technician = $this->userWithRole('cashier');
-        $employee = $this->employee(['user_id' => $technician->id]);
+        $employee = $this->employee(['user_id' => $technician->id, 'job_title' => 'Technician']);
         $this->actingAs($cashier)->post(route('repair-jobs.assign', $job), [
             'technician_id' => $employee->id,
         ])->assertRedirect(route('repair-jobs.show', $job))->assertSessionHasNoErrors();

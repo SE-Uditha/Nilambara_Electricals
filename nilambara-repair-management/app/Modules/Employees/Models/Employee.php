@@ -9,6 +9,7 @@ use App\Modules\Payments\Models\Payment;
 use App\Modules\Purchases\Models\GoodsReceivedNote;
 use App\Modules\RepairJobs\Models\JobInspection;
 use App\Modules\RepairJobs\Models\RepairJob;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -28,7 +29,15 @@ class Employee extends BusinessModel
         'user_id',
     ];
 
+    public const TECHNICIAN_TITLE = 'Technician';
+
     protected array $immutableFields = ['id', 'employee_code'];
+
+    public function scopeActiveTechnicians(Builder $query): Builder
+    {
+        return $query->where('is_active', true)
+            ->whereRaw('LOWER(TRIM(job_title)) = ?', [strtolower(self::TECHNICIAN_TITLE)]);
+    }
 
     protected bool $preserveRecord = true;
 

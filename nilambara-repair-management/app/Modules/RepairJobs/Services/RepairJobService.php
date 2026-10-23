@@ -84,8 +84,8 @@ class RepairJobService
         return DB::transaction(function () use ($job, $employeeId, $user): RepairJob {
             $lockedJob = RepairJob::query()->whereKey($job->getKey())->lockForUpdate()->firstOrFail();
             $technician = Employee::query()->with('user')
+                ->activeTechnicians()
                 ->whereKey($employeeId)
-                ->where('is_active', true)
                 ->first();
 
             if ($technician === null) {

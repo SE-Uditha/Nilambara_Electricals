@@ -18,6 +18,8 @@
         <div role="status" class="mb-5 rounded-xl border border-teal-200 bg-teal-50 px-4 py-3 text-sm text-teal-800">{{ session('status') }}</div>
     @endif
 
+    @include('modules.repair-jobs.billing-queue')
+
     <form method="GET" class="mb-5 grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 sm:grid-cols-2 lg:grid-cols-6">
         <div class="lg:col-span-2"><label for="q" class="form-label">{{ __('invoices.search') }}</label><input id="q" name="q" value="{{ request('q') }}" class="form-input" placeholder="{{ __('invoices.search_invoice_hint') }}"></div>
         <div><label for="date_from" class="form-label">{{ __('invoices.date_from') }}</label><input id="date_from" name="date_from" type="date" value="{{ request('date_from') }}" class="form-input"></div>

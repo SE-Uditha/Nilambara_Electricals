@@ -21,8 +21,7 @@ class InvoiceCalculationService
      */
     public function billableLines(RepairJob $job): array
     {
-        if (! in_array($job->status, [JobStatus::RepairCompleted, JobStatus::ReadyForCollection], true)
-            || $job->cancelled_at !== null) {
+        if (! in_array($job->status, JobStatus::billable(), true)) {
             throw ValidationException::withMessages([
                 'repair_job_ids' => __('invoices.job_not_billable', ['job' => $job->automatic_number ?: $job->job_number]),
             ]);

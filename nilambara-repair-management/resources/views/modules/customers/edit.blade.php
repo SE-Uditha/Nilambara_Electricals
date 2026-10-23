@@ -8,5 +8,9 @@
         <h1 class="mt-3 text-2xl font-bold tracking-tight text-slate-900">{{ __('ui.edit_customer') }}</h1>
         <p class="mt-1 text-sm text-slate-500">{{ $customer->display_name }}</p>
     </div>
-    @include('modules.customers.form', ['action' => route('customers.update', $customer), 'method' => 'PUT'])
+    @if ($requestMode ?? false)
+        @include('modules.customers.form', ['action' => route('customers.request-edit.store', $customer), 'method' => 'POST'])
+    @else
+        @include('modules.customers.form', ['action' => route('customers.update', $customer), 'method' => 'PUT'])
+    @endif
 @endsection
