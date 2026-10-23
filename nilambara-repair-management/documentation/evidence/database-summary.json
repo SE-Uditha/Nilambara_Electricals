@@ -1,9 +1,0 @@
-{
-  "tables": 69,
-  "foreign_key_constraints": 199,
-  "orphans": 0,
-  "all_innodb": true,
-  "all_utf8mb4": true,
-  "floating_columns": [],
-  "row_counts_unchanged": true
-}
