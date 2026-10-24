@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\File;
+use Illuminate\Validation\ValidationException;
 
 class SystemSettingController
 {
@@ -31,7 +32,11 @@ class SystemSettingController
             'document_footer' => ['nullable', 'string', 'max:2000'],
             'print_paper' => ['sometimes', Rule::in(['A4', 'A5'])],
             'logo' => ['nullable', File::image()->types(['jpg', 'jpeg', 'png'])->max(2048)],
+            'common_faults' => ['nullable', 'string', 'max:10000'],
         ]);
+        if (array_key_exists('common_faults', $values)) {
+            $values['common_faults'] = $this->normalizeFaults($values['common_faults']);
+        }
 
         $logo = $request->file('logo');
         unset($values['logo']);
@@ -56,5 +61,26 @@ class SystemSettingController
         $settings->apply();
 
         return back()->with('status', __('settings.saved'));
+    }
+
+    /** One fault per line: trimmed, de-duplicated (case-insensitive), at most 100 entries of 150 characters. */
+    private function normalizeFaults(?string $raw): ?string
+    {
+        $faults = [];
+        foreach (preg_split('/\R/u', (string) $raw) ?: [] as $line) {
+            $line = trim(preg_replace('/\s+/u', ' ', $line));
+            if ($line === '') {
+                continue;
+            }
+            if (mb_strlen($line) > 150) {
+                throw ValidationException::withMessages(['common_faults' => __('settings.common_faults_too_long')]);
+            }
+            $faults[mb_strtolower($line)] ??= $line;
+        }
+        if (count($faults) > 100) {
+            throw ValidationException::withMessages(['common_faults' => __('settings.common_faults_too_many')]);
+        }
+
+        return $faults === [] ? null : implode("\n", $faults);
     }
 }

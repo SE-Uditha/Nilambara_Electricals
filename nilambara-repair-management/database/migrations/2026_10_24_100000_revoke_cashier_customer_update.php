@@ -11,7 +11,7 @@ return new class extends Migration
         $permission = DB::table('permissions')->where('name', 'customers.update')->value('id');
 
         if ($role !== null && $permission !== null) {
-            DB::table('role_has_permissions')->where('role_id', $role)->where('permission_id', $permission)->delete();
+            DB::table('permission_role')->where('role_id', $role)->where('permission_id', $permission)->delete();
         }
 
         DB::table('cache')->where('key', 'like', '%spatie.permission.cache%')->delete();

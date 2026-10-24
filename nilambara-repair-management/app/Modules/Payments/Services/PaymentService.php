@@ -87,6 +87,38 @@ class PaymentService
     }
 
     /**
+     * Credit method: no money is received; the remaining balance moves to credit management.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    public function moveInvoiceToCredit(array $data, User $actor): Invoice
+    {
+        $this->authorizeReceiver($actor);
+
+        return DB::transaction(function () use ($data, $actor): Invoice {
+            $invoice = Invoice::query()->whereKey($data['invoice_id'])->lockForUpdate()->firstOrFail();
+            $this->assertInvoiceReceivable($invoice);
+            if ($invoice->payment_terms === PaymentTerms::Credit) {
+                throw ValidationException::withMessages(['invoice_id' => __('payments.already_on_credit')]);
+            }
+            $outstanding = $this->invoiceBalances->summary($invoice)['outstanding'];
+            DB::table('invoices')->where('id', $invoice->getKey())->update([
+                'payment_terms' => PaymentTerms::Credit->value,
+                'payment_method' => null,
+                'due_date' => $data['due_date'] ?? $invoice->due_date?->toDateString(),
+                'updated_at' => now(),
+            ]);
+            BusinessAudit::record($actor, 'credit.invoice_moved_to_credit', Invoice::class, (int) $invoice->getKey(), newValues: [
+                'invoice_number' => $invoice->invoice_number,
+                'customer_id' => $invoice->customer_id,
+                'credit_amount' => $outstanding,
+            ]);
+
+            return $invoice->refresh();
+        }, 3);
+    }
+
+    /**
      * @param  array<string, mixed>  $data
      */
     public function receiveAdvance(array $data, User $actor, ?RepairJob $job = null): Payment

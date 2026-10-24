@@ -18,6 +18,80 @@ use Illuminate\Validation\ValidationException;
 
 class RepairJobService
 {
+    /** Tables that hold money, stock or quotation history for a job; any row blocks deletion. */
+    private const DELETE_BLOCKING_TABLES = [
+        'payment_allocations' => 'a payment (reverse it first)',
+        'job_part_usages' => 'issued or requested spare parts',
+        'stock_returns' => 'a stock return',
+        'quotations' => 'a quotation',
+        'job_approvals' => 'a customer approval record',
+    ];
+
+    /** Records that exist only to document the job and are removed with it. */
+    private const DELETE_CASCADE_TABLES = ['repair_receipts', 'job_cards', 'job_status_histories', 'job_inspections', 'repair_job_charges'];
+
+    /** Invoice records removed together with an invoice that was issued only for the deleted job. */
+    private const DELETE_INVOICE_TABLES = ['invoice_items', 'invoice_history', 'document_print_histories', 'customer_account_entries', 'invoice_jobs'];
+
+    /** @return list<string> */
+    public function deletionBlockers(RepairJob $job): array
+    {
+        $blockers = [];
+        foreach (self::DELETE_BLOCKING_TABLES as $table => $label) {
+            if (DB::table($table)->where('repair_job_id', $job->getKey())->exists()) {
+                $blockers[] = $label;
+            }
+        }
+
+        $invoiceIds = DB::table('invoice_jobs')->where('repair_job_id', $job->getKey())->pluck('invoice_id');
+        if ($invoiceIds->isNotEmpty()) {
+            if (DB::table('invoice_jobs')->whereIn('invoice_id', $invoiceIds)->where('repair_job_id', '!=', $job->getKey())->exists()) {
+                $blockers[] = 'an invoice shared with other jobs';
+            }
+            if (DB::table('payment_allocations')->whereIn('invoice_id', $invoiceIds)->exists() && ! in_array('a payment (reverse it first)', $blockers, true)) {
+                $blockers[] = 'a payment (reverse it first)';
+            }
+        }
+
+        return $blockers;
+    }
+
+    public function delete(RepairJob $job, User $actor): void
+    {
+        Gate::forUser($actor)->authorize('delete', $job);
+
+        DB::transaction(function () use ($job, $actor): void {
+            $locked = RepairJob::query()->whereKey($job->getKey())->lockForUpdate()->first();
+            if ($locked === null) {
+                throw ValidationException::withMessages(['delete' => 'This repair job no longer exists.']);
+            }
+
+            $blockers = $this->deletionBlockers($locked);
+            if ($blockers !== []) {
+                throw ValidationException::withMessages(['delete' => 'This job cannot be deleted because it has '.implode(', ', $blockers).'. Cancel the job instead.']);
+            }
+
+            $snapshot = $locked->only(['automatic_number', 'job_number', 'customer_id', 'item_name', 'brand', 'model', 'status', 'received_at', 'total_job_amount']);
+            $invoiceIds = DB::table('invoice_jobs')->where('repair_job_id', $locked->getKey())->pluck('invoice_id');
+            if ($invoiceIds->isNotEmpty()) {
+                $snapshot['deleted_invoices'] = DB::table('invoices')->whereIn('id', $invoiceIds)->pluck('invoice_number')->all();
+                foreach (self::DELETE_INVOICE_TABLES as $table) {
+                    DB::table($table)->whereIn('invoice_id', $invoiceIds)->delete();
+                }
+                DB::table('invoices')->whereIn('id', $invoiceIds)->delete();
+            }
+            $receiptIds = DB::table('repair_receipts')->where('repair_job_id', $locked->getKey())->pluck('id');
+            $cardIds = DB::table('job_cards')->where('repair_job_id', $locked->getKey())->pluck('id');
+            DB::table('document_print_histories')->where(fn ($q) => $q->whereIn('repair_receipt_id', $receiptIds)->orWhereIn('job_card_id', $cardIds))->delete();
+            foreach (self::DELETE_CASCADE_TABLES as $table) {
+                DB::table($table)->where('repair_job_id', $locked->getKey())->delete();
+            }
+            DB::table('repair_jobs')->where('id', $locked->getKey())->delete();
+
+            BusinessAudit::record($actor, 'repair_job.deleted', RepairJob::class, (int) $locked->getKey(), json_decode(json_encode($snapshot), true));
+        }, 3);
+    }
+
     public function setLabourCharge(RepairJob $job, string $amount, User $actor): RepairJob
     {
         Gate::forUser($actor)->authorize('invoices.create');
@@ -243,7 +317,7 @@ class RepairJobService
             if ($next === JobStatus::Cancelled && $lockedJob->cancelled_at === null) {
                 $lockedJob->cancelled_at = now();
                 $lockedJob->cancelled_by_user_id = $user->getKey();
-                $lockedJob->cancellation_reason = $data['cancellation_reason'];
+                $lockedJob->cancellation_reason = $data['cancellation_reason'] ?? null;
             }
 
             $lockedJob->save();

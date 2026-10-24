@@ -11,6 +11,7 @@
 <form id="bill-form" method="POST" action="{{ route('repair-jobs.billing.update', $job) }}" class="space-y-5" x-data="jobBillEditor()">
 @csrf<input type="hidden" name="idempotency_key" value="{{ $submissionKey }}">
 <section class="rounded-2xl border border-slate-200 bg-white p-5"><h2 class="font-bold">Labour / repair charge</h2><label class="form-label mt-3" for="bill-labour">Base labour amount</label><input id="bill-labour" name="labour_charge" type="number" min="0" max="999999999999.99" step="0.01" class="form-input" x-model="labour" required></section>
+@if($job->status !== \App\Enums\JobStatus::Cancelled)
 <section class="rounded-2xl border border-slate-200 bg-white p-5"><h2 class="font-bold">Spare parts already used</h2><div class="mt-3 space-y-2">@forelse($job->jobPartUsages->where('status','issued') as $usage)<p>{{ $usage->sparePart?->name }} / {{ $usage->quantity }} x {{ $usage->unit_price }}</p>@empty<p class="text-sm text-slate-500">No parts issued yet.</p>@endforelse</div><p class="mt-3 font-semibold">Existing parts total: {{ config('business.currency') }} {{ $job->parts_charge }}</p></section>
 <section class="rounded-2xl border border-slate-200 bg-white p-5"><h2 class="font-bold">Add inventory spare parts</h2><p class="mt-2 text-sm text-slate-500">Saving issues these parts from stock and adds their selling prices to the bill. Already issued parts are included above; do not add them again.</p>
 @can('inventory.issue')
@@ -30,6 +31,7 @@
 <div><span class="form-label">Line amount</span><p x-text="money(line(row.quantity,row.unit_price))"></p><button type="button" class="mt-2 text-sm text-red-700" x-on:click="charges.splice(index,1)">Remove</button></div>
 </div></template><button type="button" class="mt-4 rounded-xl border px-4 py-2 text-teal-800" x-on:click="charges.push({key:++nextKey,description:'',quantity:'1',unit_price:'0.00'})">Add Custom Charge</button>
 </section>
+@endif
 <section class="rounded-2xl bg-teal-50 p-5"><span>Final bill total</span><p class="mt-2 text-2xl font-bold text-teal-900" x-text="money(total())"></p><p class="mt-2 text-xs text-slate-600">Includes base labour, custom charges and spare parts. The saved total is recalculated on the server. Previously received advances are applied on the invoice.</p></section>
 <button class="rounded-xl bg-teal-700 px-5 py-3 font-semibold text-white">Save Bill Changes</button>
 </form>

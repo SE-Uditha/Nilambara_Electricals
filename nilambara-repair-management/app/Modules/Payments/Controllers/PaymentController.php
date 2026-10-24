@@ -132,6 +132,9 @@ class PaymentController extends Controller
         }
         $openInvoices = $balances->constrainPaymentStatus($invoiceQuery, 'outstanding')
             ->orderByDesc('invoice_date')->orderByDesc('id')->limit(100)->get();
+        foreach ($openInvoices as $openInvoice) {
+            $openInvoice->setAttribute('payment_summary', $balances->summary($openInvoice));
+        }
 
         return view('modules.payments.create', [
             'invoice' => $selectedInvoice,
@@ -172,6 +175,11 @@ class PaymentController extends Controller
     public function store(StorePaymentRequest $request, PaymentService $service): RedirectResponse
     {
         $data = $request->validated();
+        if ($data['method'] === 'credit') {
+            $invoice = $service->moveInvoiceToCredit($data, $request->user());
+
+            return redirect()->route('credit-invoices.show', $invoice)->with('status', __('payments.moved_to_credit'));
+        }
         if ($data['payment_type'] === 'invoice') {
             $payment = $service->receiveInvoicePayment($data, $request->user());
         } else {

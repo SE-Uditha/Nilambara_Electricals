@@ -14,6 +14,15 @@ class UpdateInvoiceRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        $isCredit = $this->input('payment_method') === 'credit';
+        $this->merge([
+            'payment_terms' => $isCredit ? 'credit' : ($this->input('payment_terms') ?: 'cash'),
+            'payment_method' => $isCredit ? null : $this->input('payment_method'),
+        ]);
+    }
+
     public function rules(): array
     {
         return [

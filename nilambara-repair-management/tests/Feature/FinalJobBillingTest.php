@@ -40,7 +40,7 @@ class FinalJobBillingTest extends TestCase
         $actor = $this->actor();
         $customer = $this->customer();
         $receipt = app(RepairReceiptService::class)->register(['customer_id' => $customer->id, 'job_number' => $this->code('MAN'), 'item_name' => 'Motor', 'brand' => 'Test', 'job_type' => 'normal', 'received_by_employee_id' => $actor->employee->id, 'labor_cost' => '9876.54'], $actor);
-        $this->assertSame('0.00', $receipt->repairJob->total_job_amount);
+        $this->assertSame('9876.54', $receipt->repairJob->total_job_amount);
         $this->get(route('repair-jobs.receipt.print', $receipt->repairJob))->assertOk()->assertDontSee('9876.54')->assertDontSee('0.00')->assertDontSee(__('ui.labor_cost'));
         $this->getJson(route('repair-jobs.billing', $receipt->repairJob))->assertUnprocessable();
         if (! is_dir(base_path('tmp/pdfs'))) {
@@ -72,7 +72,7 @@ class FinalJobBillingTest extends TestCase
         $this->assertDatabaseCount('job_part_usages', 1);
         $this->assertDatabaseCount('repair_job_charges', 1);
         $this->get(route('invoices.create', ['customer_id' => $job->customer_id, 'repair_job_ids' => [$job->id]]))->assertOk()->assertSee($job->customer->display_name);
-        $this->post(route('invoices.store'), ['customer_id' => $job->customer_id, 'repair_job_ids' => [$job->id], 'invoice_date' => now()->toDateString(), 'payment_terms' => 'cash', 'payment_method' => 'cash', 'intent' => 'issue'])->assertRedirect()->assertSessionHasNoErrors();
+        $this->post(route('invoices.store'), ['customer_id' => $job->customer_id, 'repair_job_ids' => [$job->id], 'invoice_date' => now()->toDateString(), 'payment_terms' => 'cash', 'payment_method' => 'cash', 'intent' => 'issue', 'amount_received' => '1'])->assertRedirect()->assertSessionHasNoErrors();
         $invoice = Invoice::sole();
         $this->assertSame('155.25', $invoice->total);
         $this->assertDatabaseHas('invoice_items', ['invoice_id' => $invoice->id, 'description' => 'Rotor balancing', 'line_total' => '30.25']);

@@ -24,9 +24,11 @@ class CreditInvoiceController extends Controller
             'date_to' => ['nullable', 'date', 'after_or_equal:date_from'],
             'payment_status' => ['nullable', Rule::in(['all', 'outstanding', 'unpaid', 'partially_paid', 'paid'])],
         ]);
+        $paid = $balances->netPaidExpression();
         $query = Invoice::query()->with('customer')
             ->where('status', DocumentStatus::Finalized->value)
-            ->where('payment_terms', 'credit')
+            ->where(fn ($terms) => $terms->where('payment_terms', 'credit')
+                ->orWhereRaw("{$paid} > 0 AND {$paid} < invoices.total"))
             ->orderByDesc('invoice_date')->orderByDesc('id');
         if (($term = trim((string) ($filters['q'] ?? ''))) !== '') {
             $like = '%'.$term.'%';
@@ -61,7 +63,7 @@ class CreditInvoiceController extends Controller
 
     public function show(Invoice $invoice, InvoiceBalanceService $balances): View
     {
-        abort_unless($invoice->status === DocumentStatus::Finalized && $invoice->payment_terms?->value === 'credit', 404);
+        abort_unless($this->isTracked($invoice, $balances), 404);
         $invoice->load(['customer', 'invoiceJobs.repairJob']);
         $jobIds = $invoice->invoiceJobs->pluck('repair_job_id');
         $allocations = PaymentAllocation::query()
@@ -85,11 +87,21 @@ class CreditInvoiceController extends Controller
         ]);
     }
 
-    public function collect(Invoice $invoice): RedirectResponse
+    public function collect(Invoice $invoice, InvoiceBalanceService $balances): RedirectResponse
     {
-        abort_unless($invoice->status === DocumentStatus::Finalized && $invoice->payment_terms?->value === 'credit', 404);
+        abort_unless($this->isTracked($invoice, $balances), 404);
         abort_unless(auth()->user()->can('credit.collect'), 403);
 
         return redirect()->route('payments.create', ['invoice_id' => $invoice->getKey()]);
+    }
+
+    /** Credit invoices, plus any finalized invoice a customer has only partly paid, are tracked as outstanding. */
+    private function isTracked(Invoice $invoice, InvoiceBalanceService $balances): bool
+    {
+        if ($invoice->status !== DocumentStatus::Finalized) {
+            return false;
+        }
+
+        return $invoice->payment_terms?->value === 'credit' || $balances->summary($invoice)['payment_status'] === 'partially_paid';
     }
 }

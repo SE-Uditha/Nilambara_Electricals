@@ -76,34 +76,63 @@
                     <input id="invoice_date" name="invoice_date" type="date" required value="{{ old('invoice_date', $invoiceDate) }}" class="form-input">
                     @error('invoice_date')<p class="mt-1 text-xs text-red-700">{{ $message }}</p>@enderror
                 </div>
-                <div class="grid gap-3 sm:grid-cols-2">
-                    <div>
-                        <label for="payment_terms" class="form-label">{{ __('invoices.payment_terms') }}</label>
-                        <select id="payment_terms" name="payment_terms" class="form-input">
-                            <option value="cash" @selected(old('payment_terms', $invoice?->payment_terms?->value ?? 'cash') === 'cash')>{{ __('invoices.cash') }}</option>
-                            <option value="credit" @selected(old('payment_terms', $invoice?->payment_terms?->value) === 'credit')>{{ __('invoices.credit') }}</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="payment_method" class="form-label">{{ __('invoices.payment_method') }}</label>
-                        <select id="payment_method" name="payment_method" class="form-input">
-                            <option value="">{{ __('invoices.select_method') }}</option>
-                            @foreach (['cash' => __('invoices.cash'), 'bank_transfer' => __('invoices.bank_transfer'), 'cheque' => __('invoices.cheque')] as $value => $label)
-                                <option value="{{ $value }}" @selected(old('payment_method', $invoice?->payment_method?->value) === $value)>{{ $label }}</option>
-                            @endforeach
-                        </select>
-                    </div>
+                <div>
+                    <label for="payment_method" class="form-label">{{ __('invoices.payment_method') }}</label>
+                    @php($currentMethod = old('payment_method', ($invoice?->payment_terms?->value === 'credit') ? 'credit' : ($invoice?->payment_method?->value ?? 'cash')))
+                    <select id="payment_method" name="payment_method" class="form-input">
+                        @foreach (['cash' => __('invoices.cash'), 'bank_transfer' => __('invoices.bank_transfer'), 'credit' => __('invoices.credit')] as $value => $label)
+                            <option value="{{ $value }}" @selected($currentMethod === $value)>{{ $label }}</option>
+                        @endforeach
+                    </select>
+                    @error('payment_method')<p class="mt-1 text-xs text-red-700">{{ $message }}</p>@enderror
                 </div>
-                <p class="-mt-2 text-xs text-slate-500">{{ __('invoices.method_is_not_payment') }}</p>
+                <p class="-mt-2 text-xs text-slate-500">{{ __('invoices.credit_method_note') }}</p>
                 <div>
                     <label for="due_date" class="form-label">{{ __('invoices.due_date') }}</label>
                     <input id="due_date" name="due_date" type="date" value="{{ old('due_date', $invoice?->due_date?->toDateString()) }}" class="form-input">
                     @error('due_date')<p class="mt-1 text-xs text-red-700">{{ $message }}</p>@enderror
                 </div>
-                <div class="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-900">
-                    {{ __('invoices.pending_step_8') }}
-                    <div class="mt-2 flex justify-between border-t border-amber-200 pt-2"><span>{{ __('invoices.current_payment') }}</span><span class="font-semibold">{{ config('business.currency') }} 0.00</span></div>
-                </div>
+                @if ($editing)
+                    <div class="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-900">
+                        {{ __('invoices.pending_step_8') }}
+                        <div class="mt-2 flex justify-between border-t border-amber-200 pt-2"><span>{{ __('invoices.current_payment') }}</span><span class="font-semibold">{{ config('business.currency') }} 0.00</span></div>
+                    </div>
+                @else
+                    <div class="space-y-3 rounded-xl border border-teal-200 bg-teal-50 p-3" id="payment-now-box">
+                        <p class="text-xs leading-5 text-teal-900">{{ __('invoices.payment_first_note') }}</p>
+                        <input type="hidden" name="payment_idempotency_key" value="{{ old('payment_idempotency_key', \Illuminate\Support\Str::uuid()) }}">
+                        <div>
+                            <label for="amount_received" class="form-label">{{ __('invoices.amount_received_now') }}</label>
+                            <input id="amount_received" name="amount_received" type="number" min="0" step="0.01" value="{{ old('amount_received') }}" class="form-input">
+                        </div>
+                        <div id="reference-box">
+                            <label for="reference_number" class="form-label">{{ __('invoices.payment_reference') }}</label>
+                            <input id="reference_number" name="reference_number" maxlength="100" value="{{ old('reference_number') }}" class="form-input">
+                        </div>
+                    </div>
+                    <div class="hidden rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-900" id="credit-box">
+                        {{ __('invoices.credit_whole_total_note') }}
+                        <div class="mt-2 flex justify-between border-t border-amber-200 pt-2"><span>{{ __('invoices.credit_amount') }}</span><span id="credit-amount" class="font-semibold">{{ config('business.currency') }} 0.00</span></div>
+                    </div>
+                    <script>
+                        (() => {
+                            const method = document.getElementById('payment_method');
+                            const sync = () => {
+                                const credit = method.value === 'credit';
+                                document.getElementById('payment-now-box').classList.toggle('hidden', credit);
+                                document.getElementById('credit-box').classList.toggle('hidden', !credit);
+                                document.getElementById('amount_received').disabled = credit;
+                                const bank = method.value === 'bank_transfer';
+                                document.getElementById('reference-box').classList.toggle('hidden', !bank);
+                                document.getElementById('reference_number').disabled = !bank;
+                                document.getElementById('credit-amount').textContent = document.getElementById('summary-total')?.textContent ?? '';
+                            };
+                            method.addEventListener('change', sync);
+                            new MutationObserver(sync).observe(document.getElementById('summary-total'), { childList: true, characterData: true, subtree: true });
+                            sync();
+                        })();
+                    </script>
+                @endif
             </section>
 
             <section class="space-y-4 rounded-2xl border border-slate-200 bg-white p-5">
@@ -143,12 +172,14 @@
 
         <div class="flex flex-wrap justify-end gap-2">
             <a href="{{ $editing ? route('invoices.show', $invoice) : route('invoices.index') }}" class="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">{{ __('ui.cancel') }}</a>
-            <button type="submit" name="intent" value="draft" class="rounded-xl border border-teal-700 px-4 py-2.5 text-xs font-semibold text-teal-800 hover:bg-teal-50">{{ __('invoices.save_draft') }}</button>
+            @if ($editing)
+                <button type="submit" name="intent" value="draft" class="rounded-xl border border-teal-700 px-4 py-2.5 text-xs font-semibold text-teal-800 hover:bg-teal-50">{{ __('invoices.save_draft') }}</button>
+            @endif
             @can('invoices.print')
                 <button type="submit" name="intent" value="preview" class="rounded-xl border border-slate-300 px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">{{ __('invoices.save_preview') }}</button>
             @endcan
             @can('invoices.issue')
-                <button type="submit" name="intent" value="issue" data-confirm="{{ __('invoices.issue_confirmation') }}" class="rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white hover:bg-teal-800">{{ __('invoices.issue_invoice') }}</button>
+                <button type="submit" name="intent" value="issue" data-confirm="{{ __('invoices.issue_confirmation') }}" class="rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white hover:bg-teal-800">{{ $editing ? __('invoices.issue_invoice') : __('invoices.record_payment_create_invoice') }}</button>
             @endcan
         </div>
     </form>

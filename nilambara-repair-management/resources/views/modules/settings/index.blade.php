@@ -27,6 +27,8 @@
         </div>
         <label class="form-label block">{{ __('settings.logo') }}<input class="form-input mt-1" type="file" name="logo" accept="image/png,image/jpeg,image/webp"><span class="mt-1 block text-xs text-slate-500">{{ __('settings.logo_help') }}</span></label>
         @error('logo')<p class="text-xs text-red-700">{{ $message }}</p>@enderror
+        <label class="form-label block">{{ __('settings.common_faults') }}<textarea class="form-input mt-1" name="common_faults" rows="8" placeholder="{{ __('settings.common_faults_placeholder') }}">{{ old('common_faults', config('business.common_faults')) }}</textarea><span class="mt-1 block text-xs text-slate-500">{{ __('settings.common_faults_help') }}</span></label>
+        @error('common_faults')<p class="text-xs text-red-700">{{ $message }}</p>@enderror
         @can('settings.update')
             <button class="rounded-lg bg-teal-700 px-5 py-2.5 text-sm font-semibold text-white">{{ __('settings.save') }}</button>
         @endcan

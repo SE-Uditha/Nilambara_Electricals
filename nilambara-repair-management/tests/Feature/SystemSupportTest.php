@@ -35,6 +35,25 @@ class SystemSupportTest extends TestCase
         $this->get(route('settings.index'))->assertOk()->assertSee('Updated Electricals');
     }
 
+    public function test_common_faults_are_saved_normalized_and_offered_on_new_repair_job(): void
+    {
+        $this->seed(RoleSeeder::class);
+        $admin = User::factory()->create();
+        $admin->assignRole('administrator');
+        $base = ['name' => 'Nilambara', 'currency' => 'LKR', 'timezone' => 'Asia/Colombo', 'date_format' => 'd M Y', 'time_format' => 'h:i A'];
+
+        $this->actingAs($admin)->put(route('settings.update'), $base + ['common_faults' => "  Screen not turning on \r\n\r\nNo power\nno POWER\nOverheating"])
+            ->assertSessionHasNoErrors();
+        $this->assertSame("Screen not turning on\nNo power\nOverheating", SystemSetting::query()->where('key', 'common_faults')->firstOrFail()->value);
+
+        $this->get(route('repair-jobs.create'))->assertOk()
+            ->assertSee('data-fault="Screen not turning on"', false)
+            ->assertSee('data-fault="Overheating"', false)
+            ->assertSee('name="reported_fault"', false);
+
+        $this->put(route('settings.update'), $base + ['common_faults' => str_repeat('x', 151)])->assertSessionHasErrors('common_faults');
+    }
+
     public function test_business_settings_reject_unknown_and_secret_fields(): void
     {
         $this->seed(RoleSeeder::class);

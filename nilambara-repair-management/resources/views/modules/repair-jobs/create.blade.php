@@ -13,7 +13,7 @@
         <div role="alert" class="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{{ __('ui.review_repair_receipt_fields') }}</div>
     @endif
 
-    <form method="POST" action="{{ route('repair-jobs.store') }}" x-data="{ selectedCustomer: @js($selectedCustomer), advancePayment: @js(old('advance_payment', '0.00')), submitting: false }" x-on:customer-selected="selectedCustomer = $event.detail" x-on:submit="if (submitting) { $event.preventDefault(); return; } submitting = true">
+    <form method="POST" action="{{ route('repair-jobs.store') }}" x-data="{ selectedCustomer: @js($selectedCustomer), advancePayment: @js(old('advance_payment', '0.00')), showLabour: @js(old('labor_cost') !== null), labourCost: @js(old('labor_cost', '')), submitting: false }" x-on:customer-selected="selectedCustomer = $event.detail" x-on:submit="if (submitting) { $event.preventDefault(); return; } setTimeout(() => submitting = true, 0)">
         @csrf
         <div class="space-y-5">
             <section class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">
@@ -94,6 +94,22 @@
                     </div>
                     <div class="sm:col-span-2">
                         <label class="form-label" for="reported_fault">{{ __('ui.reported_fault') }}</label>
+                        @php($commonFaults = array_values(array_filter(preg_split('/\R/u', (string) config('business.common_faults')))))
+                        @if ($commonFaults !== [])
+                            <div class="mb-2 flex flex-wrap gap-1.5" aria-label="{{ __('ui.common_faults') }}">
+                                <span class="self-center text-[11px] text-slate-500">{{ __('ui.common_faults_hint') }}</span>
+                                @foreach ($commonFaults as $fault)
+                                    <button type="button" data-fault="{{ $fault }}" class="rounded-full border border-teal-200 bg-teal-50 px-2.5 py-1 text-[11px] font-medium text-teal-800 hover:bg-teal-100" x-on:click="
+                                        const box = document.getElementById('reported_fault');
+                                        const lines = box.value.split(/\r?\n/).map(l => l.trim());
+                                        if (!lines.includes($el.dataset.fault)) {
+                                            box.value = box.value.trim() === '' ? $el.dataset.fault : box.value.replace(/\s+$/, '') + '\n' + $el.dataset.fault;
+                                        }
+                                        box.focus();
+                                    ">+ {{ $fault }}</button>
+                                @endforeach
+                            </div>
+                        @endif
                         <textarea id="reported_fault" name="reported_fault" rows="4" class="form-input">{{ old('reported_fault') }}</textarea>
                     </div>
                     <div>
@@ -140,6 +156,15 @@
                     @endif
 
                 </div>
+                <div class="mt-4">
+                    <button type="button" class="rounded-xl border border-teal-200 bg-teal-50 px-4 py-2 text-xs font-semibold text-teal-800 hover:bg-teal-100" x-on:click="showLabour = ! showLabour; if (! showLabour) labourCost = ''" x-text="showLabour ? 'Remove labour / inspection charge' : '+ Add labour / inspection charge'"></button>
+                    <div class="mt-3 max-w-xs" x-show="showLabour" x-cloak>
+                        <label class="form-label" for="labor_cost">{{ __('ui.labor_cost') }}</label>
+                        <input id="labor_cost" name="labor_cost" type="number" min="0" step="0.01" x-model="labourCost" x-bind:disabled="! showLabour" class="form-input">
+                        <p class="mt-1 text-[11px] text-slate-500">Optional. Use when the item is inspected and the customer declines repair, so the inspection is still charged.</p>
+                        @error('labor_cost')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+                    </div>
+                </div>
                 <p class="mt-3 text-[11px] text-slate-500">{{ __('ui.advance_payment_ledger_help') }}</p>
             </section>
 
@@ -159,10 +184,17 @@
 
             <div class="flex flex-wrap justify-end gap-3">
                 <a href="{{ route('repair-jobs.index') }}" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50">{{ __('ui.cancel') }}</a>
-                <button type="submit" name="intent" value="save" x-bind:disabled="submitting" class="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 disabled:opacity-60">{{ __('ui.accept_repair_job') }}</button>
-                @can('receipts.print')
-                    <button type="submit" name="intent" value="print" x-bind:disabled="submitting" class="rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white hover:bg-teal-800 disabled:opacity-60">{{ __('ui.accept_and_print_receipt') }}</button>
-                @endcan
+                <template x-if="! showLabour">
+                    <div class="flex flex-wrap gap-3">
+                        <button type="submit" name="intent" value="save" x-bind:disabled="submitting" class="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 disabled:opacity-60">{{ __('ui.accept_repair_job') }}</button>
+                        @can('receipts.print')
+                            <button type="submit" name="intent" value="print" x-bind:disabled="submitting" class="rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white hover:bg-teal-800 disabled:opacity-60">{{ __('ui.accept_and_print_receipt') }}</button>
+                        @endcan
+                    </div>
+                </template>
+                <template x-if="showLabour">
+                    <button type="submit" name="intent" value="cancel_payments" x-bind:disabled="submitting" class="rounded-xl bg-red-600 px-4 py-2.5 text-xs font-semibold text-white hover:bg-red-700 disabled:opacity-60">{{ __('ui.cancel_repair_job_and_payments') }}</button>
+                </template>
             </div>
         </div>
     </form>

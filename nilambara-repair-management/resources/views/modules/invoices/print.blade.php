@@ -26,6 +26,7 @@
 </head>
 <body>
     <nav class="toolbar" aria-label="Invoice actions">
+        <a href="{{ auth()->user()->can('view', $invoice) ? route('invoices.show', $invoice) : route('invoices.index') }}">{{ __('invoices.back') }}</a>
         @can('print', $invoice)<a href="{{ route('invoices.duplicate', $invoice) }}">{{ __('invoices.duplicate_print') }}</a>@endcan
         @can('export', $invoice)<a href="{{ route('invoices.pdf', $invoice) }}">{{ __('invoices.export_pdf') }}</a>@endcan
         <button type="button" onclick="window.print()">{{ __('invoices.print') }}</button>

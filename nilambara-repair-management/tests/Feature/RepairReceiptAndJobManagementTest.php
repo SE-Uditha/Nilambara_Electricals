@@ -33,6 +33,22 @@ class RepairReceiptAndJobManagementTest extends TestCase
         $this->seed(RoleSeeder::class);
     }
 
+    public function test_new_job_form_offers_optional_labour_charge_that_defaults_to_zero(): void
+    {
+        $cashier = $this->userWithRole('cashier');
+        $customer = $this->customer($this->customerAttributes());
+        $receiver = $this->employee(['name' => 'Nimal Perera']);
+        $this->actingAs($cashier)->get(route('repair-jobs.create'))->assertOk()->assertSee('name="labor_cost"', false)->assertSee('Add labour / inspection charge');
+
+        $withoutLabour = $this->receiptData($customer, $receiver);
+        unset($withoutLabour['labor_cost']);
+        $this->post(route('repair-jobs.store'), $withoutLabour)->assertSessionHasNoErrors();
+        $this->assertSame('0.00', number_format((float) RepairJob::sole()->labour_cost, 2, '.', ''));
+
+        $this->post(route('repair-jobs.store'), $this->receiptData($customer, $receiver, ['job_number' => 'J-INSP-2', 'labor_cost' => '500.00']))->assertSessionHasNoErrors();
+        $this->assertSame('500.00', number_format((float) RepairJob::latest('id')->first()->labour_cost, 2, '.', ''));
+    }
+
     public function test_accepting_a_job_generates_one_receipt_and_exposes_print_pdf_and_legacy_redirects(): void
     {
         $cashier = $this->userWithRole('cashier');
@@ -43,7 +59,7 @@ class RepairReceiptAndJobManagementTest extends TestCase
         $job = RepairJob::sole();
         $receipt = RepairReceipt::sole();
         $this->assertSame($job->id, $receipt->repair_job_id);
-        $this->get(route('repair-jobs.show', $job))->assertOk()->assertSee(route('repair-jobs.receipt.print', $job), false)->assertSee(route('repair-jobs.receipt.pdf', $job), false);
+        $this->get(route('repair-jobs.show', $job))->assertOk()->assertSee(route('repair-jobs.receipt.print', $job), false)->assertDontSee(route('repair-jobs.receipt.pdf', $job), false);
         $this->get(route('repair-jobs.receipt.print', $job))->assertOk()->assertSee('Customer Copy')->assertSee('12 Lake Road, Colombo')->assertDontSee('Urgent')->assertDontSee(__('ui.job_type'));
         $pdf = $this->get(route('repair-jobs.receipt.pdf', $job))->assertOk();
         $this->assertStringStartsWith('%PDF-', $pdf->getContent());
@@ -348,14 +364,14 @@ class RepairReceiptAndJobManagementTest extends TestCase
             ->assertSee(__('ui.worksheet_job_number'))
             ->assertSee(__('ui.worksheet_received_date'))
             ->assertSee(__('ui.job_status'))
-            ->assertSee(__('ui.worksheet_issues_found'))
+            ->assertDontSee(__('ui.worksheet_issues_found'))
             ->assertSee(__('ui.repair_details'))
             ->assertSee(__('ui.parts_used'))
             ->assertSee(__('ui.parts_cost'))
             ->assertSee(__('ui.total_amount'))
             ->assertSee(__('ui.special_notes'))
-            ->assertSee(__('ui.worksheet_handover'))
-            ->assertSee(__('ui.cashier_received'));
+            ->assertDontSee(__('ui.worksheet_handover'))
+            ->assertDontSee(__('ui.cashier_received'));
 
         $this->assertSame(1, substr_count($response->getContent(), '<article class="page">'));
 
@@ -373,7 +389,7 @@ class RepairReceiptAndJobManagementTest extends TestCase
         $inspection = JobInspection::create(['repair_job_id' => $job->id, 'inspected_at' => '2026-10-20 09:00:00', 'inspected_by_employee_id' => $inspector->id, 'inspection_result' => 'OLD FINDINGS', 'parts_used' => 'OLD PARTS TEXT', 'parts_quantity' => '7.000', 'repaired_by_employee_id' => $inspector->id, 'special_notes' => 'OLD COMPLETION NOTES']);
         $this->actingAs($actor);
         foreach (['job-cards.print', 'job-cards.duplicate'] as $route) {
-            $this->get(route($route, $job))->assertOk()->assertSee('JOB-WORKSHEET-001')->assertSee($job->item_name)->assertSee(__('ui.worksheet_issues_found'))->assertSee(__('ui.worksheet_handover'))->assertDontSee('OLD REPAIR TEXT')->assertDontSee('OLD FINDINGS')->assertDontSee('OLD PARTS TEXT')->assertDontSee('OLD COMPLETION NOTES')->assertDontSee('Saved Inspector Name')->assertDontSee('8765.43');
+            $this->get(route($route, $job))->assertOk()->assertSee('JOB-WORKSHEET-001')->assertSee($job->item_name)->assertDontSee(__('ui.worksheet_issues_found'))->assertDontSee(__('ui.worksheet_handover'))->assertDontSee('OLD REPAIR TEXT')->assertDontSee('OLD FINDINGS')->assertDontSee('OLD PARTS TEXT')->assertDontSee('OLD COMPLETION NOTES')->assertDontSee('Saved Inspector Name')->assertDontSee('8765.43');
         }
         $pdf = $this->get(route('job-cards.pdf', $job))->assertOk();
         $this->assertStringStartsWith('%PDF-', $pdf->getContent());

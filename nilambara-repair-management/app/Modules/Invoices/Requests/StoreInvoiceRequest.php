@@ -14,6 +14,16 @@ class StoreInvoiceRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        // The form offers one "method" list (cash, bank transfer, credit); credit is stored as the payment terms.
+        $isCredit = $this->input('payment_method') === 'credit';
+        $this->merge([
+            'payment_terms' => $isCredit ? 'credit' : ($this->input('payment_terms') ?: 'cash'),
+            'payment_method' => $isCredit ? null : $this->input('payment_method'),
+        ]);
+    }
+
     public function rules(): array
     {
         return [
@@ -30,6 +40,10 @@ class StoreInvoiceRequest extends FormRequest
             'delivery_information' => ['nullable', 'string', 'max:5000'],
             'special_notes' => ['nullable', 'string', 'max:5000'],
             'intent' => ['required', Rule::in(['draft', 'issue', 'preview'])],
+            'amount_received' => ['nullable', 'numeric', 'decimal:0,2', 'min:0', 'max:999999999999.99'],
+            'reference_number' => ['nullable', 'string', 'max:100'],
+            'bank_name' => ['nullable', 'string', 'max:150'],
+            'payment_idempotency_key' => ['nullable', 'uuid'],
         ];
     }
 }

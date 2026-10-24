@@ -44,7 +44,7 @@ class StoreRepairReceiptRequest extends FormRequest
                 Rule::exists('employees', 'id')->where(fn ($query) => $query->where('is_active', true)),
             ],
             'special_notes' => ['nullable', 'string', 'max:10000'],
-            'intent' => ['nullable', Rule::in(['save', 'print'])],
+            'intent' => ['nullable', Rule::in(['save', 'print', 'cancel_payments'])],
         ];
     }
 
@@ -52,6 +52,9 @@ class StoreRepairReceiptRequest extends FormRequest
     {
         return [
             function (Validator $validator): void {
+                if ($this->input('intent') === 'cancel_payments' && (! is_numeric($this->input('labor_cost')) || (float) $this->input('labor_cost') <= 0)) {
+                    $validator->errors()->add('labor_cost', __('ui.labour_required_to_cancel'));
+                }
                 $amount = $this->input('advance_payment');
 
                 if (is_numeric($amount) && (float) $amount > 0 && ! in_array($this->input('payment_method'), ['cash', 'bank_transfer', 'cheque'], true)) {

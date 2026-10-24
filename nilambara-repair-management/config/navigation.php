@@ -14,7 +14,7 @@ return [
                 ['label' => 'customers', 'icon' => 'users', 'route' => 'customers.index', 'permission' => 'customers.view'],
                 ['label' => 'register_customer', 'icon' => 'users', 'route' => 'customers.create', 'permission' => 'customers.create'],
             ]],
-            ['label' => 'repair_jobs', 'icon' => 'tool', 'active_routes' => ['repair-jobs.*', 'repair-receipts.*', 'job-cards.*'], 'children' => [
+            ['label' => 'repair_jobs', 'icon' => 'tool', 'active_routes' => ['repair-jobs.*', 'repair-receipts.*', 'job-cards.*'], 'except_routes' => ['repair-jobs.billing', 'repair-jobs.billing.update'], 'children' => [
                 ['label' => 'new_repair_job', 'icon' => 'receipt', 'route' => 'repair-jobs.create', 'permission' => 'receipts.create'],
                 ['label' => 'all_repair_jobs', 'icon' => 'tool', 'route' => 'repair-jobs.index', 'permission' => 'jobs.view'],
                 ['label' => 'job_cards', 'icon' => 'clipboard', 'route' => 'job-cards.index', 'permission' => 'job-cards.view'],
@@ -29,8 +29,8 @@ return [
     [
         'label' => 'sales_finance',
         'items' => [
-            ['label' => 'payments', 'icon' => 'wallet', 'active_routes' => ['payments.*', 'credit-invoices.*'], 'children' => [
-                ['label' => 'payments', 'icon' => 'wallet', 'route' => 'payments.index', 'permission' => 'payments.view'],
+            ['label' => 'payments', 'icon' => 'wallet', 'active_routes' => ['payments.*', 'credit-invoices.*', 'repair-jobs.billing', 'repair-jobs.billing.update'], 'children' => [
+                ['label' => 'payments', 'icon' => 'wallet', 'route' => 'payments.index', 'active_routes' => ['repair-jobs.billing', 'repair-jobs.billing.update'], 'permission' => 'payments.view'],
                 ['label' => 'record_payment', 'icon' => 'wallet', 'route' => 'payments.create', 'permission' => 'payments.receive'],
                 ['label' => 'credit_management', 'icon' => 'credit', 'route' => 'credit-invoices.index', 'permission' => 'credit.view'],
                 ['label' => 'cash_summary', 'icon' => 'wallet', 'route' => 'reports.show', 'route_parameters' => ['report' => 'cash-summary'], 'permission' => 'reports.view', 'roles' => ['administrator', 'cashier']],

@@ -38,6 +38,9 @@ class SidebarNavigation
                 if (isset($item['active_routes'])) {
                     $item['active'] = $item['active'] || $request->routeIs(...$item['active_routes']);
                 }
+                if (isset($item['except_routes']) && $request->routeIs(...$item['except_routes'])) {
+                    $item['active'] = false;
+                }
             } else {
                 $item['active'] = $this->isActive($item, $request)
                     || (isset($item['active_routes']) && $request->routeIs(...$item['active_routes']));

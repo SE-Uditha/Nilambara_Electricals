@@ -7,6 +7,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory.index');
 Route::get('/inventory/create', [InventoryController::class, 'form'])->name('inventory.create');
+Route::get('/inventory/import', [InventoryController::class, 'importForm'])->middleware('can:inventory.create')->name('inventory.import');
+Route::get('/inventory/import/template', [InventoryController::class, 'importTemplate'])->middleware('can:inventory.create')->name('inventory.import.template');
+Route::post('/inventory/import', [InventoryController::class, 'import'])->middleware(['can:inventory.create', 'throttle:20,1'])->name('inventory.import.store');
 Route::post('/inventory', [InventoryController::class, 'save'])->middleware('can:inventory.create')->name('inventory.store');
 Route::post('/inventory/references', [InventoryController::class, 'reference'])->name('inventory.references');
 Route::get('/inventory/{part}/edit', [InventoryController::class, 'form'])->name('inventory.edit');

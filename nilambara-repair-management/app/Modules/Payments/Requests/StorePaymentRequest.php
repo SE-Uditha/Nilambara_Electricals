@@ -33,11 +33,12 @@ class StorePaymentRequest extends FormRequest
             'repair_job_id' => ['nullable', 'integer', 'exists:repair_jobs,id'],
             'received_by_employee_id' => ['nullable', 'integer', 'exists:employees,id'],
             'payment_date' => ['required', 'date', 'before_or_equal:today'],
-            'amount' => ['required', 'numeric', 'decimal:0,2', 'gt:0', new DecimalValue],
-            'method' => ['required', Rule::enum(PaymentMethod::class)],
+            'amount' => ['required_unless:method,credit', 'nullable', 'numeric', 'decimal:0,2', 'gt:0', new DecimalValue],
+            'method' => ['required', Rule::in(array_map(fn (PaymentMethod $m): string => $m->value, PaymentMethod::selectable()))],
             'reference_number' => ['nullable', 'string', 'max:100', 'required_if:method,bank_transfer', 'required_if:method,cheque'],
             'bank_name' => ['nullable', 'string', 'max:150'],
             'cheque_date' => ['nullable', 'date'],
+            'due_date' => ['nullable', 'date', 'after_or_equal:today'],
             'notes' => ['nullable', 'string', 'max:5000'],
             'idempotency_key' => ['required', 'uuid', 'max:100'],
         ];
@@ -56,6 +57,9 @@ class StorePaymentRequest extends FormRequest
                 }
                 if ($this->input('payment_type') === 'advance' && $this->filled('invoice_id')) {
                     $validator->errors()->add('invoice_id', __('payments.advance_invoice_not_allowed'));
+                }
+                if ($this->input('method') === PaymentMethod::Credit->value && $this->input('payment_type') !== 'invoice') {
+                    $validator->errors()->add('method', __('payments.credit_only_for_invoices'));
                 }
                 if ($this->input('method') !== PaymentMethod::Cheque->value && $this->filled('cheque_date')) {
                     $validator->errors()->add('cheque_date', __('payments.cheque_date_only_for_cheques'));

@@ -28,7 +28,10 @@ Route::middleware('can:jobs.view')->group(function (): void {
 Route::middleware('can:jobs.view')->group(function (): void {
     Route::get('/repair-jobs/{job}/request-edit', [RepairJobController::class, 'requestEdit'])->name('repair-jobs.request-edit');
     Route::post('/repair-jobs/{job}/request-edit', [RepairJobController::class, 'storeEditRequest'])->name('repair-jobs.request-edit.store');
+    Route::post('/repair-jobs/{job}/request-delete', [RepairJobController::class, 'requestDelete'])->name('repair-jobs.request-delete');
 });
+
+Route::delete('/repair-jobs/{job}', [RepairJobController::class, 'destroy'])->middleware('can:jobs.delete')->name('repair-jobs.destroy');
 
 Route::middleware('can:jobs.update')->group(function (): void {
     Route::get('/repair-jobs/{job}/edit', [RepairJobController::class, 'edit'])->name('repair-jobs.edit');

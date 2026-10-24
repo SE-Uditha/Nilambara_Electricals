@@ -12,7 +12,7 @@
 
 @endif
 @if(in_array($kind,['payment_refund','payment_reversal']))<label class="block">Amount (LKR)<input class="form-input" type="number" step="0.01" min="0.01" name="amount" value="{{ old('amount') }}" required></label>@endif
-@if($kind==='payment_refund')<label class="block">Refund method<select class="form-input" name="method" required>@foreach(['cash'=>'Cash','bank_transfer'=>'Bank transfer','cheque'=>'Cheque'] as $value=>$label)<option value="{{ $value }}" @selected(old('method')===$value)>{{ $label }}</option>@endforeach</select></label>@endif
+@if($kind==='payment_refund')<label class="block">Refund method<select class="form-input" name="method" required>@foreach(['cash'=>'Cash','bank_transfer'=>'Bank transfer'] as $value=>$label)<option value="{{ $value }}" @selected(old('method')===$value)>{{ $label }}</option>@endforeach</select></label>@endif
 @if($kind==='payment_refund')<label class="block">External reference (optional)<input class="form-input" name="external_reference" maxlength="100" value="{{ old('external_reference') }}"></label>@endif
 <label class="block" for="reason">Reason<textarea id="reason" class="form-input" rows="3" name="reason" minlength="5" maxlength="2000" required>{{ old('reason') }}</textarea></label><button class="rounded-lg bg-teal-700 px-4 py-2 font-semibold text-white">Submit request</button></form>
 @endsection

@@ -55,4 +55,9 @@ class RepairJobPolicy
     {
         return $user->can('jobs.cancel') && $this->view($user, $job);
     }
+
+    public function delete(User $user, RepairJob $job): bool
+    {
+        return $user->can('jobs.delete') && $this->view($user, $job);
+    }
 }

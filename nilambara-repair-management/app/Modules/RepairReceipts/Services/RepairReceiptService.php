@@ -65,10 +65,15 @@ class RepairReceiptService
                 'received_at' => $receivedAt,
                 'received_by_employee_id' => $employee->getKey(),
                 'labour_cost' => $data['labor_cost'] ?? '0.00',
-                'total_job_amount' => '0.00',
-                'status' => JobStatus::Received->value,
+                'labour_charge' => $data['labor_cost'] ?? '0.00',
+                'total_job_amount' => $data['labor_cost'] ?? '0.00',
+                'status' => ($data['intent'] ?? null) === 'cancel_payments' ? JobStatus::Cancelled->value : JobStatus::Received->value,
                 'special_notes' => $this->nullableTrim($data['special_notes'] ?? null),
             ]);
+
+            if (($data['intent'] ?? null) === 'cancel_payments') {
+                $job->forceFill(['cancelled_at' => $receivedAt, 'cancelled_by_user_id' => $user->getKey()])->save();
+            }
 
             // The database-generated primary key is the concurrency-safe sequence.
             $jobReference = 'JOB-'.str_pad((string) $job->getKey(), 5, '0', STR_PAD_LEFT);
@@ -132,7 +137,7 @@ class RepairReceiptService
             JobStatusHistory::query()->create([
                 'repair_job_id' => $job->getKey(),
                 'previous_status' => null,
-                'new_status' => JobStatus::Received->value,
+                'new_status' => $job->status->value,
                 'changed_by_user_id' => $user->getKey(),
                 'changed_at' => $receivedAt,
                 'notes' => __('ui.initial_status_note'),
@@ -152,7 +157,7 @@ class RepairReceiptService
                     'automatic_number' => $jobReference,
                     'job_number' => $job->job_number,
                     'customer_code' => $customer->customer_code,
-                    'status' => JobStatus::Received->value,
+                    'status' => $job->status->value,
                     'repair_receipt_id' => $receipt->getKey(),
                 ],
             );

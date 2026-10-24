@@ -9,6 +9,7 @@ use App\Modules\Inventory\Models\SparePartCategory;
 use App\Modules\Inventory\Models\StockLocation;
 use App\Modules\Inventory\Models\UnitOfMeasure;
 use App\Modules\Inventory\Services\InventoryService;
+use App\Modules\Inventory\Services\StockImportService;
 use App\Modules\Inventory\Services\StockWorkflowService;
 use App\Modules\RepairJobs\Models\RepairJob;
 use App\Modules\Suppliers\Models\Supplier;
@@ -86,6 +87,42 @@ class InventoryController
         Gate::authorize('inventory.view');
 
         return view('modules.inventory.show', ['part' => $part->load(['unit', 'defaultLocation']), 'movements' => $part->stockMovements()->with(['location', 'recordedByUser'])->orderByDesc('id')->paginate(25), 'locations' => StockLocation::where('is_active', true)->get()]);
+    }
+
+    public function importForm()
+    {
+        Gate::authorize('inventory.create');
+
+        return view('modules.inventory.import', [
+            'units' => UnitOfMeasure::orderBy('code')->get(),
+            'locations' => StockLocation::where('is_active', true)->orderBy('code')->get(),
+        ]);
+    }
+
+    public function importTemplate(StockImportService $importer)
+    {
+        Gate::authorize('inventory.create');
+
+        return response($importer->template(), 200, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => 'attachment; filename="stock-import-template.xlsx"',
+        ]);
+    }
+
+    public function import(Request $request, StockImportService $importer)
+    {
+        Gate::authorize('inventory.create');
+        $request->validate(['file' => ['required', 'file', 'mimes:xlsx', 'max:5120']]);
+        try {
+            $result = $importer->import($request->file('file')->getRealPath(), $request->user());
+        } catch (\PhpOffice\PhpSpreadsheet\Exception) {
+            throw ValidationException::withMessages(['file' => __('inventory.import_unreadable')]);
+        }
+        if (isset($result['errors'])) {
+            return back()->with('import_errors', $result['errors']);
+        }
+
+        return redirect()->route('inventory.index')->with('status', __('inventory.import_done', ['count' => $result['created']]));
     }
 
     public function reference(Request $request)

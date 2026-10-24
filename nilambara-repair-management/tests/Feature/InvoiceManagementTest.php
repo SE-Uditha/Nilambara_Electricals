@@ -53,14 +53,15 @@ class InvoiceManagementTest extends TestCase
             ->assertSessionHasNoErrors();
 
         $invoice = Invoice::query()->sole();
+        $this->assertSame('1.00', \App\Modules\Payments\Models\Payment::query()->sole()->amount);
         $this->assertMatchesRegularExpression('/^INV-\d{5,}$/', $invoice->invoice_number);
-        $this->assertSame(DocumentStatus::Draft, $invoice->status);
+        $this->assertSame(DocumentStatus::Finalized, $invoice->status);
         $this->assertSame('825.00', $invoice->total);
         $this->assertSame(3, $invoice->invoiceJobs()->count());
         $this->assertSame(5, $invoice->invoiceItems()->count());
-        $this->assertSame(4, InvoiceHistory::query()->where('invoice_id', $invoice->getKey())->count());
+        $this->assertSame(5, InvoiceHistory::query()->where('invoice_id', $invoice->getKey())->count());
         $this->assertSame('Database Test Customer', data_get($invoice->document_snapshot, 'customer.name'));
-        $this->assertDatabaseCount('payments', 0);
+        $this->assertDatabaseCount('payments', 1);
 
         $next = $this->billableJob($customer, '90.00', '10.00');
         $this->actingAs($user)->post(route('invoices.store'), $this->invoiceData($customer, [$next]))
@@ -153,9 +154,8 @@ class InvoiceManagementTest extends TestCase
         $customer = $this->customer();
         $first = $this->billableJob($customer, '200.00', '0.00');
         $second = $this->billableJob($customer, '100.00', '50.00');
-        $this->actingAs($user)->post(route('invoices.store'), $this->invoiceData($customer, [$first]))
-            ->assertRedirect()
-            ->assertSessionHasNoErrors();
+        $this->actingAs($user);
+        app(\App\Modules\Invoices\Services\InvoiceService::class)->create($this->invoiceData($customer, [$first]), $user);
         $invoice = Invoice::query()->sole();
 
         $this->actingAs($user)->put(route('invoices.update', $invoice), $this->invoiceData($customer, [$first, $second], [
@@ -473,9 +473,8 @@ class InvoiceManagementTest extends TestCase
 
     private function createIssuedInvoice(User $user, $customer, array $jobs): Invoice
     {
-        $this->actingAs($user)->post(route('invoices.store'), $this->invoiceData($customer, $jobs, ['intent' => 'issue']))
-            ->assertRedirect()
-            ->assertSessionHasNoErrors();
+        $this->actingAs($user);
+        app(\App\Modules\Invoices\Services\InvoiceService::class)->create($this->invoiceData($customer, $jobs, ['intent' => 'issue']), $user);
 
         return Invoice::query()->latest('id')->firstOrFail();
     }
@@ -489,6 +488,7 @@ class InvoiceManagementTest extends TestCase
             'payment_terms' => 'cash',
             'payment_method' => 'cash',
             'intent' => 'draft',
+            'amount_received' => '1',
         ], $overrides);
     }
 

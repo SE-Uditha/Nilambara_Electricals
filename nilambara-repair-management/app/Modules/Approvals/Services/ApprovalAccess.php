@@ -13,6 +13,7 @@ class ApprovalAccess
         'stock_count' => 'Physical stock count',
         'customer_update' => 'Customer edit',
         'job_update' => 'Repair job edit',
+        'job_delete' => 'Repair job deletion',
     ];
 
     public const REVIEW = [
@@ -23,6 +24,7 @@ class ApprovalAccess
         'stock_count' => ['inventory.view', 'inventory.stock-count'],
         'customer_update' => ['customers.view', 'customers.update'],
         'job_update' => ['jobs.view', 'jobs.update'],
+        'job_delete' => ['jobs.view', 'jobs.delete'],
     ];
 
     public const REQUEST = [
@@ -35,6 +37,7 @@ class ApprovalAccess
     public const CHANGE = [
         'customer_update' => ['customers.view', 'customers.update'],
         'job_update' => ['jobs.view', 'jobs.update'],
+        'job_delete' => ['jobs.view', 'jobs.delete'],
     ];
 
     public static function canRequestChange(?User $user, string $kind): bool

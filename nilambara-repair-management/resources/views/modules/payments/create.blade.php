@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="mb-7">
-        <a href="{{ $creditCollection ? route('credit-invoices.index') : route('payments.index') }}" class="text-xs font-semibold text-teal-700 hover:text-teal-900">← {{ __('payments.back_to_payments') }}</a>
+        <a href="{{ $creditCollection ? route('credit-invoices.index') : route('payments.index') }}" class="text-xs font-semibold text-teal-700 hover:text-teal-900">← {{ __('payments.back_to_payments') }}</a>
         <h1 class="mt-3 text-2xl font-bold tracking-tight text-slate-900">{{ $creditCollection ? __('payments.collect_credit') : __('payments.record_payment') }}</h1>
         <p class="mt-1 text-sm text-slate-500">{{ __('payments.payment_entry_help') }}</p>
     </div>
@@ -50,9 +50,16 @@
                     <select id="invoice_id" name="invoice_id" class="form-input">
                         <option value="">{{ __('payments.select_invoice') }}</option>
                         @foreach ($openInvoices as $openInvoice)
-                            <option value="{{ $openInvoice->getKey() }}" @selected((string) old('invoice_id') === (string) $openInvoice->getKey())>{{ $openInvoice->invoice_number }} · {{ $openInvoice->customer->display_name }} · {{ config('business.currency') }} {{ $openInvoice->total }}</option>
+                            <option value="{{ $openInvoice->getKey() }}" data-total="{{ $openInvoice->total }}" data-paid="{{ $openInvoice->payment_summary['total_paid'] }}" data-outstanding="{{ $openInvoice->payment_summary['outstanding'] }}" @selected((string) old('invoice_id') === (string) $openInvoice->getKey())>{{ $openInvoice->invoice_number }} · {{ $openInvoice->customer->display_name }} · {{ config('business.currency') }} {{ $openInvoice->total }} · {{ __('payments.outstanding') }} {{ $openInvoice->payment_summary['outstanding'] }}</option>
                         @endforeach
                     </select>
+                    <div id="invoice-balance" class="hidden rounded-xl border border-teal-200 bg-teal-50 p-3 text-sm">
+                        <dl class="grid grid-cols-3 gap-2">
+                            <div><dt class="text-xs text-slate-500">{{ __('payments.invoice_total') }}</dt><dd id="bal-total" class="font-semibold"></dd></div>
+                            <div><dt class="text-xs text-slate-500">{{ __('payments.previous_payments') }}</dt><dd id="bal-paid" class="font-semibold"></dd></div>
+                            <div><dt class="text-xs font-bold text-teal-900">{{ __('payments.outstanding') }}</dt><dd id="bal-outstanding" class="font-bold text-teal-900"></dd></div>
+                        </dl>
+                    </div>
                     <p class="text-xs text-slate-500">{{ __('payments.select_invoice_help') }}</p>
                 </div>
                 <div id="advance-choice" class="mt-4 hidden grid gap-4 md:grid-cols-2">
@@ -106,7 +113,7 @@
             </div>
             <div>
                 <label for="method" class="form-label">{{ __('payments.payment_method') }}</label>
-                <select id="method" name="method" required class="form-input">@foreach (\App\Enums\PaymentMethod::cases() as $method)<option value="{{ $method->value }}" @selected(old('method') === $method->value)>{{ __('payments.method_'.$method->value) }}</option>@endforeach</select>
+                <select id="method" name="method" required class="form-input">@foreach (\App\Enums\PaymentMethod::selectable() as $method)<option value="{{ $method->value }}" @selected(old('method') === $method->value)>{{ __('payments.method_'.$method->value) }}</option>@endforeach</select>
             </div>
             <div>
                 <label for="reference_number" class="form-label">{{ __('payments.reference_number') }}</label>
@@ -117,9 +124,11 @@
                 <label for="bank_name" class="form-label">{{ __('payments.bank_name') }}</label>
                 <input id="bank_name" name="bank_name" maxlength="150" value="{{ old('bank_name') }}" class="form-input">
             </div>
-            <div id="cheque-date-field" class="hidden">
-                <label for="cheque_date" class="form-label">{{ __('payments.cheque_date') }}</label>
-                <input id="cheque_date" name="cheque_date" type="date" value="{{ old('cheque_date') }}" class="form-input">
+            <div id="due-date-field" class="hidden">
+                <label for="due_date" class="form-label">{{ __('payments.credit_due_date') }}</label>
+                <input id="due_date" name="due_date" type="date" min="{{ now(config('business.timezone'))->toDateString() }}" value="{{ old('due_date') }}" class="form-input">
+                <p class="mt-1 text-xs text-slate-500">{{ __('payments.credit_method_note') }}</p>
+                @error('due_date')<p class="mt-1 text-xs text-red-700">{{ $message }}</p>@enderror
             </div>
             <div class="md:col-span-2">
                 <label for="notes" class="form-label">{{ __('payments.notes') }}</label>
@@ -166,14 +175,41 @@
                 };
                 radios.forEach((radio) => radio.addEventListener('change', updateType));
                 customer?.addEventListener('change', loadJobs);
-                document.getElementById('method').addEventListener('change', (event) => {
-                    const cheque = event.target.value === 'cheque';
-                    document.getElementById('cheque-date-field').classList.toggle('hidden', !cheque);
-                    document.getElementById('reference_number').required = event.target.value !== 'cash';
-                });
                 updateType();
                 if (customer?.value) loadJobs();
             })();
         </script>
     @endif
+    <script>
+        (() => {
+            const method = document.getElementById('method');
+            const sync = () => {
+                const credit = method.value === 'credit';
+                const amount = document.getElementById('amount');
+                amount.required = !credit;
+                amount.disabled = credit;
+                document.getElementById('due-date-field').classList.toggle('hidden', !credit);
+                document.getElementById('reference_number').required = method.value === 'bank_transfer';
+            };
+            method.addEventListener('change', sync);
+            sync();
+            const select = document.getElementById('invoice_id');
+            const panel = document.getElementById('invoice-balance');
+            if (select && panel) {
+                const currency = @js(config('business.currency'));
+                const showBalance = () => {
+                    const option = select.selectedOptions[0];
+                    const picked = option && option.dataset.outstanding !== undefined;
+                    panel.classList.toggle('hidden', !picked);
+                    if (!picked) return;
+                    document.getElementById('bal-total').textContent = `${currency} ${option.dataset.total}`;
+                    document.getElementById('bal-paid').textContent = `${currency} ${option.dataset.paid}`;
+                    document.getElementById('bal-outstanding').textContent = `${currency} ${option.dataset.outstanding}`;
+                    document.getElementById('amount').max = option.dataset.outstanding;
+                };
+                select.addEventListener('change', showBalance);
+                showBalance();
+            }
+        })();
+    </script>
 @endsection

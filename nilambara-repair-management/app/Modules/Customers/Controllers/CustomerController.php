@@ -92,7 +92,7 @@ class CustomerController extends Controller
             })
             ->orderBy('customer_code')
             ->limit(10)
-            ->get(['id', 'customer_code', 'customer_type', 'customer_name', 'company_name', 'mobile_number']);
+            ->get(['id', 'customer_code', 'customer_type', 'customer_name', 'company_name', 'contact_person', 'address', 'mobile_number']);
 
         return response()->json([
             'data' => $customers->map(fn (Customer $customer): array => [

@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="mb-6 flex justify-between"><h1 class="text-2xl font-bold">Inventory</h1>
-@can('inventory.create')<a class="rounded-xl bg-teal-700 px-4 py-2 text-white" href="{{ route('inventory.create') }}">Register part</a>
+@can('inventory.create')<div class="flex gap-2"><a class="rounded-xl border border-teal-700 px-4 py-2 text-teal-800" href="{{ route('inventory.import') }}">{{ __('inventory.bulk_upload') }}</a><a class="rounded-xl bg-teal-700 px-4 py-2 text-white" href="{{ route('inventory.create') }}">Register part</a></div>
 @endcan</div>
 
 @include('modules.inventory.feedback')

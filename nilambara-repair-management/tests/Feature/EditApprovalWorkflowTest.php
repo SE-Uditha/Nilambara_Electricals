@@ -97,6 +97,68 @@ class EditApprovalWorkflowTest extends TestCase
         $this->assertSame('Changed item', $job->fresh()->item_name);
     }
 
+    public function test_admin_can_delete_a_job_directly_and_cashier_cannot(): void
+    {
+        $cashier = $this->userWithRole('cashier');
+        $admin = $this->userWithRole('administrator');
+        $job = $this->job();
+
+        $this->actingAs($cashier)->delete(route('repair-jobs.destroy', $job))->assertForbidden();
+        $this->assertDatabaseHas('repair_jobs', ['id' => $job->id]);
+
+        $this->actingAs($admin)->delete(route('repair-jobs.destroy', $job))->assertRedirect(route('repair-jobs.index'));
+        $this->assertDatabaseMissing('repair_jobs', ['id' => $job->id]);
+        $this->assertDatabaseHas('audit_logs', ['action' => 'repair_job.deleted']);
+    }
+
+    public function test_cashier_delete_request_needs_admin_approval(): void
+    {
+        $cashier = $this->userWithRole('cashier');
+        $admin = $this->userWithRole('administrator');
+        $job = $this->job();
+        $payload = ['reason' => 'Created by mistake', 'idempotency_key' => (string) Str::uuid()];
+
+        $this->actingAs($cashier)->post(route('repair-jobs.request-delete', $job), $payload)->assertRedirect(route('repair-jobs.show', $job));
+        $this->post(route('repair-jobs.request-delete', $job), $payload);
+        $this->assertSame(1, ApprovalRequest::where('kind', 'job_delete')->count());
+        $this->assertDatabaseHas('repair_jobs', ['id' => $job->id]);
+
+        $approval = ApprovalRequest::where('kind', 'job_delete')->firstOrFail();
+        $this->post(route('approval-requests.decide', $approval), ['decision' => 'approved', 'comment' => 'Approved fine'])->assertForbidden();
+        $this->assertDatabaseHas('repair_jobs', ['id' => $job->id]);
+
+        $this->actingAs($admin)->post(route('approval-requests.decide', $approval), ['decision' => 'approved', 'comment' => 'Approved fine'])->assertSessionHasNoErrors();
+        $this->assertDatabaseMissing('repair_jobs', ['id' => $job->id]);
+    }
+
+    public function test_deleting_a_job_also_deletes_its_invoice(): void
+    {
+        $admin = $this->userWithRole('administrator');
+        $job = $this->job();
+        $invoice = $this->invoice($job->customer);
+        \App\Modules\Invoices\Models\InvoiceJob::create([
+            'invoice_id' => $invoice->id,
+            'repair_job_id' => $job->id,
+            'customer_id' => $job->customer_id,
+        ]);
+
+        $this->actingAs($admin);
+        $db = fn (string $table) => \Illuminate\Support\Facades\DB::table($table);
+        $receiptId = $db('repair_receipts')->insertGetId(['repair_job_id' => $job->id, 'customer_id' => $job->customer_id, 'receipt_number' => 'RC-DEL-1', 'created_at' => now(), 'updated_at' => now()]);
+        $cardId = $db('job_cards')->insertGetId(['repair_job_id' => $job->id, 'paper_size' => 'A5', 'created_at' => now(), 'updated_at' => now()]);
+        foreach ([['repair_receipt_id' => $receiptId], ['job_card_id' => $cardId], ['invoice_id' => $invoice->id]] as $link) {
+            \Illuminate\Support\Facades\DB::table('document_print_histories')->insert($link + [
+                'printed_at' => now(), 'printed_by_user_id' => $admin->id, 'document_snapshot' => '{}', 'created_at' => now(), 'updated_at' => now(),
+            ]);
+        }
+
+        $this->delete(route('repair-jobs.destroy', $job))->assertSessionHasNoErrors();
+        $this->assertDatabaseMissing('repair_jobs', ['id' => $job->id]);
+        $this->assertDatabaseMissing('invoices', ['id' => $invoice->id]);
+        $this->assertDatabaseMissing('invoice_jobs', ['invoice_id' => $invoice->id]);
+        $this->assertSame(0, \Illuminate\Support\Facades\DB::table('document_print_histories')->count());
+    }
+
     public function test_admin_and_cashier_can_both_update_job_status_but_only_admin_can_cancel(): void
     {
         $cashier = $this->userWithRole('cashier');
@@ -110,6 +172,39 @@ class EditApprovalWorkflowTest extends TestCase
         $this->assertSame('Waiting for Spare Parts', $job->fresh()->status->value);
 
         $this->actingAs($cashier)->post(route('repair-jobs.update-status', $job), ['status' => 'Cancelled', 'cancellation_reason' => 'Customer left'])->assertSessionHasErrors('status');
+    }
+
+    public function test_status_can_be_changed_from_the_job_status_window_and_returns_there(): void
+    {
+        $cashier = $this->userWithRole('cashier');
+        $job = $this->job();
+
+        $this->actingAs($cashier)->get(route('repair-jobs.status-search'))->assertOk()->assertSee('name="return_to"', false)->assertSee(route('repair-jobs.update-status', $job), false);
+
+        $this->from(route('repair-jobs.status-search'))->post(route('repair-jobs.update-status', $job), ['status' => 'Under Inspection', 'return_to' => 'status-search'])
+            ->assertRedirect(route('repair-jobs.status-search'))->assertSessionHasNoErrors();
+        $this->assertSame('Under Inspection', $job->fresh()->status->value);
+    }
+
+    public function test_cancelled_job_hides_inspection_repair_and_quotation_sections(): void
+    {
+        $admin = $this->userWithRole('administrator');
+        $job = $this->job();
+
+        $this->actingAs($admin)->get(route('repair-jobs.show', $job))->assertSee(__('ui.inspection_and_repair_history'));
+
+        $job->forceFill(['status' => \App\Enums\JobStatus::Cancelled])->save();
+        $this->get(route('repair-jobs.show', $job))->assertOk()->assertDontSee(__('ui.inspection_and_repair_history'))->assertDontSee(__('ui.save_inspection'));
+    }
+
+    public function test_cancellation_reason_is_optional(): void
+    {
+        $admin = $this->userWithRole('administrator');
+        $job = $this->job();
+
+        $this->actingAs($admin)->post(route('repair-jobs.update-status', $job), ['status' => 'Cancelled'])->assertSessionHasNoErrors();
+        $this->assertSame('Cancelled', $job->fresh()->status->value);
+        $this->assertNull($job->fresh()->cancellation_reason);
     }
 
     public function test_approval_is_blocked_when_the_record_changed_after_the_request(): void

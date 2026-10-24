@@ -57,6 +57,12 @@ class RepairReceiptController extends Controller
     {
         $receipt = $receipts->register($request->validated(), $request->user());
 
+        if ($request->validated('intent') === 'cancel_payments') {
+            $target = $request->user()->can('payments.view') ? route('payments.index') : route('repair-jobs.show', $receipt->repair_job_id);
+
+            return redirect($target)->with('status', __('ui.repair_job_cancelled_to_payments'));
+        }
+
         if ($request->validated('intent') === 'print' && $request->user()->can('receipts.print')) {
             return redirect()->route('repair-jobs.receipt.print', $receipt->repair_job_id)
                 ->with('status', __('ui.repair_job_accepted'));

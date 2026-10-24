@@ -45,7 +45,24 @@
                             <td class="px-4 py-4">{{ $job->customer->display_name }}<span class="mt-1 block text-[10px] text-slate-400">{{ $job->customer->mobile_number }}</span></td>
                             <td class="px-4 py-4">{{ $job->item_name }}</td>
                             <td class="max-w-48 truncate px-4 py-4" title="{{ $job->repair_description }}">{{ $job->repair_description ?: '—' }}</td>
-                            <td class="px-4 py-4"><span class="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold text-slate-700">{{ $job->status->value }}</span></td>
+                            <td class="px-4 py-4">
+                                @can('updateStatus', $job)
+                                    <form method="POST" action="{{ route('repair-jobs.update-status', $job) }}" class="flex items-center gap-2">
+                                        @csrf
+                                        <input type="hidden" name="return_to" value="status-search">
+                                        <select name="status" class="form-input min-w-44 py-1 text-xs" aria-label="{{ __('ui.job_status') }}">
+                                            @foreach ($statuses as $status)
+                                                @if (($status !== \App\Enums\JobStatus::Cancelled || auth()->user()->can('jobs.cancel')) && ($status !== \App\Enums\JobStatus::RepairCompleted || auth()->user()->can('jobs.complete')))
+                                                    <option value="{{ $status->value }}" @selected($job->status === $status)>{{ $status->value }}</option>
+                                                @endif
+                                            @endforeach
+                                        </select>
+                                        <button class="rounded-lg bg-teal-700 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-teal-800">{{ __('ui.save_status') }}</button>
+                                    </form>
+                                @else
+                                    <span class="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold text-slate-700">{{ $job->status->value }}</span>
+                                @endcan
+                            </td>
                             <td class="max-w-40 truncate px-4 py-4" title="{{ $job->special_notes }}">{{ $job->special_notes ?: '—' }}</td>
                             <td class="px-4 py-4">{{ (float) $job->total_job_amount > 0 ? config('business.currency').' '.$job->total_job_amount : __('ui.amount_unavailable') }}</td>
                             <td class="px-4 py-4">{{ config('business.currency') }} {{ number_format((float) ($job->advance_paid ?? 0), 2) }}</td>

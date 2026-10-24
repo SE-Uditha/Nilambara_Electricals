@@ -159,7 +159,9 @@ class CustomerManagementTest extends TestCase
             ->assertJsonPath('data.0.name', 'Nalaka Perera');
         $this->actingAs($user)->getJson(route('customers.search', ['q' => '0771234567']))
             ->assertOk()
-            ->assertJsonPath('data.0.mobile_number', '0771234567');
+            ->assertJsonPath('data.0.mobile_number', '0771234567')
+            ->assertJsonPath('data.0.address', $customer->address);
+        $this->assertNotEmpty($customer->address);
 
         $customer->forceFill(['is_active' => false])->save();
         $this->actingAs($user)->getJson(route('customers.search', ['q' => 'Nalaka']))

@@ -14,13 +14,26 @@
             @can('update', $job)<a href="{{ route('repair-jobs.edit', $job) }}" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">{{ __('ui.edit_job') }}</a>@endcan
                         @if (\App\Modules\Approvals\Services\ApprovalAccess::canRequestChange(auth()->user(), 'job_update'))<a href="{{ route('repair-jobs.request-edit', $job) }}" class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-xs font-semibold text-amber-900 hover:bg-amber-100">{{ __('ui.request_edit') }}</a>@endif
                         @can('assign', $job)<a href="{{ route('repair-jobs.assign-form', $job) }}" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">{{ __('ui.assign_technician') }}</a>@endcan
+            @can('delete', $job)
+                <form method="POST" action="{{ route('repair-jobs.destroy', $job) }}" onsubmit="return confirm('{{ __('ui.confirm_delete_job') }}')">@csrf @method('DELETE')<button class="rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-xs font-semibold text-red-700 hover:bg-red-100">{{ __('ui.delete_job') }}</button></form>
+            @elseif (\App\Modules\Approvals\Services\ApprovalAccess::canRequestChange(auth()->user(), 'job_delete'))
+                <details class="relative">
+                    <summary class="cursor-pointer list-none rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-xs font-semibold text-red-700 hover:bg-red-100">{{ __('ui.request_delete') }}</summary>
+                    <form method="POST" action="{{ route('repair-jobs.request-delete', $job) }}" class="absolute right-0 z-10 mt-2 w-72 space-y-2 rounded-xl border border-slate-200 bg-white p-4 shadow-lg">
+                        @csrf
+                        <input type="hidden" name="idempotency_key" value="{{ \Illuminate\Support\Str::uuid() }}">
+                        <label class="form-label" for="delete_reason">{{ __('ui.reason_for_deletion') }} <span class="text-red-600">*</span></label>
+                        <textarea id="delete_reason" name="reason" rows="3" minlength="5" maxlength="2000" required class="form-input"></textarea>
+                        <button class="w-full rounded-xl bg-red-600 px-4 py-2 text-xs font-semibold text-white hover:bg-red-700">{{ __('ui.submit_delete_request') }}</button>
+                    </form>
+                </details>
+            @endcan
             @if (in_array($job->status, \App\Enums\JobStatus::billable(), true) && ! $job->invoiceJobs()->exists())
                 @can('invoices.create')<a href="{{ route('repair-jobs.billing', $job) }}" class="rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white">Prepare Final Bill / Invoice</a>@endcan
             @endif
             @if ($job->receipt)
                 @can('receipts.print')
                     <a href="{{ route('repair-jobs.receipt.print', $job) }}" class="rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white hover:bg-teal-800">{{ __('ui.print_receipt') }}</a>
-                    <a href="{{ route('repair-jobs.receipt.pdf', $job) }}" class="rounded-xl border border-teal-200 px-4 py-2.5 text-xs font-semibold text-teal-700">{{ __('ui.receipt_pdf') }}</a>
                 @endcan
                 @can('receipts.reprint')<a href="{{ route('repair-jobs.receipt.duplicate', $job) }}" class="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-700">{{ __('ui.reprint_duplicate') }}</a>@endcan
             @endif
@@ -60,6 +73,7 @@
                 @endif
             </section>
 
+            @if ($job->status !== \App\Enums\JobStatus::Cancelled)
             <section class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">
                 <h2 class="mb-5 text-sm font-bold text-slate-900">{{ __('ui.inspection_and_repair_history') }}</h2>
                 <div class="space-y-4">
@@ -184,6 +198,7 @@
                     </form>
                 </section>
             @endcan
+            @endif
         </div>
 
         <aside class="space-y-5">

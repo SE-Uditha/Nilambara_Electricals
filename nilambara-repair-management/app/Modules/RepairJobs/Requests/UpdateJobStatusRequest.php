@@ -21,12 +21,7 @@ class UpdateJobStatusRequest extends FormRequest
         return [
             'status' => ['required', Rule::enum(JobStatus::class)],
             'notes' => ['nullable', 'string', 'max:5000'],
-            'cancellation_reason' => [
-                Rule::requiredIf(fn (): bool => $this->input('status') === JobStatus::Cancelled->value),
-                'nullable',
-                'string',
-                'max:5000',
-            ],
+            'cancellation_reason' => ['nullable', 'string', 'max:5000'],
         ];
     }
 

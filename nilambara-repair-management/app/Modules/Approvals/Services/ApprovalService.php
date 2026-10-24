@@ -111,6 +111,42 @@ class ApprovalService
         }, 3);
     }
 
+    /** Stores a request from a user without delete rights so an administrator can approve removing a repair job. */
+    public function submitDelete(RepairJob $job, string $reason, string $key, User $actor): ApprovalRequest
+    {
+        abort_unless(ApprovalAccess::canRequestChange($actor, 'job_delete'), 403);
+
+        $blockers = app(RepairJobService::class)->deletionBlockers($job);
+        if ($blockers !== []) {
+            throw ValidationException::withMessages(['reason' => 'This job cannot be deleted because it has '.implode(', ', $blockers).'. Cancel the job instead.']);
+        }
+
+        $payload = [
+            'subject_id' => $job->getKey(),
+            'subject_label' => $job->automatic_number.' · '.$job->item_name,
+            'idempotency_key' => $key,
+            'reason' => $reason,
+        ];
+        $hash = hash('sha256', json_encode($payload, JSON_THROW_ON_ERROR));
+
+        return DB::transaction(function () use ($key, $actor, $payload, $hash, $reason): ApprovalRequest {
+            if ($old = ApprovalRequest::where('source_key', $key)->first()) {
+                if ((int) $old->requested_by_user_id !== (int) $actor->id || $old->kind !== 'job_delete') {
+                    throw ValidationException::withMessages(['idempotency_key' => 'This request key is already used for different details.']);
+                }
+
+                return $old;
+            }
+            $approval = ApprovalRequest::create([
+                'source_key' => $key, 'kind' => 'job_delete', 'status' => 'pending',
+                'requested_by_user_id' => $actor->id, 'reason' => $reason, 'payload' => $payload, 'payload_hash' => $hash,
+            ]);
+            BusinessAudit::record($actor, 'approval.requested', ApprovalRequest::class, $approval->id, newValues: ['kind' => 'job_delete', 'reason' => $reason]);
+
+            return $approval;
+        }, 3);
+    }
+
     /** @param  list<string>  $fields */
     private function snapshot(Customer|RepairJob $subject, array $fields): array
     {
@@ -170,6 +206,10 @@ class ApprovalService
                     'stock_adjustment' => app(StockWorkflowService::class)->adjust($data, $actor),
                     'stock_count' => app(StockWorkflowService::class)->count($data, $actor),
                     'customer_update', 'job_update' => $this->applyChange($approval, $actor),
+                    'job_delete' => app(RepairJobService::class)->delete(
+                        RepairJob::query()->find($data['subject_id']) ?? throw ValidationException::withMessages(['decision' => 'This repair job no longer exists. Reject the request.']),
+                        $actor,
+                    ),
                     default => throw ValidationException::withMessages(['kind' => 'Unsupported request type.']),
                 };
             }

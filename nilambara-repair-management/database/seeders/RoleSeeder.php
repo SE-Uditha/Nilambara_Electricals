@@ -39,7 +39,7 @@ class RoleSeeder extends Seeder
             'dashboard' => ['view'],
             'customers' => ['view', 'create', 'update', 'deactivate', 'statement'],
             'receipts' => ['view', 'create', 'print', 'reprint'],
-            'jobs' => ['view', 'create', 'update', 'assign', 'inspect', 'repair', 'update-status', 'complete', 'cancel'],
+            'jobs' => ['view', 'create', 'update', 'assign', 'inspect', 'repair', 'update-status', 'complete', 'cancel', 'delete'],
             'job-cards' => ['view', 'print'],
             'quotations' => ['view', 'create', 'update', 'issue', 'approve', 'revise', 'cancel', 'print'],
             'invoices' => ['view', 'create', 'update-draft', 'issue', 'print', 'cancel', 'export'],

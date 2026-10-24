@@ -48,7 +48,10 @@ class PaymentManagementTest extends TestCase
         $this->postPayment($cashier, $invoice, '50.00', 'cheque', [
             'reference_number' => 'CHQ-001',
             'cheque_date' => now()->toDateString(),
-        ])->assertRedirect()->assertSessionHasNoErrors();
+        ])->assertSessionHasErrors('method');
+        $this->postPayment($cashier, $invoice, '50.00', 'bank_transfer', ['reference_number' => 'BANK-002'])
+            ->assertRedirect()
+            ->assertSessionHasNoErrors();
 
         $summary = app(InvoiceBalanceService::class)->summary($invoice->fresh());
         $this->assertSame('100.00', $summary['total_paid']);
@@ -57,7 +60,6 @@ class PaymentManagementTest extends TestCase
         $this->assertDatabaseCount('payments', 3);
         $this->assertDatabaseCount('customer_account_entries', 4);
         $this->assertDatabaseHas('payments', ['method' => 'bank_transfer', 'bank_reference' => 'BANK-001']);
-        $this->assertDatabaseHas('payments', ['method' => 'cheque', 'cheque_number' => 'CHQ-001']);
 
         $bankPayment = Payment::query()->where('bank_reference', 'BANK-001')->firstOrFail();
         $this->actingAs($cashier)->get(route('payments.index'))->assertOk()->assertSee($bankPayment->payment_number);
@@ -308,6 +310,120 @@ class PaymentManagementTest extends TestCase
             ->assertSee($invoice->invoice_number);
     }
 
+    public function test_partially_paid_cash_invoice_and_credit_method_invoice_appear_in_outstanding(): void
+    {
+        $cashier = $this->userWithRole('cashier');
+        $cashInvoice = $this->issuedInvoice($cashier, $this->customer(), '100.00', 'cash');
+        $unpaidCash = $this->issuedInvoice($cashier, $this->customer(), '80.00', 'cash');
+        $creditInvoice = $this->issuedInvoice($cashier, $this->customer(), '60.00', 'credit');
+
+        $this->actingAs($cashier)->get(route('credit-invoices.index'))->assertOk()
+            ->assertSee($creditInvoice->invoice_number)->assertDontSee($cashInvoice->invoice_number);
+
+        $this->postPayment($cashier, $cashInvoice, '40.00', 'cash')->assertSessionHasNoErrors();
+        $this->get(route('credit-invoices.index'))->assertOk()
+            ->assertSee($cashInvoice->invoice_number)->assertSee($creditInvoice->invoice_number)->assertDontSee($unpaidCash->invoice_number);
+        $this->get(route('credit-invoices.show', $cashInvoice))->assertOk();
+    }
+
+    public function test_credit_payment_method_on_the_invoice_form_stores_credit_terms(): void
+    {
+        $cashier = $this->userWithRole('cashier');
+        $invoice = $this->issuedInvoice($cashier, $this->customer(), '50.00', 'cash');
+        $request = \App\Modules\Invoices\Requests\StoreInvoiceRequest::create('/', 'POST', ['payment_method' => 'credit']);
+        $method = new \ReflectionMethod($request, 'prepareForValidation');
+        $method->setAccessible(true);
+        $method->invoke($request);
+
+        $this->assertSame('credit', $request->input('payment_terms'));
+        $this->assertNull($request->input('payment_method'));
+        $this->assertNotNull($invoice);
+    }
+
+    public function test_invoice_is_only_created_together_with_its_payment_record(): void
+    {
+        $user = $this->userWithRole('administrator');
+        $customer = $this->customer();
+        $job = $this->job($customer, [
+            'brand' => 'Test brand',
+            'status' => JobStatus::RepairCompleted->value,
+            'labour_charge' => '500.00',
+            'parts_charge' => '0.00',
+            'total_job_amount' => '500.00',
+            'repair_description' => 'Test repair',
+        ]);
+        $data = [
+            'customer_id' => $customer->getKey(),
+            'repair_job_ids' => [$job->getKey()],
+            'invoice_date' => now()->toDateString(),
+            'payment_terms' => 'cash',
+            'payment_method' => 'cash',
+            'intent' => 'issue',
+        ];
+
+        $this->actingAs($user)->post(route('invoices.store'), $data)->assertSessionHasErrors('amount_received');
+        $this->assertDatabaseCount('invoices', 0);
+
+        $this->post(route('invoices.store'), $data + ['amount_received' => '600.00'])->assertSessionHasErrors();
+        $this->assertDatabaseCount('invoices', 0);
+        $this->assertDatabaseCount('payments', 0);
+
+        $this->post(route('invoices.store'), $data + ['amount_received' => '200.00'])->assertSessionHasNoErrors();
+        $this->assertDatabaseCount('invoices', 1);
+        $this->assertDatabaseCount('payments', 1);
+        $this->actingAs($user)->get(route('credit-invoices.index'))->assertSee(Invoice::query()->first()->invoice_number);
+    }
+
+    public function test_credit_invoice_needs_no_payment_now(): void
+    {
+        $user = $this->userWithRole('administrator');
+        $customer = $this->customer();
+        $job = $this->job($customer, [
+            'brand' => 'Test brand',
+            'status' => JobStatus::RepairCompleted->value,
+            'labour_charge' => '500.00',
+            'parts_charge' => '0.00',
+            'total_job_amount' => '500.00',
+            'repair_description' => 'Test repair',
+        ]);
+        $this->actingAs($user)->post(route('invoices.store'), [
+            'customer_id' => $customer->getKey(),
+            'repair_job_ids' => [$job->getKey()],
+            'invoice_date' => now()->toDateString(),
+            'payment_method' => 'credit',
+            'due_date' => now()->addDays(30)->toDateString(),
+            'intent' => 'issue',
+        ])->assertSessionHasNoErrors();
+        $this->assertDatabaseCount('invoices', 1);
+        $this->assertDatabaseCount('payments', 0);
+    }
+
+    public function test_credit_method_moves_invoice_balance_to_credit_management_without_a_payment(): void
+    {
+        $cashier = $this->userWithRole('cashier');
+        $customer = $this->customer();
+        $invoice = $this->issuedInvoice($cashier, $customer, '100.00');
+        $this->postPayment($cashier, $invoice, '30.00', 'cash')->assertSessionHasNoErrors();
+
+        $this->actingAs($cashier)->post(route('payments.store'), [
+            'payment_type' => 'invoice',
+            'invoice_id' => $invoice->getKey(),
+            'payment_date' => now()->toDateString(),
+            'method' => 'credit',
+            'idempotency_key' => (string) Str::uuid(),
+        ])->assertRedirect(route('credit-invoices.show', $invoice))->assertSessionHasNoErrors();
+
+        $this->assertSame('credit', $invoice->fresh()->payment_terms->value);
+        $this->assertDatabaseCount('payments', 1);
+        $this->actingAs($cashier)->post(route('payments.store'), [
+            'payment_type' => 'invoice',
+            'invoice_id' => $invoice->getKey(),
+            'payment_date' => now()->toDateString(),
+            'method' => 'credit',
+            'idempotency_key' => (string) Str::uuid(),
+        ])->assertSessionHasErrors('invoice_id');
+    }
+
     private function userWithRole(string $role): User
     {
         $user = User::factory()->create();
@@ -327,7 +443,8 @@ class PaymentManagementTest extends TestCase
             'total_job_amount' => $amount,
             'repair_description' => 'Test repair',
         ]);
-        $this->actingAs($user)->post(route('invoices.store'), [
+        $this->actingAs($user);
+        app(\App\Modules\Invoices\Services\InvoiceService::class)->create([
             'customer_id' => $customer->getKey(),
             'repair_job_ids' => [$job->getKey()],
             'invoice_date' => now()->toDateString(),
@@ -335,7 +452,7 @@ class PaymentManagementTest extends TestCase
             'payment_method' => 'cash',
             'due_date' => $terms === 'credit' ? now()->addDays(30)->toDateString() : null,
             'intent' => 'issue',
-        ])->assertRedirect()->assertSessionHasNoErrors();
+        ], $user);
 
         return Invoice::query()->latest('id')->firstOrFail();
     }

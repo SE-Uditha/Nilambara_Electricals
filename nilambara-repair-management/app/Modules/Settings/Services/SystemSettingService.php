@@ -16,7 +16,7 @@ class SystemSettingService
 {
     private const BUSINESS_KEYS = [
         'name', 'address', 'contact_number', 'currency', 'timezone', 'date_format',
-        'time_format', 'logo', 'default_language', 'document_footer', 'print_paper',
+        'time_format', 'logo', 'default_language', 'document_footer', 'print_paper', 'common_faults',
     ];
 
     public function apply(): void

@@ -42,7 +42,7 @@
 </head>
 <body>
     <nav class="screen-actions" aria-label="{{ __('ui.print_actions') }}">
-        <a href="{{ route('repair-jobs.show', $job) }}">{{ __('ui.back') }}</a>
+        <a href="{{ auth()->user()?->can('job-cards.view') ? route('job-cards.index') : route('repair-jobs.show', $job) }}">{{ __('ui.back') }}</a>
         @can('job-cards.print')<a href="{{ route('job-cards.duplicate', $job) }}">{{ __('ui.reprint_job_card') }}</a>@endcan
         <button type="button" onclick="window.print()">{{ __('ui.print') }}</button>
         <a href="{{ route('job-cards.pdf',['job'=>$job,'duplicate'=>$duplicate ? 1 : 0]) }}">PDF</a>
@@ -62,14 +62,11 @@
                     <tr><th>{{ __('ui.worksheet_job_number') }}</th><td colspan="3">{{ $job->job_number }}</td></tr>
                     <tr><th>{{ __('ui.item_name') }}</th><td colspan="3">{{ $job->item_name }}</td></tr>
                     <tr><th>{{ __('ui.worksheet_brand_details') }}</th><td colspan="3">{{ trim(($job->brand ?? '').' '.($job->model ?? '').' '.($job->item_description ?? '')) ?: '-' }}</td></tr>
-                    <tr><th>{{ __('ui.worksheet_item_fault') }}</th><td colspan="3">{{ $job->reported_fault ?: '-' }}</td></tr>
+                    <tr><th rowspan="2">{{ __('ui.worksheet_item_fault') }}</th><td colspan="3">{{ $job->reported_fault ?: '-' }}</td></tr>
+                    <tr><td colspan="3">&nbsp;</td></tr>
                     <tr><th>{{ __('ui.job_status') }}</th><td colspan="3">&nbsp;</td></tr>
                 </tbody>
             </table>
-            <section class="section">
-                <h2>{{ __('ui.worksheet_issues_found') }}</h2>
-                <table class="writing issues"><tbody><tr><td>&nbsp;</td></tr><tr><td>&nbsp;</td></tr></tbody></table>
-            </section>
             <section class="section">
                 <table class="signoffs">
                     <tbody>
@@ -80,7 +77,7 @@
             </section>
             <section class="section">
                 <h2>{{ __('ui.repair_details') }}</h2>
-                <table class="writing repair"><tbody><tr><td>&nbsp;</td></tr><tr><td>&nbsp;</td></tr><tr><td>&nbsp;</td></tr><tr><td>&nbsp;</td></tr><tr><td>&nbsp;</td></tr></tbody></table>
+                <table class="writing repair"><colgroup><col style="width:72%"><col style="width:28%"></colgroup><tbody>@for ($line = 0; $line < 13; $line++)<tr><td>&nbsp;</td><td>&nbsp;</td></tr>@endfor</tbody></table>
             </section>
             <section class="section">
                 <table class="amounts">
@@ -94,15 +91,6 @@
             <section class="section">
                 <h2>{{ __('ui.special_notes') }}</h2>
                 <table class="writing notes"><tbody><tr><td>&nbsp;</td></tr><tr><td>&nbsp;</td></tr></tbody></table>
-            </section>
-            <section class="section">
-                <h2>{{ __('ui.worksheet_handover') }}</h2>
-                <table class="handover">
-                    <tbody>
-                        <tr><th>{{ __('ui.worksheet_signature') }}</th><td></td><th>{{ __('ui.worksheet_return_date') }}</th><td></td></tr>
-                        <tr><th>{{ __('ui.cashier_received') }}</th><td colspan="3"></td></tr>
-                    </tbody>
-                </table>
             </section>
             @if ($footerText)<footer class="footer">{{ $footerText }}</footer>@endif
         </article>

@@ -169,6 +169,27 @@ class RepairJobController extends Controller
         return redirect()->route('repair-jobs.show', $job)->with('status', __('ui.edit_request_submitted'));
     }
 
+    public function destroy(RepairJob $job, RepairJobService $jobs, Request $request): RedirectResponse
+    {
+        Gate::authorize('delete', $job);
+        $jobs->delete($job, $request->user());
+
+        return redirect()->route('repair-jobs.index')->with('status', __('ui.repair_job_deleted'));
+    }
+
+    public function requestDelete(Request $request, RepairJob $job, ApprovalService $approvals): RedirectResponse
+    {
+        Gate::authorize('view', $job);
+        abort_unless(ApprovalAccess::canRequestChange($request->user(), 'job_delete'), 403);
+        $data = $request->validate([
+            'reason' => ['required', 'string', 'min:5', 'max:2000'],
+            'idempotency_key' => ['required', 'uuid'],
+        ]);
+        $approvals->submitDelete($job, $data['reason'], $data['idempotency_key'], $request->user());
+
+        return redirect()->route('repair-jobs.show', $job)->with('status', __('ui.delete_request_submitted'));
+    }
+
     public function assignForm(RepairJob $job): View
     {
         Gate::authorize('assign', $job);
@@ -264,7 +285,11 @@ class RepairJobController extends Controller
     {
         $jobs->updateStatus($job, $request->validated(), $request->user());
 
-        return redirect()->route('repair-jobs.show', $job)->with('status', __('ui.job_status_updated'));
+        $target = $request->input('return_to') === 'status-search'
+            ? redirect()->to(url()->previous(route('repair-jobs.status-search')))
+            : redirect()->route('repair-jobs.show', $job);
+
+        return $target->with('status', __('ui.job_status_updated'));
     }
 
     private function filteredJobs(Request $request): Builder
