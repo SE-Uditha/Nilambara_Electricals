@@ -424,6 +424,24 @@ class PaymentManagementTest extends TestCase
         ])->assertSessionHasErrors('invoice_id');
     }
 
+    public function test_expected_payment_date_is_saved_on_partial_payment_and_flags_overdue_customers(): void
+    {
+        $cashier = $this->userWithRole('cashier');
+        $customer = $this->customer(['customer_name' => 'Latepayer Perera']);
+        $invoice = $this->issuedInvoice($cashier, $customer, '100.00');
+        $future = now()->addDays(10)->toDateString();
+        $this->postPayment($cashier, $invoice, '40.00', 'cash', ['due_date' => $future])->assertSessionHasNoErrors();
+        $this->assertSame($future, $invoice->fresh()->due_date->toDateString());
+
+        $this->get(route('credit-invoices.index'))->assertOk()->assertSee('Expected payment date')->assertDontSee('Passed by');
+
+        DB::table('invoices')->where('id', $invoice->getKey())->update(['due_date' => now()->subDays(3)->toDateString()]);
+        $this->get(route('credit-invoices.index'))->assertOk()->assertSee('Passed by 3 day(s)')->assertSee('Latepayer Perera');
+        $this->get(route('credit-invoices.index', ['due' => 'overdue']))->assertOk()->assertSee($invoice->invoice_number);
+        $this->get(route('credit-invoices.index', ['due' => 'upcoming']))->assertOk()->assertDontSee($invoice->invoice_number);
+        $this->get(route('credit-invoices.show', $invoice))->assertOk()->assertSee('Passed by 3 day(s)');
+    }
+
     private function userWithRole(string $role): User
     {
         $user = User::factory()->create();

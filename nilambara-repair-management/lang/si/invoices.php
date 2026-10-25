@@ -85,6 +85,8 @@ return [
     'payment_reference' => 'බැංකු මාරු යොමු අංකය',
     'credit_whole_total_note' => 'ණය ක්‍රමය: දැන් ගෙවීමක් නොගනී. සම්පූර්ණ ඉන්වොයිස් මුදල ණය මුදලක් ලෙස සටහන් වී හිඟ ඉන්වොයිස් / ණය කළමනාකරණයේ පෙනේ.',
     'credit_amount' => 'ණය මුදල',
+    'expected_payment_date' => 'Expected payment date (credit / partial payment)',
+    'expected_payment_date_help' => 'Date the customer says they will pay the balance. It appears in Credit Management and flags the customer once the date passes.',
     'payment_required' => 'දැන් ලැබුණු මුදල ඇතුළත් කරන්න. ගෙවීම සටහන් කිරීමට පෙර ඉන්වොයිසියක් සෑදිය නොහැක (ගෙවීමකින් තොරව බිල් කිරීමට ණය තෝරන්න).',
     'reference_required' => 'බැංකු මාරු යොමු අංකය ඇතුළත් කරන්න.',
     'no_payment_permission' => 'ගෙවීම් සටහන් කිරීමට ඔබට අවසරයක් නැත.',

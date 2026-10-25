@@ -73,6 +73,45 @@
                 @endif
             </section>
 
+            @php($contactFailed = in_array($job->status, [\App\Enums\JobStatus::CustomerContactFailed, \App\Enums\JobStatus::CustomerContactFailedAfterReady], true))
+            @if ($contactFailed || $job->contactAttempts->isNotEmpty())
+                <section id="contact-attempts" class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">
+                    <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+                        <h2 class="text-sm font-bold text-slate-900">{{ __('ui.contact_attempts') }}</h2>
+                        <span class="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-800">{{ __('ui.times_contacted', ['count' => $job->contactAttempts->count()]) }}</span>
+                    </div>
+                    <ol class="mb-5 space-y-2">
+                        @forelse ($job->contactAttempts as $attempt)
+                            <li class="rounded-xl border border-slate-100 bg-slate-50 px-4 py-3 text-xs text-slate-700">
+                                <span class="font-semibold">#{{ $attempt->attempt_number }}</span> · {{ $attempt->contacted_on->format(config('business.date_format')) }}
+                                @if ($attempt->recordedBy) · {{ $attempt->recordedBy->name }} @endif
+                                @if ($attempt->notes)<p class="mt-1 whitespace-pre-line text-slate-600">{{ $attempt->notes }}</p>@endif
+                            </li>
+                        @empty
+                            <li class="rounded-xl bg-slate-50 px-4 py-4 text-sm text-slate-500">{{ __('ui.no_contact_attempts') }}</li>
+                        @endforelse
+                    </ol>
+                    @if ($contactFailed)
+                        @can('jobs.update-status')
+                            <form method="POST" action="{{ route('repair-jobs.contact-attempts.store', $job) }}" class="grid gap-3 sm:grid-cols-[200px_1fr_auto] sm:items-end">
+                                @csrf
+                                <div>
+                                    <label class="form-label" for="contacted_on">{{ __('ui.date_contacted') }} <span class="text-red-600">*</span></label>
+                                    <input id="contacted_on" name="contacted_on" type="date" required max="{{ now()->timezone(config('business.timezone'))->toDateString() }}" value="{{ old('contacted_on', now()->timezone(config('business.timezone'))->toDateString()) }}" class="form-input">
+                                    @error('contacted_on')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+                                </div>
+                                <div>
+                                    <label class="form-label" for="contact_notes">{{ __('ui.contact_notes') }}</label>
+                                    <input id="contact_notes" name="notes" type="text" maxlength="1000" value="{{ old('notes') }}" class="form-input">
+                                    @error('notes')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+                                </div>
+                                <button class="rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white hover:bg-teal-800">{{ __('ui.add_contact_attempt') }}</button>
+                            </form>
+                        @endcan
+                    @endif
+                </section>
+            @endif
+
             @if ($job->status !== \App\Enums\JobStatus::Cancelled)
             <section class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">
                 <h2 class="mb-5 text-sm font-bold text-slate-900">{{ __('ui.inspection_and_repair_history') }}</h2>

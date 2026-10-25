@@ -351,6 +351,41 @@ class RepairReceiptAndJobManagementTest extends TestCase
         $this->assertDatabaseCount('stock_movements', 0);
     }
 
+    public function test_job_cards_list_can_be_searched_and_filtered_by_status(): void
+    {
+        $administrator = $this->userWithRole('administrator');
+        $this->job(null, ['automatic_number' => 'JOB-SRCH-1', 'item_name' => 'Blender Alpha', 'status' => 'Under Repair']);
+        $this->job(null, ['automatic_number' => 'JOB-SRCH-2', 'item_name' => 'Kettle Beta', 'status' => 'Cancelled']);
+
+        $this->actingAs($administrator)->get(route('job-cards.index', ['q' => 'Blender']))
+            ->assertOk()->assertSee('JOB-SRCH-1')->assertDontSee('JOB-SRCH-2');
+        $this->get(route('job-cards.index', ['status' => 'Cancelled']))
+            ->assertOk()->assertSee('JOB-SRCH-2')->assertDontSee('JOB-SRCH-1');
+        $this->get(route('job-cards.index', ['status' => 'bogus']))->assertSessionHasErrors('status');
+    }
+
+    public function test_contact_failed_jobs_record_dated_contact_attempts_and_count_them(): void
+    {
+        $administrator = $this->userWithRole('administrator');
+        $job = $this->job(null, ['status' => 'Customer Contact Failed']);
+
+        $this->actingAs($administrator)->get(route('repair-jobs.show', $job))->assertOk()->assertSee('Contacted 0 time(s)')->assertSee('Add contact attempt');
+        $this->post(route('repair-jobs.contact-attempts.store', $job), ['contacted_on' => now()->toDateString(), 'notes' => 'No answer'])->assertSessionHasNoErrors();
+        $this->post(route('repair-jobs.contact-attempts.store', $job), ['contacted_on' => now()->subDay()->toDateString()])->assertSessionHasNoErrors();
+        $this->post(route('repair-jobs.contact-attempts.store', $job), ['contacted_on' => now()->addDays(2)->toDateString()])->assertSessionHasErrors('contacted_on');
+
+        $this->assertSame([1, 2], $job->contactAttempts()->pluck('attempt_number')->all());
+        $this->get(route('repair-jobs.show', $job))->assertSee('Contacted 2 time(s)')->assertSee('No answer');
+
+        $other = $this->job(null, ['status' => 'Under Repair']);
+        $this->post(route('repair-jobs.contact-attempts.store', $other), ['contacted_on' => now()->toDateString()])->assertSessionHasErrors('contacted_on');
+        $this->assertDatabaseCount('job_contact_attempts', 2);
+
+        $this->get(route('repair-jobs.status-search'))->assertOk()->assertSee('Contacted 2 time(s)')->assertSee('Last contacted');
+        $this->post(route('repair-jobs.contact-attempts.store', $job), ['contacted_on' => now()->toDateString(), 'return_to' => 'status-search'])->assertRedirect();
+        $this->assertDatabaseCount('job_contact_attempts', 3);
+    }
+
     public function test_job_card_print_is_one_page_a5_with_writable_technician_and_handover_fields(): void
     {
         $administrator = $this->userWithRole('administrator');

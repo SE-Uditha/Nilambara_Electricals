@@ -94,22 +94,7 @@
                     </div>
                     <div class="sm:col-span-2">
                         <label class="form-label" for="reported_fault">{{ __('ui.reported_fault') }}</label>
-                        @php($commonFaults = array_values(array_filter(preg_split('/\R/u', (string) config('business.common_faults')))))
-                        @if ($commonFaults !== [])
-                            <div class="mb-2 flex flex-wrap gap-1.5" aria-label="{{ __('ui.common_faults') }}">
-                                <span class="self-center text-[11px] text-slate-500">{{ __('ui.common_faults_hint') }}</span>
-                                @foreach ($commonFaults as $fault)
-                                    <button type="button" data-fault="{{ $fault }}" class="rounded-full border border-teal-200 bg-teal-50 px-2.5 py-1 text-[11px] font-medium text-teal-800 hover:bg-teal-100" x-on:click="
-                                        const box = document.getElementById('reported_fault');
-                                        const lines = box.value.split(/\r?\n/).map(l => l.trim());
-                                        if (!lines.includes($el.dataset.fault)) {
-                                            box.value = box.value.trim() === '' ? $el.dataset.fault : box.value.replace(/\s+$/, '') + '\n' + $el.dataset.fault;
-                                        }
-                                        box.focus();
-                                    ">+ {{ $fault }}</button>
-                                @endforeach
-                            </div>
-                        @endif
+                        @include('modules.repair-jobs.partials.quick-add', ['config' => 'common_faults', 'target' => 'reported_fault'])
                         <textarea id="reported_fault" name="reported_fault" rows="4" class="form-input">{{ old('reported_fault') }}</textarea>
                     </div>
                     <div>
@@ -118,10 +103,12 @@
                     </div>
                     <div>
                         <label class="form-label" for="physical_condition">{{ __('ui.physical_condition') }}</label>
+                        @include('modules.repair-jobs.partials.quick-add', ['config' => 'common_physical_conditions', 'target' => 'physical_condition'])
                         <textarea id="physical_condition" name="physical_condition" rows="3" class="form-input">{{ old('physical_condition') }}</textarea>
                     </div>
                     <div class="sm:col-span-2">
                         <label class="form-label" for="visible_damage">{{ __('ui.visible_damage') }}</label>
+                        @include('modules.repair-jobs.partials.quick-add', ['config' => 'common_visible_damages', 'target' => 'visible_damage'])
                         <textarea id="visible_damage" name="visible_damage" rows="3" class="form-input">{{ old('visible_damage') }}</textarea>
                     </div>
                     <div class="sm:col-span-2">
@@ -184,17 +171,10 @@
 
             <div class="flex flex-wrap justify-end gap-3">
                 <a href="{{ route('repair-jobs.index') }}" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50">{{ __('ui.cancel') }}</a>
-                <template x-if="! showLabour">
-                    <div class="flex flex-wrap gap-3">
-                        <button type="submit" name="intent" value="save" x-bind:disabled="submitting" class="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 disabled:opacity-60">{{ __('ui.accept_repair_job') }}</button>
-                        @can('receipts.print')
-                            <button type="submit" name="intent" value="print" x-bind:disabled="submitting" class="rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white hover:bg-teal-800 disabled:opacity-60">{{ __('ui.accept_and_print_receipt') }}</button>
-                        @endcan
-                    </div>
-                </template>
-                <template x-if="showLabour">
-                    <button type="submit" name="intent" value="cancel_payments" x-bind:disabled="submitting" class="rounded-xl bg-red-600 px-4 py-2.5 text-xs font-semibold text-white hover:bg-red-700 disabled:opacity-60">{{ __('ui.cancel_repair_job_and_payments') }}</button>
-                </template>
+                <button type="submit" name="intent" value="save" x-bind:disabled="submitting" class="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 disabled:opacity-60">{{ __('ui.accept_repair_job') }}</button>
+                @can('receipts.print')
+                    <button type="submit" name="intent" value="print" x-bind:disabled="submitting" class="rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white hover:bg-teal-800 disabled:opacity-60">{{ __('ui.accept_and_print_receipt') }}</button>
+                @endcan
             </div>
         </div>
     </form>

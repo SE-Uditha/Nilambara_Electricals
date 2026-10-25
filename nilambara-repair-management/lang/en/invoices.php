@@ -85,6 +85,8 @@ return [
     'payment_reference' => 'Bank transfer reference number',
     'credit_whole_total_note' => 'Credit method: no payment is taken now. The whole invoice total is recorded as a credit amount and appears in Outstanding Invoices / Credit Management.',
     'credit_amount' => 'Credit amount',
+    'expected_payment_date' => 'Expected payment date (credit / partial payment)',
+    'expected_payment_date_help' => 'Date the customer says they will pay the balance. It appears in Credit Management and flags the customer once the date passes.',
     'payment_required' => 'Enter the amount received now. An invoice cannot be created before its payment is recorded (choose Credit to bill without a payment).',
     'reference_required' => 'Enter the bank transfer reference number.',
     'no_payment_permission' => 'You do not have permission to record payments.',

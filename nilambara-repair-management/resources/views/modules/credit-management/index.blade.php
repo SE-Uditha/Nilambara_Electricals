@@ -8,32 +8,47 @@
         @can('payments.view')<a href="{{ route('payments.index', ['payment_type' => 'credit_collection']) }}" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700">{{ __('payments.credit_collections') }}</a>@endcan
     </div>
 
-    <form method="GET" class="mb-5 grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 md:grid-cols-2 xl:grid-cols-6">
+    <form method="GET" class="mb-5 grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 md:grid-cols-2 xl:grid-cols-7">
         <input name="q" value="{{ request('q') }}" placeholder="{{ __('payments.search_hint') }}" class="form-input md:col-span-2">
         <select name="customer_id" class="form-input"><option value="">{{ __('payments.all_customers') }}</option>@foreach ($customers as $customer)<option value="{{ $customer->getKey() }}" @selected((string) request('customer_id') === (string) $customer->getKey())>{{ $customer->customer_code }} · {{ $customer->display_name }}</option>@endforeach</select>
         <input name="date_from" type="date" value="{{ request('date_from') }}" class="form-input" aria-label="{{ __('payments.date_from') }}">
         <input name="date_to" type="date" value="{{ request('date_to') }}" class="form-input" aria-label="{{ __('payments.date_to') }}">
         <select name="payment_status" class="form-input"><option value="outstanding" @selected(request('payment_status', 'outstanding') === 'outstanding')>{{ __('payments.outstanding_only') }}</option><option value="partially_paid" @selected(request('payment_status') === 'partially_paid')>{{ __('payments.status_partially_paid') }}</option><option value="paid" @selected(request('payment_status') === 'paid')>{{ __('payments.status_paid') }}</option><option value="all" @selected(request('payment_status') === 'all')>{{ __('payments.all_statuses') }}</option></select>
+        <select name="due" class="form-input" aria-label="{{ __('payments.expected_payment_date') }}">
+            <option value="">{{ __('payments.due_any') }}</option>
+            @foreach (['overdue', 'today', 'upcoming', 'no_date'] as $due)<option value="{{ $due }}" @selected(request('due') === $due)>{{ __('payments.due_'.$due) }}</option>@endforeach
+        </select>
         <button class="rounded-xl border border-teal-700 px-4 py-2 text-xs font-semibold text-teal-800 hover:bg-teal-50">{{ __('ui.search') }}</button>
     </form>
 
     <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white">
-        <div class="overflow-x-auto"><table class="w-full min-w-[980px] text-left text-xs">
-            <thead class="bg-slate-50 text-[10px] font-semibold tracking-wide text-slate-500 uppercase"><tr><th class="px-4 py-3">{{ __('payments.invoice') }}</th><th class="px-4 py-3">{{ __('payments.date') }}</th><th class="px-4 py-3">{{ __('payments.customer') }}</th><th class="px-4 py-3 text-right">{{ __('payments.credit_amount') }}</th><th class="px-4 py-3 text-right">{{ __('payments.amount_paid') }}</th><th class="px-4 py-3 text-right">{{ __('payments.outstanding') }}</th><th class="px-4 py-3">{{ __('payments.status') }}</th><th class="px-4 py-3">{{ __('payments.actions') }}</th></tr></thead>
+        <div class="overflow-x-auto"><table class="w-full min-w-[1080px] text-left text-xs">
+            <thead class="bg-slate-50 text-[10px] font-semibold tracking-wide text-slate-500 uppercase"><tr><th class="px-4 py-3">{{ __('payments.invoice') }}</th><th class="px-4 py-3">{{ __('payments.date') }}</th><th class="px-4 py-3">{{ __('payments.customer') }}</th><th class="px-4 py-3 text-right">{{ __('payments.credit_amount') }}</th><th class="px-4 py-3 text-right">{{ __('payments.amount_paid') }}</th><th class="px-4 py-3 text-right">{{ __('payments.outstanding') }}</th><th class="px-4 py-3">{{ __('payments.expected_payment_date') }}</th><th class="px-4 py-3">{{ __('payments.status') }}</th><th class="px-4 py-3">{{ __('payments.actions') }}</th></tr></thead>
             <tbody class="divide-y divide-slate-100">
                 @forelse ($invoices as $invoice)
-                    <tr class="text-slate-700">
+                    @php($owing = $invoice->payment_summary['outstanding'] !== '0.00')
+                    @php($daysLate = $owing && $invoice->due_date && $invoice->due_date->toDateString() < $today ? (int) $invoice->due_date->diffInDays($today) : 0)
+                    <tr class="text-slate-700 {{ $daysLate > 0 ? 'bg-red-50/60' : '' }}">
                         <td class="px-4 py-3 font-mono font-semibold"><a href="{{ route('credit-invoices.show', $invoice) }}" class="text-teal-800 hover:underline">{{ $invoice->invoice_number }}</a></td>
                         <td class="px-4 py-3">{{ $invoice->invoice_date->format(config('business.date_format')) }}</td>
-                        <td class="px-4 py-3">{{ $invoice->customer->display_name }}<span class="mt-1 block text-[10px] text-slate-400">{{ $invoice->customer->mobile_number }}</span></td>
+                        <td class="px-4 py-3 {{ $daysLate > 0 ? 'font-semibold text-red-800' : '' }}">{{ $invoice->customer->display_name }}<span class="mt-1 block text-[10px] text-slate-400">{{ $invoice->customer->mobile_number }}</span></td>
                         <td class="px-4 py-3 text-right">{{ config('business.currency') }} {{ $invoice->total }}</td>
                         <td class="px-4 py-3 text-right">{{ config('business.currency') }} {{ $invoice->payment_summary['total_paid'] }}</td>
                         <td class="px-4 py-3 text-right font-semibold">{{ config('business.currency') }} {{ $invoice->payment_summary['outstanding'] }}</td>
+                        <td class="whitespace-nowrap px-4 py-3">
+                            @if ($invoice->due_date)
+                                {{ $invoice->due_date->format(config('business.date_format')) }}
+                                @if ($daysLate > 0)<span class="ml-1 rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-semibold text-red-800">{{ __('payments.passed_due_days', ['days' => $daysLate]) }}</span>
+                                @elseif ($owing && $invoice->due_date->toDateString() === $today)<span class="ml-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-800">{{ __('payments.due_today_badge') }}</span>@endif
+                            @else
+                                <span class="text-slate-400">—</span>
+                            @endif
+                        </td>
                         <td class="px-4 py-3">{{ __('payments.status_'.$invoice->payment_summary['payment_status']) }}</td>
                         <td class="whitespace-nowrap px-4 py-3"><a href="{{ route('credit-invoices.show', $invoice) }}" class="font-semibold text-teal-800 hover:underline">{{ __('payments.history') }}</a>@if ($invoice->payment_summary['outstanding'] !== '0.00' && auth()->user()->can('credit.collect') && auth()->user()->can('payments.receive'))<a href="{{ route('credit-invoices.collect', $invoice) }}" class="ml-3 text-slate-600 hover:underline">{{ __('payments.collect') }}</a>@endif</td>
                     </tr>
                 @empty
-                    <tr><td colspan="8" class="px-4 py-14 text-center text-sm text-slate-500">{{ __('payments.no_credit_invoices') }}</td></tr>
+                    <tr><td colspan="9" class="px-4 py-14 text-center text-sm text-slate-500">{{ __('payments.no_credit_invoices') }}</td></tr>
                 @endforelse
             </tbody>
         </table></div>

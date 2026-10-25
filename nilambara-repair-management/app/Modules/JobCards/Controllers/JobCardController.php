@@ -2,6 +2,7 @@
 
 namespace App\Modules\JobCards\Controllers;
 
+use App\Enums\JobStatus;
 use App\Http\Controllers\Controller;
 use App\Modules\JobCards\Models\JobCard;
 use App\Modules\PrintTemplates\Models\DocumentPrintHistory;
@@ -9,21 +10,46 @@ use App\Modules\PrintTemplates\Models\PrintTemplate;
 use App\Modules\PrintTemplates\Services\IntakePdfService;
 use App\Modules\RepairJobs\Models\RepairJob;
 use App\Support\BusinessAudit;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class JobCardController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
+        $filters = $request->validate([
+            'q' => ['nullable', 'string', 'max:120'],
+            'status' => ['nullable', Rule::enum(JobStatus::class)],
+        ]);
         $query = RepairJob::query()
             ->with(['customer', 'technician', 'jobCard'])
             ->orderByDesc('received_at')
             ->orderByDesc('id');
 
+        $search = trim((string) ($filters['q'] ?? ''));
+        if ($search !== '') {
+            $like = '%'.$search.'%';
+            $query->where(function ($builder) use ($like): void {
+                $builder->where('automatic_number', 'like', $like)
+                    ->orWhere('job_number', 'like', $like)
+                    ->orWhere('item_name', 'like', $like)
+                    ->orWhereHas('customer', fn ($customer) => $customer->where('customer_name', 'like', $like)
+                        ->orWhere('company_name', 'like', $like)
+                        ->orWhere('mobile_number', 'like', $like))
+                    ->orWhereHas('technician', fn ($technician) => $technician->where('name', 'like', $like));
+            });
+        }
+        if (! empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
         return view('modules.job-cards.index', [
-            'jobs' => $query->paginate(20),
+            'jobs' => $query->paginate(20)->withQueryString(),
+            'search' => $search,
+            'status' => $filters['status'] ?? '',
         ]);
     }
 

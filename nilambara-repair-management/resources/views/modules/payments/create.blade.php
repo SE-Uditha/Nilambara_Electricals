@@ -124,10 +124,10 @@
                 <label for="bank_name" class="form-label">{{ __('payments.bank_name') }}</label>
                 <input id="bank_name" name="bank_name" maxlength="150" value="{{ old('bank_name') }}" class="form-input">
             </div>
-            <div id="due-date-field" class="hidden">
-                <label for="due_date" class="form-label">{{ __('payments.credit_due_date') }}</label>
+            <div id="due-date-field">
+                <label for="due_date" class="form-label">{{ __('payments.expected_payment_date') }}</label>
                 <input id="due_date" name="due_date" type="date" min="{{ now(config('business.timezone'))->toDateString() }}" value="{{ old('due_date') }}" class="form-input">
-                <p class="mt-1 text-xs text-slate-500">{{ __('payments.credit_method_note') }}</p>
+                <p class="mt-1 text-xs text-slate-500">{{ __('payments.expected_payment_date_help') }}</p>
                 @error('due_date')<p class="mt-1 text-xs text-red-700">{{ $message }}</p>@enderror
             </div>
             <div class="md:col-span-2">
@@ -188,10 +188,11 @@
                 const amount = document.getElementById('amount');
                 amount.required = !credit;
                 amount.disabled = credit;
-                document.getElementById('due-date-field').classList.toggle('hidden', !credit);
+                document.getElementById('due-date-field').classList.toggle('hidden', document.querySelector('[name="payment_type"]:checked')?.value === 'advance');
                 document.getElementById('reference_number').required = method.value === 'bank_transfer';
             };
             method.addEventListener('change', sync);
+            document.querySelectorAll('[name="payment_type"]').forEach((radio) => radio.addEventListener('change', sync));
             sync();
             const select = document.getElementById('invoice_id');
             const panel = document.getElementById('invoice-balance');

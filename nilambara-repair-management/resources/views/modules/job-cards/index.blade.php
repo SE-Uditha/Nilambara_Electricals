@@ -8,6 +8,23 @@
         <h1 class="text-2xl font-bold tracking-tight text-slate-900">{{ __('ui.job_cards') }}</h1>
         <p class="mt-1 text-sm text-slate-500">{{ __('ui.job_cards_description') }}</p>
     </div>
+    <form method="GET" action="{{ route('job-cards.index') }}" class="mb-4 flex flex-wrap items-end gap-3">
+        <div class="min-w-[240px] flex-1">
+            <label for="q" class="form-label">{{ __('ui.search') }}</label>
+            <input id="q" type="search" name="q" value="{{ $search }}" maxlength="120" class="form-input" placeholder="{{ __('ui.job_reference') }}, {{ __('ui.manual_job_number') }}, {{ __('ui.customer') }}, {{ __('ui.item_name') }}, {{ __('ui.technician') }}">
+        </div>
+        <div>
+            <label for="status" class="form-label">{{ __('ui.job_status') }}</label>
+            <select id="status" name="status" class="form-input">
+                <option value="">{{ __('ui.all_statuses') }}</option>
+                @foreach (\App\Enums\JobStatus::cases() as $case)
+                    <option value="{{ $case->value }}" @selected($status === $case->value)>{{ $case->value }}</option>
+                @endforeach
+            </select>
+        </div>
+        <button type="submit" class="rounded-xl border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">{{ __('ui.filter') }}</button>
+        @if ($search !== '' || $status !== '')<a href="{{ route('job-cards.index') }}" class="text-sm font-semibold text-slate-600 hover:text-slate-900">{{ __('ui.clear') }}</a>@endif
+    </form>
     <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white">
         <div class="overflow-x-auto">
             <table class="w-full min-w-[850px] text-left text-xs">

@@ -67,6 +67,11 @@ class RepairJob extends BusinessModel
         return $this->hasMany(RepairJobCharge::class);
     }
 
+    public function contactAttempts(): HasMany
+    {
+        return $this->hasMany(JobContactAttempt::class)->orderBy('attempt_number');
+    }
+
     protected function casts(): array
     {
         return [

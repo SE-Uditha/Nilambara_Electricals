@@ -73,6 +73,9 @@ class PaymentService
                 'payment-allocation:'.$data['idempotency_key'],
             );
             $this->recordPaymentLedger($payment, $customer, $actor, $paymentType);
+            if (! empty($data['due_date']) && BigDecimal::of($this->invoiceBalances->summary($invoice)['outstanding'])->isGreaterThan(0)) {
+                DB::table('invoices')->where('id', $invoice->getKey())->update(['due_date' => $data['due_date'], 'updated_at' => now()]);
+            }
             BusinessAudit::record($actor, $paymentType === 'credit_collection' ? 'credit.payment_collected' : 'payment.created', Payment::class, (int) $payment->getKey(), newValues: [
                 'payment_number' => $payment->payment_number,
                 'customer_id' => $customer->getKey(),

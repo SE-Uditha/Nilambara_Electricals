@@ -88,8 +88,9 @@
                 </div>
                 <p class="-mt-2 text-xs text-slate-500">{{ __('invoices.credit_method_note') }}</p>
                 <div>
-                    <label for="due_date" class="form-label">{{ __('invoices.due_date') }}</label>
+                    <label for="due_date" class="form-label">{{ __('invoices.expected_payment_date') }}</label>
                     <input id="due_date" name="due_date" type="date" value="{{ old('due_date', $invoice?->due_date?->toDateString()) }}" class="form-input">
+                    <p class="mt-1 text-xs text-slate-500">{{ __('invoices.expected_payment_date_help') }}</p>
                     @error('due_date')<p class="mt-1 text-xs text-red-700">{{ $message }}</p>@enderror
                 </div>
                 @if ($editing)

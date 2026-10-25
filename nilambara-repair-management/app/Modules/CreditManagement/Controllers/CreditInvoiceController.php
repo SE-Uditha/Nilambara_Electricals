@@ -23,7 +23,9 @@ class CreditInvoiceController extends Controller
             'date_from' => ['nullable', 'date'],
             'date_to' => ['nullable', 'date', 'after_or_equal:date_from'],
             'payment_status' => ['nullable', Rule::in(['all', 'outstanding', 'unpaid', 'partially_paid', 'paid'])],
+            'due' => ['nullable', Rule::in(['overdue', 'today', 'upcoming', 'no_date'])],
         ]);
+        $today = now(config('business.timezone'))->toDateString();
         $paid = $balances->netPaidExpression();
         $query = Invoice::query()->with('customer')
             ->where('status', DocumentStatus::Finalized->value)
@@ -49,6 +51,13 @@ class CreditInvoiceController extends Controller
             $query->whereDate('invoice_date', '<=', $filters['date_to']);
         }
         $balances->constrainPaymentStatus($query, $filters['payment_status'] ?? 'outstanding');
+        match ($filters['due'] ?? null) {
+            'overdue' => $query->whereNotNull('invoices.due_date')->whereDate('invoices.due_date', '<', $today),
+            'today' => $query->whereDate('invoices.due_date', $today),
+            'upcoming' => $query->whereDate('invoices.due_date', '>', $today),
+            'no_date' => $query->whereNull('invoices.due_date'),
+            default => null,
+        };
         $invoices = $query->paginate(20)->withQueryString();
         foreach ($invoices as $invoice) {
             $invoice->setAttribute('payment_summary', $balances->summary($invoice));
@@ -56,6 +65,7 @@ class CreditInvoiceController extends Controller
 
         return view('modules.credit-management.index', [
             'invoices' => $invoices,
+            'today' => $today,
             'filters' => $filters,
             'customers' => Customer::query()->orderBy('customer_code')->get(),
         ]);

@@ -7,6 +7,7 @@ use App\Enums\JobStatus;
 use App\Models\User;
 use App\Modules\Employees\Models\Employee;
 use App\Modules\JobTracking\Models\JobStatusHistory;
+use App\Modules\RepairJobs\Models\JobContactAttempt;
 use App\Modules\RepairJobs\Models\JobInspection;
 use App\Modules\RepairJobs\Models\RepairJob;
 use App\Support\BusinessAudit;
@@ -28,7 +29,7 @@ class RepairJobService
     ];
 
     /** Records that exist only to document the job and are removed with it. */
-    private const DELETE_CASCADE_TABLES = ['repair_receipts', 'job_cards', 'job_status_histories', 'job_inspections', 'repair_job_charges'];
+    private const DELETE_CASCADE_TABLES = ['repair_receipts', 'job_cards', 'job_status_histories', 'job_inspections', 'repair_job_charges', 'job_contact_attempts'];
 
     /** Invoice records removed together with an invoice that was issued only for the deleted job. */
     private const DELETE_INVOICE_TABLES = ['invoice_items', 'invoice_history', 'document_print_histories', 'customer_account_entries', 'invoice_jobs'];
@@ -283,6 +284,32 @@ class RepairJobService
 
             return $inspection;
         });
+    }
+
+    public function recordContactAttempt(RepairJob $job, string $contactedOn, ?string $notes, User $user): JobContactAttempt
+    {
+        Gate::forUser($user)->authorize('updateStatus', $job);
+
+        return DB::transaction(function () use ($job, $contactedOn, $notes, $user): JobContactAttempt {
+            $locked = RepairJob::query()->whereKey($job->getKey())->lockForUpdate()->firstOrFail();
+            $status = $locked->status instanceof JobStatus ? $locked->status : JobStatus::from($locked->status);
+            if (! in_array($status, [JobStatus::CustomerContactFailed, JobStatus::CustomerContactFailedAfterReady], true)) {
+                throw ValidationException::withMessages(['contacted_on' => __('ui.contact_attempt_wrong_status')]);
+            }
+            $attempt = JobContactAttempt::query()->create([
+                'repair_job_id' => $locked->getKey(),
+                'attempt_number' => ((int) $locked->contactAttempts()->max('attempt_number')) + 1,
+                'contacted_on' => $contactedOn,
+                'notes' => $notes !== null && trim($notes) !== '' ? trim($notes) : null,
+                'recorded_by_user_id' => $user->getKey(),
+            ]);
+            BusinessAudit::record($user, 'repair_job.contact_attempt_recorded', RepairJob::class, (int) $locked->getKey(), null, [
+                'attempt_number' => $attempt->attempt_number,
+                'contacted_on' => $contactedOn,
+            ]);
+
+            return $attempt;
+        }, 3);
     }
 
     /**

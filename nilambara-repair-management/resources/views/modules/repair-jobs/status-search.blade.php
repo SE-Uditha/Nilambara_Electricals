@@ -69,6 +69,27 @@
                             <td class="px-4 py-4">{{ __('ui.amount_unavailable') }}</td>
                             <td class="px-4 py-4">{{ $job->completed_at?->timezone(config('business.timezone'))->format(config('business.date_format')) ?: '—' }}</td>
                         </tr>
+                        @if (in_array($job->status, [\App\Enums\JobStatus::CustomerContactFailed, \App\Enums\JobStatus::CustomerContactFailedAfterReady], true))
+                            <tr class="bg-amber-50/50">
+                                <td colspan="11" class="px-4 py-3">
+                                    <div class="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-slate-700">
+                                        <span class="font-semibold text-amber-800">{{ __('ui.times_contacted', ['count' => $job->contactAttempts->count()]) }}</span>
+                                        @if ($job->contactAttempts->isNotEmpty())
+                                            <span>{{ __('ui.last_contacted') }}: {{ $job->contactAttempts->last()->contacted_on->format(config('business.date_format')) }}</span>
+                                        @endif
+                                        @can('updateStatus', $job)
+                                            <form method="POST" action="{{ route('repair-jobs.contact-attempts.store', $job) }}" class="flex flex-wrap items-center gap-2">
+                                                @csrf
+                                                <input type="hidden" name="return_to" value="status-search">
+                                                <input type="date" name="contacted_on" required max="{{ now()->timezone(config('business.timezone'))->toDateString() }}" value="{{ now()->timezone(config('business.timezone'))->toDateString() }}" class="form-input w-40 py-1 text-xs" aria-label="{{ __('ui.date_contacted') }}">
+                                                <input type="text" name="notes" maxlength="1000" placeholder="{{ __('ui.contact_notes') }}" class="form-input w-56 py-1 text-xs" aria-label="{{ __('ui.contact_notes') }}">
+                                                <button class="rounded-lg bg-teal-700 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-teal-800">{{ __('ui.add_contact_attempt') }}</button>
+                                            </form>
+                                        @endcan
+                                    </div>
+                                </td>
+                            </tr>
+                        @endif
                     @empty
                         <tr><td colspan="11" class="px-5 py-14 text-center"><p class="font-semibold text-slate-700">{{ __('ui.no_matching_jobs') }}</p><p class="mt-1 text-xs text-slate-400">{{ __('ui.no_matching_jobs_description') }}</p></td></tr>
                     @endforelse

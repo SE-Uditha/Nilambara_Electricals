@@ -35,13 +35,13 @@ class FinalJobBillingTest extends TestCase
         return ['labour_charge' => '100.00', 'idempotency_key' => (string) Str::uuid(), 'charges' => [['description' => 'Rotor balancing', 'quantity' => '2', 'unit_price' => '15.1250']]];
     }
 
-    public function test_intake_receipt_never_displays_repair_prices_and_omits_zero_payment(): void
+    public function test_intake_receipt_shows_labour_charge_when_added_and_omits_zero_payment(): void
     {
         $actor = $this->actor();
         $customer = $this->customer();
         $receipt = app(RepairReceiptService::class)->register(['customer_id' => $customer->id, 'job_number' => $this->code('MAN'), 'item_name' => 'Motor', 'brand' => 'Test', 'job_type' => 'normal', 'received_by_employee_id' => $actor->employee->id, 'labor_cost' => '9876.54'], $actor);
         $this->assertSame('9876.54', $receipt->repairJob->total_job_amount);
-        $this->get(route('repair-jobs.receipt.print', $receipt->repairJob))->assertOk()->assertDontSee('9876.54')->assertDontSee('0.00')->assertDontSee(__('ui.labor_cost'));
+        $this->get(route('repair-jobs.receipt.print', $receipt->repairJob))->assertOk()->assertSee('9876.54')->assertSee(__('ui.labor_cost'))->assertDontSee('0.00');
         $this->getJson(route('repair-jobs.billing', $receipt->repairJob))->assertUnprocessable();
         if (! is_dir(base_path('tmp/pdfs'))) {
             mkdir(base_path('tmp/pdfs'), 0700, true);

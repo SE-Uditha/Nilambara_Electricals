@@ -57,3 +57,7 @@ Route::post('/repair-jobs/{job}/repair', [RepairJobController::class, 'saveRepai
 Route::post('/repair-jobs/{job}/status', [RepairJobController::class, 'updateStatus'])
     ->middleware('can:jobs.update-status')
     ->name('repair-jobs.update-status');
+
+Route::post('/repair-jobs/{job}/contact-attempts', [RepairJobController::class, 'recordContactAttempt'])
+    ->middleware('can:jobs.update-status')
+    ->name('repair-jobs.contact-attempts.store');

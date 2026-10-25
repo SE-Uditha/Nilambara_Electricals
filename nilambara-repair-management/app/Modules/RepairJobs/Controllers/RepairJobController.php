@@ -109,6 +109,7 @@ class RepairJobController extends Controller
             'technician',
             'jobInspections.inspectedByEmployee',
             'jobInspections.repairedByEmployee',
+            'contactAttempts.recordedBy',
             'jobStatusHistories' => fn ($history) => $history->with('changedByUser')
                 ->orderByDesc('changed_at')
                 ->orderByDesc('id'),
@@ -281,6 +282,21 @@ class RepairJobController extends Controller
         return redirect()->route('repair-jobs.show', $job)->with('status', __('ui.repair_information_saved'));
     }
 
+    public function recordContactAttempt(Request $request, RepairJob $job, RepairJobService $jobs): RedirectResponse
+    {
+        $data = $request->validate([
+            'contacted_on' => ['required', 'date', 'before_or_equal:today'],
+            'notes' => ['nullable', 'string', 'max:1000'],
+        ]);
+        $attempt = $jobs->recordContactAttempt($job, $data['contacted_on'], $data['notes'] ?? null, $request->user());
+
+        $target = $request->input('return_to') === 'status-search'
+            ? redirect()->to(url()->previous(route('repair-jobs.status-search')))
+            : redirect()->route('repair-jobs.show', $job);
+
+        return $target->with('status', __('ui.contact_attempt_saved', ['number' => $attempt->attempt_number]));
+    }
+
     public function updateStatus(UpdateJobStatusRequest $request, RepairJob $job, RepairJobService $jobs): RedirectResponse
     {
         $jobs->updateStatus($job, $request->validated(), $request->user());
@@ -303,7 +319,7 @@ class RepairJobController extends Controller
         ]);
 
         $query = RepairJob::query()
-            ->with(['customer', 'technician', 'receivedByEmployee', 'receipt'])
+            ->with(['customer', 'technician', 'receivedByEmployee', 'receipt', 'contactAttempts'])
             ->select('repair_jobs.*')
             ->selectSub(
                 PaymentAllocation::query()

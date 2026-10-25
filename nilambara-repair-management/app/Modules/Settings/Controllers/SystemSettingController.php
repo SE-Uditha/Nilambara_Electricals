@@ -13,6 +13,8 @@ use Illuminate\Validation\ValidationException;
 
 class SystemSettingController
 {
+    private const PRESET_FIELDS = ['common_faults', 'common_physical_conditions', 'common_visible_damages'];
+
     public function index(): View
     {
         return view('modules.settings.index');
@@ -33,9 +35,13 @@ class SystemSettingController
             'print_paper' => ['sometimes', Rule::in(['A4', 'A5'])],
             'logo' => ['nullable', File::image()->types(['jpg', 'jpeg', 'png'])->max(2048)],
             'common_faults' => ['nullable', 'string', 'max:10000'],
+            'common_physical_conditions' => ['nullable', 'string', 'max:10000'],
+            'common_visible_damages' => ['nullable', 'string', 'max:10000'],
         ]);
-        if (array_key_exists('common_faults', $values)) {
-            $values['common_faults'] = $this->normalizeFaults($values['common_faults']);
+        foreach (self::PRESET_FIELDS as $field) {
+            if (array_key_exists($field, $values)) {
+                $values[$field] = $this->normalizeFaults($values[$field], $field);
+            }
         }
 
         $logo = $request->file('logo');
@@ -64,7 +70,7 @@ class SystemSettingController
     }
 
     /** One fault per line: trimmed, de-duplicated (case-insensitive), at most 100 entries of 150 characters. */
-    private function normalizeFaults(?string $raw): ?string
+    private function normalizeFaults(?string $raw, string $field): ?string
     {
         $faults = [];
         foreach (preg_split('/\R/u', (string) $raw) ?: [] as $line) {
@@ -73,12 +79,12 @@ class SystemSettingController
                 continue;
             }
             if (mb_strlen($line) > 150) {
-                throw ValidationException::withMessages(['common_faults' => __('settings.common_faults_too_long')]);
+                throw ValidationException::withMessages([$field => __('settings.common_faults_too_long')]);
             }
             $faults[mb_strtolower($line)] ??= $line;
         }
         if (count($faults) > 100) {
-            throw ValidationException::withMessages(['common_faults' => __('settings.common_faults_too_many')]);
+            throw ValidationException::withMessages([$field => __('settings.common_faults_too_many')]);
         }
 
         return $faults === [] ? null : implode("\n", $faults);

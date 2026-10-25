@@ -84,6 +84,13 @@
             <table class="details"><tr><td>{{ __('ui.advance_payment') }}@if (data_get($snapshot, 'advance_payment_number'))<br><span class="label">{{ data_get($snapshot, 'advance_payment_number') }}</span>@endif</td><td class="money">{{ config('business.currency') }} {{ data_get($snapshot, 'advance_payment') }}</td></tr></table>
         </section>
         @endif
+        @php($labourOnReceipt = (string) data_get($snapshot, 'labor_cost', '0.00'))
+        @if (\Brick\Math\BigDecimal::of($labourOnReceipt)->isGreaterThan(0))
+        <section class="section">
+            <h3>{{ __('ui.labor_cost') }}</h3>
+            <table class="details"><tr><td>{{ __('ui.labor_cost') }}</td><td class="money">{{ config('business.currency') }} {{ $labourOnReceipt }}</td></tr></table>
+        </section>
+        @endif
         @if (data_get($snapshot, 'special_notes'))<section class="section"><h3>{{ __('ui.special_notes') }}</h3><table class="details"><tr><td class="value">{{ data_get($snapshot, 'special_notes') }}</td></tr></table></section>@endif
         <p class="collection-note">{{ __('ui.receipt_collection_note') }}</p>
         <table class="signatures"><tr><td><div class="signature-line">{{ __('ui.customer_signature') }}</div></td><td><div class="signature-line">{{ data_get($snapshot, 'received_by') ?: '—' }}<br>{{ __('ui.received_by') }}</div></td></tr></table>

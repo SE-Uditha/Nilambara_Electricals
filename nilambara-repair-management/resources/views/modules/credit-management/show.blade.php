@@ -14,6 +14,8 @@
         <div><p class="form-label">{{ __('payments.customer') }}</p><p class="font-semibold">{{ $invoice->customer->display_name }}</p><p class="mt-1 text-xs text-slate-500">{{ $invoice->customer->mobile_number }}</p></div>
         <div><p class="form-label">{{ __('payments.invoice_date') }}</p><p>{{ $invoice->invoice_date->format(config('business.date_format')) }}</p></div>
         <div><p class="form-label">{{ __('payments.credit_amount') }}</p><p class="font-semibold">{{ config('business.currency') }} {{ $invoice->total }}</p></div>
+        <div><p class="form-label">{{ __('payments.expected_payment_date') }}</p><p class="font-semibold">{{ $invoice->due_date?->format(config('business.date_format')) ?: '—' }}
+            @if ($invoice->due_date && $balance['outstanding'] !== '0.00' && $invoice->due_date->toDateString() < now(config('business.timezone'))->toDateString())<span class="ml-1 rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-semibold text-red-800">{{ __('payments.passed_due_days', ['days' => (int) $invoice->due_date->diffInDays(now(config('business.timezone'))->toDateString())]) }}</span>@endif</p></div>
         <div><p class="form-label">{{ __('payments.payment_status') }}</p><p>{{ __('payments.status_'.$balance['payment_status']) }}</p></div>
         <div><p class="form-label">{{ __('payments.advance_applied') }}</p><p>{{ config('business.currency') }} {{ $balance['advance_paid'] }}</p></div>
         <div><p class="form-label">{{ __('payments.amount_paid') }}</p><p>{{ config('business.currency') }} {{ $balance['total_paid'] }}</p></div>
