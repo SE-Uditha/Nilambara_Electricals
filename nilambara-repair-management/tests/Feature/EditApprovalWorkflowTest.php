@@ -2,10 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Enums\JobStatus;
 use App\Models\User;
 use App\Modules\Approvals\Models\ApprovalRequest;
+use App\Modules\Invoices\Models\InvoiceJob;
+use App\Modules\RepairJobs\Models\JobInspection;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
@@ -136,18 +140,18 @@ class EditApprovalWorkflowTest extends TestCase
         $admin = $this->userWithRole('administrator');
         $job = $this->job();
         $invoice = $this->invoice($job->customer);
-        \App\Modules\Invoices\Models\InvoiceJob::create([
+        InvoiceJob::create([
             'invoice_id' => $invoice->id,
             'repair_job_id' => $job->id,
             'customer_id' => $job->customer_id,
         ]);
 
         $this->actingAs($admin);
-        $db = fn (string $table) => \Illuminate\Support\Facades\DB::table($table);
+        $db = fn (string $table) => DB::table($table);
         $receiptId = $db('repair_receipts')->insertGetId(['repair_job_id' => $job->id, 'customer_id' => $job->customer_id, 'receipt_number' => 'RC-DEL-1', 'created_at' => now(), 'updated_at' => now()]);
         $cardId = $db('job_cards')->insertGetId(['repair_job_id' => $job->id, 'paper_size' => 'A5', 'created_at' => now(), 'updated_at' => now()]);
         foreach ([['repair_receipt_id' => $receiptId], ['job_card_id' => $cardId], ['invoice_id' => $invoice->id]] as $link) {
-            \Illuminate\Support\Facades\DB::table('document_print_histories')->insert($link + [
+            DB::table('document_print_histories')->insert($link + [
                 'printed_at' => now(), 'printed_by_user_id' => $admin->id, 'document_snapshot' => '{}', 'created_at' => now(), 'updated_at' => now(),
             ]);
         }
@@ -156,7 +160,7 @@ class EditApprovalWorkflowTest extends TestCase
         $this->assertDatabaseMissing('repair_jobs', ['id' => $job->id]);
         $this->assertDatabaseMissing('invoices', ['id' => $invoice->id]);
         $this->assertDatabaseMissing('invoice_jobs', ['invoice_id' => $invoice->id]);
-        $this->assertSame(0, \Illuminate\Support\Facades\DB::table('document_print_histories')->count());
+        $this->assertSame(0, DB::table('document_print_histories')->count());
     }
 
     public function test_admin_and_cashier_can_both_update_job_status_but_only_admin_can_cancel(): void
@@ -186,15 +190,34 @@ class EditApprovalWorkflowTest extends TestCase
         $this->assertSame('Under Inspection', $job->fresh()->status->value);
     }
 
-    public function test_cancelled_job_hides_inspection_repair_and_quotation_sections(): void
+    public function test_cancelled_job_keeps_inspection_and_repair_details_accessible(): void
     {
         $admin = $this->userWithRole('administrator');
         $job = $this->job();
+        $inspector = $this->employee();
+        JobInspection::query()->create([
+            'repair_job_id' => $job->id,
+            'inspected_at' => now(),
+            'inspected_by_employee_id' => $inspector->id,
+            'inspection_result' => 'Stored inspection result',
+            'work_performed' => 'Stored repair details',
+            'parts_used' => 'Stored required part',
+        ]);
 
         $this->actingAs($admin)->get(route('repair-jobs.show', $job))->assertSee(__('ui.inspection_and_repair_history'));
 
-        $job->forceFill(['status' => \App\Enums\JobStatus::Cancelled])->save();
-        $this->get(route('repair-jobs.show', $job))->assertOk()->assertDontSee(__('ui.inspection_and_repair_history'))->assertDontSee(__('ui.save_inspection'));
+        $job->forceFill([
+            'status' => JobStatus::Cancelled,
+            'cancellation_reason' => 'Customer declined repair.',
+        ])->save();
+        $this->get(route('repair-jobs.show', $job))
+            ->assertOk()
+            ->assertSee(__('ui.inspection_and_repair_history'))
+            ->assertSee(__('ui.save_inspection'))
+            ->assertSee('Stored inspection result')
+            ->assertSee('Stored repair details')
+            ->assertSee('Stored required part')
+            ->assertSee('Customer declined repair.');
     }
 
     public function test_cancellation_reason_is_optional(): void

@@ -11,7 +11,6 @@ use App\Modules\Inventory\Models\UnitOfMeasure;
 use App\Modules\Inventory\Services\InventoryService;
 use App\Modules\Inventory\Services\StockImportService;
 use App\Modules\Inventory\Services\StockWorkflowService;
-use App\Modules\RepairJobs\Models\RepairJob;
 use App\Modules\Suppliers\Models\Supplier;
 use App\Support\BusinessAudit;
 use Illuminate\Http\Request;
@@ -20,6 +19,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use PhpOffice\PhpSpreadsheet\Exception;
 
 class InventoryController
 {
@@ -115,7 +115,7 @@ class InventoryController
         $request->validate(['file' => ['required', 'file', 'mimes:xlsx', 'max:5120']]);
         try {
             $result = $importer->import($request->file('file')->getRealPath(), $request->user());
-        } catch (\PhpOffice\PhpSpreadsheet\Exception) {
+        } catch (Exception) {
             throw ValidationException::withMessages(['file' => __('inventory.import_unreadable')]);
         }
         if (isset($result['errors'])) {
@@ -160,12 +160,11 @@ class InventoryController
         abort_unless($request->user()->can('inventory.issue') || $request->user()->can('jobs.repair'), 403);
         $actor = $request->user();
         $query = JobPartUsage::with(['repairJob', 'sparePart', 'location'])->orderByDesc('id');
-        $jobs = RepairJob::query()->whereNull('cancelled_at');
         if (! $actor->can('inventory.issue')) {
             $query->where('requested_by_user_id', $actor->id);
         }
 
-        return view('modules.inventory.issues', ['usages' => $query->paginate(25), 'jobs' => $jobs->orderByDesc('id')->limit(100)->get(), 'parts' => SparePart::where('is_active', true)->orderBy('name')->get(), 'locations' => StockLocation::where('is_active', true)->get()]);
+        return view('modules.inventory.issues', ['usages' => $query->paginate(25)]);
     }
 
     public function requestPart(Request $request, StockWorkflowService $service)
@@ -176,11 +175,17 @@ class InventoryController
         return back()->with('status', 'Part requested. Stock has not been deducted.');
     }
 
-    public function issue(Request $request, JobPartUsage $usage, StockWorkflowService $service)
+    public function updateUsage(Request $request, JobPartUsage $usage, StockWorkflowService $service)
     {
-        $service->issue($usage, $request->user());
+        $data = $request->validate([
+            'spare_part_id' => 'required|integer|exists:spare_parts,id',
+            'location_id' => 'required|integer|exists:stock_locations,id',
+            'quantity' => 'required|numeric|decimal:0,3|gt:0|max:999999999999.999',
+            'notes' => 'nullable|string|max:2000',
+        ]);
+        $service->updateRequest($usage, $data, $request->user());
 
-        return back()->with('status', 'Part approved and issued.');
+        return back()->with('status', 'Part request updated. Stock has not been deducted.');
     }
 
     public function cancelUsage(Request $request, JobPartUsage $usage, StockWorkflowService $service)

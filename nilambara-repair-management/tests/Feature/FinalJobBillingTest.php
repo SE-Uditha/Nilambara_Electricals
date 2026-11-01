@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Enums\JobStatus;
 use App\Models\User;
 use App\Modules\Inventory\Services\InventoryService;
+use App\Modules\Inventory\Services\StockWorkflowService;
 use App\Modules\Invoices\Models\Invoice;
 use App\Modules\Invoices\Services\InvoiceCalculationService;
 use App\Modules\RepairJobs\Services\RepairJobService;
@@ -50,20 +51,25 @@ class FinalJobBillingTest extends TestCase
         file_put_contents(base_path('tmp/pdfs/intake-no-total-preview.pdf'), $pdf->getContent());
     }
 
-    public function test_custom_charges_and_inventory_parts_flow_into_a_separate_invoice_without_double_issuing(): void
+    public function test_completed_job_parts_and_custom_charges_flow_into_a_separate_invoice(): void
     {
         $actor = $this->actor();
         $location = $this->location();
         $part = $this->part(['default_location_id' => $location->id, 'selling_price' => '12.5000']);
         $this->movement($part, $location, ['quantity_delta' => '5.000', 'unit_cost' => '4.0000']);
-        $job = $this->job(null, ['status' => JobStatus::RepairCompleted->value]);
-        $page = $this->get(route('repair-jobs.billing', $job))->assertOk()->assertSee('Add Spare Part')->assertSee('Add Custom Charge');
+        $job = $this->job();
+        $usage = app(StockWorkflowService::class)->request([
+            'repair_job_id' => $job->id, 'spare_part_id' => $part->id, 'location_id' => $location->id,
+            'quantity' => '2.000', 'idempotency_key' => (string) Str::uuid(),
+        ], $actor);
+        app(RepairJobService::class)->updateStatus($job, ['status' => JobStatus::RepairCompleted->value], $actor);
+        $this->assertSame('issued', $usage->fresh()->status);
+        $page = $this->get(route('repair-jobs.billing', $job))->assertOk()->assertSee('Parts recorded for this job')->assertSee('Add Custom Charge')->assertDontSee('Add Spare Part');
         if (! is_dir(base_path('tmp/pdfs'))) {
             mkdir(base_path('tmp/pdfs'), 0700, true);
         }
         file_put_contents(base_path('tmp/pdfs/final-billing-preview.html'), $page->getContent());
         $data = $this->payload();
-        $data['parts'] = [['spare_part_id' => $part->id, 'location_id' => $location->id, 'quantity' => '2']];
         for ($i = 0; $i < 2; $i++) {
             $this->post(route('repair-jobs.billing.update', $job), $data)->assertRedirect()->assertSessionHasNoErrors();
         }
@@ -84,7 +90,7 @@ class FinalJobBillingTest extends TestCase
         $this->assertSame('3.000', (string) app(InventoryService::class)->availableAtDefaultLocation($part));
     }
 
-    public function test_insufficient_stock_rolls_back_custom_charges_prices_and_stock_requests(): void
+    public function test_final_billing_rejects_inventory_part_entries(): void
     {
         $this->actor();
         $location = $this->location();

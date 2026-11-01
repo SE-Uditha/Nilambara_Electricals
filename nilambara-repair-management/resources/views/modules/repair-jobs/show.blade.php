@@ -67,10 +67,104 @@
                     <div><dt class="form-label">{{ __('ui.physical_condition') }}</dt><dd class="whitespace-pre-line text-slate-700">{{ $job->physical_condition ?: '—' }}</dd></div>
                     <div><dt class="form-label">{{ __('ui.visible_damage') }}</dt><dd class="whitespace-pre-line text-slate-700">{{ $job->visible_damage ?: '—' }}</dd></div>
                     <div class="sm:col-span-2 xl:col-span-3"><dt class="form-label">{{ __('ui.special_notes') }}</dt><dd class="whitespace-pre-line text-slate-700">{{ $job->special_notes ?: '—' }}</dd></div>
+                    @if ($job->status === \App\Enums\JobStatus::Cancelled)
+                        <div><dt class="form-label">{{ __('ui.cancelled_date') }}</dt><dd class="text-slate-700">{{ $job->cancelled_at?->timezone(config('business.timezone'))->format(config('business.date_format').' '.config('business.time_format')) ?: '—' }}</dd></div>
+                        <div class="sm:col-span-2"><dt class="form-label">{{ __('ui.cancellation_reason') }}</dt><dd class="whitespace-pre-line text-slate-700">{{ $job->cancellation_reason ?: '—' }}</dd></div>
+                    @endif
                 </dl>
                 @if ($job->receipt && auth()->user()->can('receipts.print'))
                     <div class="mt-5 border-t border-slate-100 pt-4"><a href="{{ route('repair-jobs.receipt.print', $job) }}" class="text-xs font-semibold text-teal-700 hover:text-teal-900">{{ __('ui.view_receipt') }} · {{ $job->receipt->receipt_number }}</a></div>
                 @endif
+            </section>
+
+            <section class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">
+                <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+                    <h2 class="text-sm font-bold text-slate-900">{{ __('ui.parts_management') }}</h2>
+                    <p class="text-xs text-slate-500">{{ __('ui.stock_deducted_on_completion') }}</p>
+                </div>
+                <div class="space-y-3">
+                    @forelse ($job->jobPartUsages->sortBy('id') as $usage)
+                        <article class="rounded-xl border border-slate-100 bg-slate-50 p-4">
+                            <div class="mb-3 flex flex-wrap items-center justify-between gap-2 text-xs">
+                                <span class="font-semibold text-slate-800">{{ $usage->sparePart->name }} · {{ $usage->location->name }}</span>
+                                <span class="rounded-full bg-white px-2.5 py-1 text-slate-600">{{ $usage->status }}</span>
+                            </div>
+                            <p class="mb-2 text-xs text-slate-600">{{ __('ui.quantity') }}: {{ $usage->quantity }} · {{ __('ui.estimated_part_total') }}: {{ config('business.currency') }} {{ number_format((float) $usage->quantity * (float) $usage->unit_price, 2) }}</p>
+                            @if ($usage->notes)<p class="mb-3 whitespace-pre-line text-xs text-slate-600">{{ $usage->notes }}</p>@endif
+                            @if ($usage->status === 'draft')
+                                @can('repair', $job)
+                                    <form method="POST" action="{{ route('stock-issues.update', $usage) }}" class="grid gap-3 sm:grid-cols-2">
+                                        @csrf
+                                        @method('PUT')
+                                        <label class="form-label">{{ __('ui.part') }}
+                                            <select name="spare_part_id" required class="form-input">
+                                                @foreach ($parts as $part)
+                                                    <option value="{{ $part->id }}" @selected((int) $usage->spare_part_id === $part->id)>{{ $part->sku }} · {{ $part->name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </label>
+                                        <label class="form-label">{{ __('ui.location') }}
+                                            <select name="location_id" required class="form-input">
+                                                @foreach ($locations as $location)
+                                                    <option value="{{ $location->id }}" @selected((int) $usage->location_id === $location->id)>{{ $location->name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </label>
+                                        <label class="form-label">{{ __('ui.quantity') }}
+                                            <input name="quantity" type="number" min="0.001" step="0.001" required value="{{ $usage->quantity }}" class="form-input">
+                                        </label>
+                                        <label class="form-label">{{ __('ui.notes') }}
+                                            <input name="notes" type="text" maxlength="2000" value="{{ $usage->notes }}" class="form-input">
+                                        </label>
+                                        @error('quantity')<p class="text-xs text-red-600">{{ $message }}</p>@enderror
+                                        @error('usage')<p class="text-xs text-red-600">{{ $message }}</p>@enderror
+                                        <button class="w-fit rounded-lg bg-teal-700 px-3 py-2 text-xs font-semibold text-white">{{ __('ui.update_part') }}</button>
+                                    </form>
+                                    <form method="POST" action="{{ route('stock-issues.cancel', $usage) }}" class="mt-2">
+                                        @csrf
+                                        <input name="reason" type="hidden" value="Part request removed from job details">
+                                        <button class="rounded-lg border border-red-200 px-3 py-2 text-xs font-semibold text-red-700">{{ __('ui.cancel_part_request') }}</button>
+                                    </form>
+                                @endcan
+                            @else
+                                @error('usage')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+                            @endif
+                        </article>
+                    @empty
+                        <p class="rounded-xl bg-slate-50 px-4 py-5 text-sm text-slate-500">{{ __('ui.no_parts_for_job') }}</p>
+                    @endforelse
+                </div>
+                @can('repair', $job)
+                    @if ($parts->isNotEmpty() && $locations->isNotEmpty())
+                        <form method="POST" action="{{ route('stock-issues.store') }}" class="mt-5 grid gap-3 border-t border-slate-100 pt-5 sm:grid-cols-2">
+                            @csrf
+                            <input type="hidden" name="repair_job_id" value="{{ $job->id }}">
+                            <input type="hidden" name="idempotency_key" value="{{ old('idempotency_key', (string) \Illuminate\Support\Str::uuid()) }}">
+                            <label class="form-label">{{ __('ui.part') }}
+                                <select name="spare_part_id" required class="form-input">
+                                    @foreach ($parts as $part)
+                                        <option value="{{ $part->id }}" @selected((int) old('spare_part_id') === $part->id)>{{ $part->sku }} · {{ $part->name }}</option>
+                                    @endforeach
+                                </select>
+                            </label>
+                            <label class="form-label">{{ __('ui.location') }}
+                                <select name="location_id" required class="form-input">
+                                    @foreach ($locations as $location)
+                                        <option value="{{ $location->id }}" @selected((int) old('location_id', $locations->first()?->id) === $location->id)>{{ $location->name }}</option>
+                                    @endforeach
+                                </select>
+                            </label>
+                            <label class="form-label">{{ __('ui.quantity') }}
+                                <input name="quantity" type="number" min="0.001" step="0.001" required value="{{ old('quantity') }}" class="form-input">
+                                @error('quantity')<span class="mt-1 block text-xs text-red-600">{{ $message }}</span>@enderror
+                            </label>
+                            <label class="form-label">{{ __('ui.notes') }}
+                                <input name="notes" type="text" maxlength="2000" value="{{ old('notes') }}" class="form-input">
+                            </label>
+                            <button class="rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white sm:col-span-2">{{ __('ui.add_part_to_job') }}</button>
+                        </form>
+                    @endif
+                @endcan
             </section>
 
             @php($contactFailed = in_array($job->status, [\App\Enums\JobStatus::CustomerContactFailed, \App\Enums\JobStatus::CustomerContactFailedAfterReady], true))
@@ -112,7 +206,6 @@
                 </section>
             @endif
 
-            @if ($job->status !== \App\Enums\JobStatus::Cancelled)
             <section class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">
                 <h2 class="mb-5 text-sm font-bold text-slate-900">{{ __('ui.inspection_and_repair_history') }}</h2>
                 <div class="space-y-4">
@@ -127,6 +220,7 @@
                             @if ($inspection->work_performed)<p class="mt-2 whitespace-pre-line text-xs text-slate-700"><strong>{{ __('ui.work_performed') }}:</strong> {{ $inspection->work_performed }}</p>@endif
                             @if ($inspection->parts_used)<p class="mt-2 whitespace-pre-line text-xs text-slate-700"><strong>{{ __('ui.parts_used') }}:</strong> {{ $inspection->parts_used }} @if ($inspection->parts_quantity) · {{ __('ui.quantity') }}: {{ $inspection->parts_quantity }} @endif</p>@endif
                             @if ($inspection->testing_details)<p class="mt-2 whitespace-pre-line text-xs text-slate-700"><strong>{{ __('ui.testing_details') }}:</strong> {{ $inspection->testing_details }}</p>@endif
+                            @if ($inspection->special_notes)<p class="mt-2 whitespace-pre-line text-xs text-slate-700"><strong>{{ __('ui.special_notes') }}:</strong> {{ $inspection->special_notes }}</p>@endif
                             @if ($inspection->repair_completed_at)<p class="mt-2 text-xs text-slate-700"><strong>{{ __('ui.repair_completed_date') }}:</strong> {{ $inspection->repair_completed_at->timezone(config('business.timezone'))->format(config('business.date_format')) }}</p>@endif
                         </article>
                     @empty
@@ -237,7 +331,6 @@
                     </form>
                 </section>
             @endcan
-            @endif
         </div>
 
         <aside class="space-y-5">
@@ -245,6 +338,8 @@
                 <h2 class="mb-4 text-sm font-bold text-slate-900">{{ __('ui.job_financial_snapshot') }}</h2>
                 <dl class="space-y-3 text-sm">
                     <div><dt class="form-label">{{ __('ui.advance_paid') }}</dt><dd class="font-semibold text-slate-800">{{ config('business.currency') }} {{ number_format((float) $advancePaid, 2) }}</dd></div>
+                    <div><dt class="form-label">{{ __('ui.parts_cost') }}</dt><dd class="text-slate-700">{{ config('business.currency') }} {{ number_format((float) $job->parts_cost, 2) }}</dd></div>
+                    <div><dt class="form-label">{{ __('ui.labor_cost') }}</dt><dd class="text-slate-700">{{ config('business.currency') }} {{ number_format((float) $job->labour_cost, 2) }}</dd></div>
                     <div><dt class="form-label">{{ __('ui.total_amount') }}</dt><dd class="text-slate-700">{{ in_array($job->status->value, ['Repair Completed', 'Ready for Collection', 'Delivered']) ? config('business.currency').' '.$job->total_job_amount : __('ui.amount_unavailable') }}</dd></div>
                     <div><dt class="form-label">{{ __('ui.outstanding_balance') }}</dt><dd class="text-slate-700">{{ __('ui.amount_unavailable') }}</dd></div>
                 </dl>

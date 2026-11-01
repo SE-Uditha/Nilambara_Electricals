@@ -4,7 +4,6 @@ namespace App\Modules\RepairJobs\Services;
 
 use App\Enums\JobStatus;
 use App\Models\User;
-use App\Modules\Inventory\Services\StockWorkflowService;
 use App\Modules\RepairJobs\Models\RepairJob;
 use App\Support\BusinessAudit;
 use Brick\Math\BigDecimal;
@@ -51,18 +50,8 @@ class JobBillingService
                 throw ValidationException::withMessages(['charges' => 'The total exceeds the supported amount.']);
             }
             $job->fill(['labour_charge' => (string) $total, 'total_job_amount' => (string) $total->plus($job->parts_charge)->toScale(2)])->save();
-            $stock = app(StockWorkflowService::class);
-            foreach (array_values($data['parts'] ?? []) as $index => $line) {
-                $usage = $stock->request([
-                    'repair_job_id' => $job->id, 'spare_part_id' => $line['spare_part_id'], 'location_id' => $line['location_id'],
-                    'quantity' => $line['quantity'], 'notes' => 'Added during final bill preparation',
-                    'idempotency_key' => 'bill:'.$job->id.':'.$data['idempotency_key'].':'.$index,
-                ], $actor);
-                $stock->issue($usage, $actor);
-            }
-            $job->refresh();
             if (BigDecimal::of($job->total_job_amount)->isGreaterThan('999999999999.99')) {
-                throw ValidationException::withMessages(['parts' => 'The total exceeds the supported amount.']);
+                throw ValidationException::withMessages(['charges' => 'The total exceeds the supported amount.']);
             }
             BusinessAudit::record($actor, 'repair_job.bill_prepared', RepairJob::class, $job->id,
                 ['totals' => $before, 'charges' => $linesBefore], ['totals' => $job->only(['labour_charge', 'parts_charge', 'total_job_amount']), 'charges' => $job->billingCharges()->get()->toArray()]);

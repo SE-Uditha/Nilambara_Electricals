@@ -13,7 +13,7 @@ Ask the system operator to start MySQL and the Laravel application. Open http://
 ## Repair, bill and collect
 1. An authorized manager assigns the job. Technicians work on their assigned jobs and record inspection, repair details and status.
 2. Where a quotation is used, prepare it and record the authorized approval decision before issuing parts. Approval transfers the agreed selling charges to the job.
-3. Request parts, then have an authorized stock issuer issue them. A request alone does not deduct stock.
+3. Add and manage required inventory parts from Job Details. Part requests do not deduct stock; stock is deducted once when the job is marked Repair Completed.
 4. For an unquoted, unbilled job, authorized billing staff enter the labour selling charge. Actual labour cost and customer selling charge are separate values.
 5. Prepare and issue the invoice for eligible jobs belonging to the same customer. Verify totals and already recorded advances.
 6. Receive the remaining payment, choosing cash, bank transfer or cheque and supplying required references. Partial collections are supported; never enter an advance again as a new receipt.

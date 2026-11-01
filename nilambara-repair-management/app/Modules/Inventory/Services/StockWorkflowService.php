@@ -73,7 +73,6 @@ class StockWorkflowService
         return DB::transaction(function () use ($data, $actor) {
             $job = RepairJob::whereKey($data['repair_job_id'])->lockForUpdate()->firstOrFail();
             Gate::forUser($actor)->authorize('repair', $job);
-            $this->assertUnbilled($job);
             $part = $this->lockPart($data['spare_part_id'], $data['location_id']);
             $quantity = $this->quantity($part, (string) $data['quantity']);
             if (! $quantity->isPositive()) {
@@ -92,39 +91,63 @@ class StockWorkflowService
         }, 3);
     }
 
-    public function issue(JobPartUsage $usage, User $actor): JobPartUsage
+    public function updateRequest(JobPartUsage $usage, array $data, User $actor): JobPartUsage
     {
-        Gate::forUser($actor)->authorize('inventory.issue');
-
-        return DB::transaction(function () use ($usage, $actor) {
-            // Job then part: a consistent product lock protects the shared ledger.
+        return DB::transaction(function () use ($usage, $data, $actor): JobPartUsage {
             $job = RepairJob::whereKey($usage->repair_job_id)->lockForUpdate()->firstOrFail();
             $usage = JobPartUsage::whereKey($usage->id)->lockForUpdate()->firstOrFail();
-            if ($usage->status === 'issued') {
-                return $usage;
+            Gate::forUser($actor)->authorize('repair', $job);
+            if ($usage->status !== 'draft') {
+                throw ValidationException::withMessages(['usage' => 'Only an unissued part request can be edited.']);
             }
-            $this->assertUnbilled($job);
-            if (! in_array($usage->status, ['draft', 'approved'], true)) {
-                throw ValidationException::withMessages(['usage' => 'Only an open request can be issued.']);
+            $part = $this->lockPart((int) $data['spare_part_id'], (int) $data['location_id']);
+            $quantity = $this->quantity($part, (string) $data['quantity']);
+            if (! $quantity->isPositive()) {
+                throw ValidationException::withMessages(['quantity' => 'Request a positive quantity.']);
             }
+            $old = $usage->only(['spare_part_id', 'location_id', 'quantity', 'unit_price', 'notes']);
+            $usage->fill([
+                'spare_part_id' => $part->id,
+                'location_id' => (int) $data['location_id'],
+                'quantity' => (string) $quantity,
+                'unit_price' => $part->selling_price,
+                'notes' => trim($data['notes'] ?? ''),
+            ])->save();
+            BusinessAudit::record($actor, 'inventory.part.request_updated', JobPartUsage::class, $usage->id, $old, $usage->only(array_keys($old)));
+
+            return $usage;
+        }, 3);
+    }
+
+    public function completeJobParts(RepairJob $job, User $actor): void
+    {
+        $usages = $job->jobPartUsages()
+            ->whereIn('status', ['draft', 'approved'])
+            ->orderBy('id')
+            ->lockForUpdate()
+            ->get();
+        if ($usages->isEmpty()) {
+            return;
+        }
+
+        $quote = $job->quotations()->where('preparation_status', 'issued')->orderByDesc('revision')->orderByDesc('id')->first();
+        if ($quote && $quote->approval_status->value !== 'approved') {
+            throw ValidationException::withMessages(['status' => 'Customer quotation approval is required before issuing repair parts.']);
+        }
+
+        foreach ($usages as $usage) {
             $part = $this->lockPart($usage->spare_part_id, $usage->location_id);
             $quantity = BigDecimal::of($usage->quantity);
             $this->ensureAvailable($part->id, $usage->location_id, $quantity);
-            $quote = $job->quotations()->where('preparation_status', 'issued')->orderByDesc('revision')->orderByDesc('id')->first();
-            if ($quote && $quote->approval_status->value !== 'approved') {
-                throw ValidationException::withMessages(['usage' => 'Customer quotation approval is required before issuing repair parts.']);
-            }
             $cost = app(InventoryService::class)->latestUnitCost($part->id, $usage->location_id);
             $usage->fill(['status' => 'issued', 'unit_cost' => $cost, 'approved_at' => now(), 'approved_by_user_id' => $actor->id])->save();
-            $this->movement($part->id, $usage->location_id, 'job_issue', $quantity->negated(), $actor, $job->job_number, 'Approved repair part issue', 'job-issue:'.$usage->id, ['job_part_usage_id' => $usage->id, 'unit_cost' => $cost]);
+            $this->movement($part->id, $usage->location_id, 'job_issue', $quantity->negated(), $actor, $job->job_number, 'Issued on job completion', 'job-issue:'.$usage->id, ['job_part_usage_id' => $usage->id, 'unit_cost' => $cost]);
             if (! $quote) {
                 $parts = BigDecimal::of($job->parts_charge)->plus($quantity->multipliedBy($usage->unit_price)->toScale(2, RoundingMode::HalfUp));
                 $job->fill(['parts_charge' => (string) $parts, 'total_job_amount' => (string) $parts->plus($job->labour_charge)->toScale(2)])->save();
             }
             BusinessAudit::record($actor, 'inventory.part.issued', JobPartUsage::class, $usage->id, newValues: ['quantity' => $usage->quantity, 'job_number' => $job->job_number]);
-
-            return $usage;
-        }, 3);
+        }
     }
 
     public function adjust(array $data, User $actor): StockAdjustment
@@ -158,16 +181,21 @@ class StockWorkflowService
 
     public function cancelUsage(JobPartUsage $usage, string $reason, User $actor): JobPartUsage
     {
-        Gate::forUser($actor)->authorize('inventory.issue');
-
         return DB::transaction(function () use ($usage, $reason, $actor) {
             $job = RepairJob::whereKey($usage->repair_job_id)->lockForUpdate()->firstOrFail();
             $usage = JobPartUsage::whereKey($usage->id)->lockForUpdate()->firstOrFail();
+            if ($usage->status === 'issued') {
+                Gate::forUser($actor)->authorize('inventory.issue');
+            } else {
+                Gate::forUser($actor)->authorize('repair', $job);
+            }
             if ($usage->status === 'cancelled') {
                 return $usage;
             }
-            $this->assertUnbilled($job);
             if ($usage->status === 'issued') {
+                if ($job->invoiceJobs()->exists()) {
+                    throw ValidationException::withMessages(['usage' => 'Issued parts cannot be returned after the job has been invoiced.']);
+                }
                 $part = $this->lockPart($usage->spare_part_id, $usage->location_id);
                 $return = StockReturn::create(['return_number' => 'RPR-'.$usage->id, 'return_type' => 'repair_return', 'repair_job_id' => $job->id, 'returned_at' => now(), 'recorded_by_user_id' => $actor->id, 'status' => 'finalized', 'reason' => $reason, 'idempotency_key' => 'repair-return:'.$usage->id]);
                 $item = $return->items()->create(['spare_part_id' => $part->id, 'location_id' => $usage->location_id, 'quantity' => $usage->quantity, 'unit_cost' => $usage->unit_cost, 'condition' => 'resalable', 'notes' => 'Returned complete issue '.$usage->id]);
@@ -225,13 +253,6 @@ class StockWorkflowService
     {
         if ($quantity->isGreaterThan($this->balance($part, $location))) {
             throw ValidationException::withMessages(['quantity' => 'Insufficient stock; refresh and try again.']);
-        }
-    }
-
-    private function assertUnbilled(RepairJob $job): void
-    {
-        if ($job->invoiceJobs()->exists() || in_array($job->status->value, ['Cancelled', 'Delivered', 'Unable to Repair'], true)) {
-            throw ValidationException::withMessages(['repair_job_id' => 'Parts cannot change for billed or closed jobs.']);
         }
     }
 

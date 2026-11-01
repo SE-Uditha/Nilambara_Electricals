@@ -2,7 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Enums\JobStatus;
 use App\Models\User;
+use App\Modules\Inventory\Models\JobPartUsage;
 use App\Modules\Inventory\Models\SparePart;
 use App\Modules\Inventory\Services\InventoryService;
 use App\Modules\Inventory\Services\StockWorkflowService;
@@ -91,7 +93,7 @@ class StockPurchasingWorkflowTest extends TestCase
         $this->get(route('suppliers.show', $purchase->supplier_id))->assertOk();
     }
 
-    public function test_repair_request_does_not_deduct_stock_and_repeated_issue_deducts_once(): void
+    public function test_repair_request_does_not_deduct_stock_until_job_completion_and_is_issued_once(): void
     {
         $actor = $this->actor();
         $location = $this->location();
@@ -104,14 +106,75 @@ class StockPurchasingWorkflowTest extends TestCase
         $service->request($data, $actor);
         $this->assertDatabaseCount('job_part_usages', 1);
         $this->assertDatabaseCount('stock_movements', 1);
-        $service->issue($usage, $actor);
-        $service->issue($usage, $actor);
-        $this->assertSame('3.000', (string) app(InventoryService::class)->availableAtDefaultLocation($part));
-        $this->assertSame('35.00', $job->fresh()->total_job_amount);
-        $this->assertSame('3.0000', $usage->fresh()->unit_cost);
+        $this->assertSame('5.000', (string) app(InventoryService::class)->availableAtDefaultLocation($part));
+        $edited = $service->updateRequest($usage, array_replace($data, ['quantity' => '2.500']), $actor);
+        $this->assertSame('2.500', (string) $edited->quantity);
+        app(RepairJobService::class)->updateStatus($job, ['status' => JobStatus::RepairCompleted->value], $actor);
+        app(RepairJobService::class)->updateStatus($job->fresh(), ['status' => JobStatus::RepairCompleted->value], $actor);
+        $this->assertSame('2.500', (string) app(InventoryService::class)->availableAtDefaultLocation($part));
+        $this->assertSame('41.25', $job->fresh()->total_job_amount);
+        $this->assertSame('3.0000', $edited->fresh()->unit_cost);
         $this->assertDatabaseCount('stock_movements', 2);
         $this->actingAs($actor)->get(route('stock-issues.index'))->assertOk();
         $this->get(route('inventory.show', $part))->assertOk();
+    }
+
+    public function test_cancelled_job_keeps_part_requests_and_repair_information_without_stock_changes(): void
+    {
+        $actor = $this->actor();
+        $location = $this->location();
+        $part = $this->part(['default_location_id' => $location->id]);
+        $this->movement($part, $location, ['quantity_delta' => '5.000']);
+        $job = $this->job(null, ['reported_fault' => 'Customer reported a burnt winding.']);
+        $jobs = app(RepairJobService::class);
+        $jobs->updateStatus($job, ['status' => JobStatus::Cancelled->value, 'cancellation_reason' => 'Customer declined the quotation.'], $actor);
+        $this->actingAs($actor)->post(route('stock-issues.store'), [
+            'repair_job_id' => $job->id, 'spare_part_id' => $part->id, 'location_id' => $location->id,
+            'quantity' => '2.000', 'idempotency_key' => (string) Str::uuid(),
+        ])->assertSessionHasNoErrors();
+        $usage = JobPartUsage::query()->sole();
+        $this->put(route('stock-issues.update', $usage), [
+            'spare_part_id' => $part->id, 'location_id' => $location->id,
+            'quantity' => '1.500', 'notes' => 'Saved for the customer to return later.',
+        ])->assertSessionHasNoErrors();
+        $jobs->recordRepairInformation($job, ['work_performed' => 'Repair estimate prepared.', 'parts_used' => 'Replacement winding', 'parts_quantity' => '1.000', 'parts_cost' => '250.00', 'labor_cost' => '300.00'], $actor);
+
+        $this->assertSame('draft', $usage->fresh()->status);
+        $this->assertSame('1.500', (string) $usage->fresh()->quantity);
+        $this->assertSame('5.000', (string) app(InventoryService::class)->availableAtDefaultLocation($part));
+        $this->assertDatabaseCount('stock_movements', 1);
+        $this->actingAs($actor)->get(route('repair-jobs.show', $job))
+            ->assertOk()
+            ->assertSee('Customer reported a burnt winding.')
+            ->assertSee('Replacement winding')
+            ->assertSee($part->name)
+            ->assertSee('Saved for the customer to return later.')
+            ->assertSee('250.00')
+            ->assertSee('300.00')
+            ->assertSee('Customer declined the quotation.');
+    }
+
+    public function test_insufficient_stock_rolls_back_completion_and_open_part_requests(): void
+    {
+        $actor = $this->actor();
+        $location = $this->location();
+        $part = $this->part(['default_location_id' => $location->id]);
+        $this->movement($part, $location, ['quantity_delta' => '1.000']);
+        $job = $this->job();
+        $usage = app(StockWorkflowService::class)->request([
+            'repair_job_id' => $job->id, 'spare_part_id' => $part->id, 'location_id' => $location->id,
+            'quantity' => '2.000', 'idempotency_key' => (string) Str::uuid(),
+        ], $actor);
+
+        try {
+            app(RepairJobService::class)->updateStatus($job, ['status' => JobStatus::RepairCompleted->value], $actor);
+            $this->fail('Completion should fail when requested stock is unavailable.');
+        } catch (ValidationException) {
+            $this->assertSame(JobStatus::Received, $job->fresh()->status);
+            $this->assertSame('draft', $usage->fresh()->status);
+            $this->assertSame('1.000', (string) app(InventoryService::class)->availableAtDefaultLocation($part));
+            $this->assertDatabaseCount('stock_movements', 1);
+        }
     }
 
     public function test_stock_correction_damage_count_and_replay_preserve_history(): void
@@ -174,7 +237,7 @@ class StockPurchasingWorkflowTest extends TestCase
         $job = $this->job();
         $service = app(StockWorkflowService::class);
         $usage = $service->request(['repair_job_id' => $job->id, 'spare_part_id' => $part->id, 'location_id' => $location->id, 'quantity' => '2.000', 'idempotency_key' => (string) Str::uuid()], $actor);
-        $service->issue($usage, $actor);
+        app(RepairJobService::class)->updateStatus($job, ['status' => JobStatus::RepairCompleted->value], $actor);
         $service->cancelUsage($usage, 'All unused parts physically returned', $actor);
         $service->cancelUsage($usage, 'All unused parts physically returned', $actor);
         $this->assertSame('3.000', (string) app(InventoryService::class)->availableAtDefaultLocation($part));
@@ -256,10 +319,9 @@ class StockPurchasingWorkflowTest extends TestCase
         $this->assertDatabaseCount('stock_movements', 1);
         $stock = app(StockWorkflowService::class);
         $usage = $stock->request(['repair_job_id' => $job->id, 'spare_part_id' => $part->id, 'location_id' => $location->id, 'quantity' => '2.000', 'idempotency_key' => (string) Str::uuid()], $actor);
-        $stock->issue($usage, $actor);
-        $this->assertSame('30.00', $job->fresh()->total_job_amount);
         $jobs = app(RepairJobService::class);
         $jobs->updateStatus($job, ['status' => 'Repair Completed'], $actor);
+        $this->assertSame('30.00', $job->fresh()->total_job_amount);
         $this->assertNotNull($job->fresh()->completed_at);
         $invoice = app(InvoiceService::class)->create(['customer_id' => $customer->id, 'repair_job_ids' => [$job->id], 'invoice_date' => now()->toDateString(), 'payment_terms' => 'cash', 'payment_method' => 'cash', 'intent' => 'issue'], $actor);
         $balances = app(InvoiceBalanceService::class);

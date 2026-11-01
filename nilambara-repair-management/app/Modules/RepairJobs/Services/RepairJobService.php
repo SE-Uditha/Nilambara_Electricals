@@ -6,6 +6,7 @@ use App\Enums\ApprovalStatus;
 use App\Enums\JobStatus;
 use App\Models\User;
 use App\Modules\Employees\Models\Employee;
+use App\Modules\Inventory\Services\StockWorkflowService;
 use App\Modules\JobTracking\Models\JobStatusHistory;
 use App\Modules\RepairJobs\Models\JobContactAttempt;
 use App\Modules\RepairJobs\Models\JobInspection;
@@ -348,6 +349,9 @@ class RepairJobService
             }
 
             $lockedJob->save();
+            if ($next === JobStatus::RepairCompleted) {
+                app(StockWorkflowService::class)->completeJobParts($lockedJob, $user);
+            }
             JobStatusHistory::query()->create([
                 'repair_job_id' => $lockedJob->getKey(),
                 'previous_status' => $previous->value,

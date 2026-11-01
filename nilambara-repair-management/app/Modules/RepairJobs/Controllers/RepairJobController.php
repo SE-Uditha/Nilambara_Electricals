@@ -4,21 +4,23 @@ namespace App\Modules\RepairJobs\Controllers;
 
 use App\Enums\JobStatus;
 use App\Http\Controllers\Controller;
+use App\Modules\Approvals\Services\ApprovalAccess;
+use App\Modules\Approvals\Services\ApprovalService;
 use App\Modules\Employees\Models\Employee;
 use App\Modules\Employees\Services\EmployeeRegistrationService;
-use App\Rules\PhoneNumber;
+use App\Modules\Inventory\Models\SparePart;
+use App\Modules\Inventory\Models\StockLocation;
 use App\Modules\Payments\Models\PaymentAllocation;
 use App\Modules\RepairJobs\Models\RepairJob;
 use App\Modules\RepairJobs\Requests\AssignTechnicianRequest;
 use App\Modules\RepairJobs\Requests\RequestRepairJobEditRequest;
-use App\Modules\Approvals\Services\ApprovalAccess;
-use App\Modules\Approvals\Services\ApprovalService;
 use App\Modules\RepairJobs\Requests\SaveJobInspectionRequest;
 use App\Modules\RepairJobs\Requests\SaveRepairInformationRequest;
 use App\Modules\RepairJobs\Requests\UpdateJobStatusRequest;
 use App\Modules\RepairJobs\Requests\UpdateRepairJobRequest;
 use App\Modules\RepairJobs\Services\RepairJobService;
 use App\Modules\RepairReceipts\Controllers\RepairReceiptController;
+use App\Rules\PhoneNumber;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
@@ -109,6 +111,8 @@ class RepairJobController extends Controller
             'technician',
             'jobInspections.inspectedByEmployee',
             'jobInspections.repairedByEmployee',
+            'jobPartUsages.sparePart',
+            'jobPartUsages.location',
             'contactAttempts.recordedBy',
             'jobStatusHistories' => fn ($history) => $history->with('changedByUser')
                 ->orderByDesc('changed_at')
@@ -136,6 +140,8 @@ class RepairJobController extends Controller
             'advancePaid' => $advancePaid,
             'advancePayments' => $advancePayments,
             'statuses' => JobStatus::cases(),
+            'parts' => SparePart::query()->where('is_active', true)->orderBy('name')->get(),
+            'locations' => StockLocation::query()->where('is_active', true)->orderBy('code')->get(),
         ]);
     }
 

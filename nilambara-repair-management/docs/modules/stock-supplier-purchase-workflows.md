@@ -18,7 +18,7 @@ Purchase and GRN pages provide browser print, PDF and duplicate copies using the
 
 ## Repair parts
 
-Authorized technicians request parts for jobs they may repair. Requests do not deduct or reserve stock. A stock issuer approves and issues an open request; only this step deducts stock. An issued customer quotation must be approved before parts can be issued. POS and repair issues use the same stock balance and product lock.
+Authorized users manage job part requests from Job Details in any job status. Requests do not deduct or reserve stock. Open requests are issued automatically, once, in the transaction that changes the job to Repair Completed; insufficient stock prevents that status change. An issued customer quotation must be approved before repair parts can be issued. POS and repair issues use the same stock balance and product lock.
 
 Before billing, an issuer can cancel an unissued request or return an entire unused, resalable issue. Confirm that the goods have physically returned. The original issue movement is retained with a linked return movement. Partial return of one repair issue is not yet provided. Record damaged goods through the damage workflow instead. Closed/billed job pricing and part use cannot silently change.
 

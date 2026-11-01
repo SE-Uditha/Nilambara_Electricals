@@ -63,7 +63,7 @@ Only Laravel's default infrastructure migrations are in Step 1. The business sch
 
 - A receipt and its repair job must be created consistently. Automatic identifiers and manual job numbers require database uniqueness and concurrency-safe generation.
 - One invoice can contain several jobs belonging to the same customer. One invoice can receive multiple payments, including allocations of earlier advances.
-- Repairs and POS share stock. Approving or issuing a repair part must deduct stock once; returns, cancellation, and reversals require linked compensating transactions.
+- Repairs and POS share stock. Repair part requests remain non-stock drafts until the job transitions to Repair Completed, when each open usage deducts stock once; returns and reversals require linked compensating transactions. Cancelled job requests do not deduct stock.
 - Stock and payment changes belonging to the same operation must commit or roll back together. Use database transactions and concurrency controls appropriate to each operation.
 - Important financial and stock transactions use controlled cancellation or reversal rather than silent destructive deletion. Status changes record their actor and timestamp.
 - Profit estimates depend on costs, discounts, and any agreed expenses; sales totals must not be presented as profit.

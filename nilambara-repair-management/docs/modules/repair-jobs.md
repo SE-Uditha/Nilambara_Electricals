@@ -6,11 +6,11 @@ Step 5 adds job browsing and the initial repair-workflow operations to the exist
 
 The repair-job list is database-paginated and supports partial search across job identifiers, customer/name/mobile, and item information, plus filters for current status, job type, and received date. The status search uses the same authorized records. Administrator and Cashier use the shared job-view policy. Cashier includes inspection, repair and completion duties; repair assignments reference active employee records independently of login roles.
 
-The detail page presents the current job, linked receipt/customer, technician, inspection and repair notes, and append-only status history. Financial totals and outstanding balances are intentionally unavailable until an authorized billing workflow provides them.
+The detail page presents the current job, linked receipt/customer, technician, inspection and repair notes, required inventory parts, estimated costs, and append-only status history. Repair details, part requests, and cancellation information remain visible after cancellation.
 
 ## Assignment, inspection, and repair notes
 
-Users with `jobs.assign` may assign an active technician employee. Users with `jobs.inspect` may record inspection date, findings, parts used, quantity, and inspected-by employee. Users with `jobs.repair` may record work performed, parts/cost notes, repaired-by employee, and completion date. These operations validate active employees and append audit events. Parts are notes only: Step 5 does not deduct or reserve inventory.
+Users with `jobs.assign` may assign an active technician employee. Users with `jobs.inspect` may record inspection date, findings, parts used, quantity, and inspected-by employee. Users with `jobs.repair` may record work performed, parts/cost notes, repaired-by employee, and completion date. These operations validate active employees and append audit events. The Job Details page also lets authorized users request, edit, and cancel inventory part requests in any job status, including cancelled. Requests do not reserve or deduct stock. On the transition to Repair Completed, open requests are checked against available stock and posted once in the same transaction as the status change. A failed stock check rolls back completion; cancelled-job requests do not create stock movements.
 
 ## Permissions and scope
 
@@ -22,7 +22,7 @@ Users with `jobs.assign` may assign an active technician employee. Users with `j
 - `jobs.update-status`: change status and append history.
 - `jobs.complete` and `jobs.cancel`: additional authorization for those status values.
 
-Quotation approval, final invoicing, stock movements, testing workflows, customer delivery, and warranty features remain future work. See the [job-status guide](job-status-tracking.md) for status history behavior.
+Final invoicing, testing workflows, customer delivery, and warranty features remain separate workflows. See the [job-status guide](job-status-tracking.md) for status history behavior.
 
 
 ## Unified job acceptance and customer receipts (22 October 2026)
@@ -41,7 +41,7 @@ Verification: 235 isolated MySQL tests passed (3,707 assertions), followed by co
 
 A receiving receipt is an acknowledgement of the item, not a completed-work invoice. It never prints labour costs or repair totals, including for old snapshots. Zero advances are omitted; a positive advance and its payment reference remain visible. New intake no longer requests labour cost. Job totals are displayed after completion, and invoicing continues to accept only completed/ready jobs.
 
-On a completed unbilled job, select Prepare Final Bill / Invoice. Enter the base labour charge, select stock spare parts and quantities, and add custom description/quantity/unit-price lines. A single typed amount uses quantity 1. Save Bill Changes issues new spare parts from inventory and recalculates totals transactionally. Existing issued parts are listed separately to avoid adding them twice. Repeated submission with the same key does not issue the same parts again. Insufficient stock rolls back charges, prices and stock requests together.
+Record required stock parts from Job Details before completion. Marking the job Repair Completed posts those open requests to stock exactly once; final bill preparation never issues stock. On a completed unbilled job, select Prepare Final Bill / Invoice, enter the base labour charge, and add custom description/quantity/unit-price lines. A single typed amount uses quantity 1. Existing issued parts are listed in the bill and contribute to invoice totals. Insufficient stock prevents completion and leaves the job and ledger unchanged.
 
 Custom charge lines are stored in repair_job_charges (many lines belong to one repair_jobs record). The migration uses InnoDB, utf8mb4, DECIMAL quantity/prices/totals, restrictive foreign keys, unique job/line numbers and financial check constraints. Removed custom lines are retained with removed_at and audit history. Existing tables and historical records are preserved.
 

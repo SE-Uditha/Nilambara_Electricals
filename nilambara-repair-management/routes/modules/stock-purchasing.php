@@ -18,8 +18,8 @@ Route::put('/inventory/{part}', [InventoryController::class, 'save'])->middlewar
 Route::post('/inventory/{part}/{operation}', [InventoryController::class, 'operation'])->whereIn('operation', ['adjust', 'count'])->name('inventory.operation');
 Route::get('/stock-issues', [InventoryController::class, 'issues'])->name('stock-issues.index');
 Route::post('/stock-issues', [InventoryController::class, 'requestPart'])->middleware('can:jobs.repair')->name('stock-issues.store');
-Route::post('/stock-issues/{usage}/issue', [InventoryController::class, 'issue'])->middleware('can:inventory.issue')->name('stock-issues.issue');
-Route::post('/stock-issues/{usage}/cancel', [InventoryController::class, 'cancelUsage'])->middleware('can:inventory.issue')->name('stock-issues.cancel');
+Route::put('/stock-issues/{usage}', [InventoryController::class, 'updateUsage'])->middleware('can:jobs.repair')->name('stock-issues.update');
+Route::post('/stock-issues/{usage}/cancel', [InventoryController::class, 'cancelUsage'])->name('stock-issues.cancel');
 
 Route::get('/suppliers', [SupplierController::class, 'index'])->name('suppliers.index');
 Route::get('/suppliers/create', [SupplierController::class, 'form'])->name('suppliers.create');
