@@ -24,7 +24,7 @@ class StoreRepairReceiptRequest extends FormRequest
                 'integer',
                 Rule::exists('customers', 'id')->where(fn ($query) => $query->where('is_active', true)),
             ],
-            'job_number' => ['required', 'string', 'max:60', 'unique:repair_jobs,job_number'],
+            'job_number' => ['nullable', 'string', 'max:60', 'unique:repair_jobs,job_number'],
             'job_type' => ['required', Rule::enum(RepairJobType::class)],
             'item_name' => ['required', 'string', 'max:255'],
             'brand' => ['nullable', 'required_without:model', 'string', 'max:150'],

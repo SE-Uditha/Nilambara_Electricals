@@ -10,7 +10,7 @@
             <p class="mt-1 text-sm text-slate-500">{{ __('ui.quotations_description') }}</p>
         </div>
         @can('create', App\Modules\Quotations\Models\Quotation::class)
-            <a href="{{ route('quotations.create') }}" class="rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white hover:bg-teal-800">{{ __('ui.new_quotation') }}</a>
+            <a href="{{ route('quotations.create') }}" class="ui-create-action rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white hover:bg-teal-800"><x-icon name="plus" :size="18" />{{ __('ui.new_quotation') }}</a>
         @endcan
     </div>
 
@@ -43,10 +43,10 @@
                             <td class="px-4 py-3">{{ $quotation->repairJob->item_name }}</td>
                             <td class="whitespace-nowrap px-4 py-3 font-semibold">LKR {{ \Brick\Math\BigDecimal::of($quotation->total)->toScale(2) }}</td>
                             <td class="whitespace-nowrap px-4 py-3">{{ $quotation->valid_until?->format(config('business.date_format')) ?: '—' }}</td>
-                            <td class="whitespace-nowrap px-4 py-3">{{ __('ui.preparation_'.$quotation->preparation_status->value) }}</td>
-                            <td class="whitespace-nowrap px-4 py-3">{{ __('ui.approval_'.$quotation->approval_status->value) }}</td>
+                            <td class="whitespace-nowrap px-4 py-3"><x-status-badge :status="$quotation->preparation_status" :label="__('ui.preparation_'.$quotation->preparation_status->value)" /></td>
+                            <td class="whitespace-nowrap px-4 py-3"><x-status-badge :status="$quotation->approval_status" :label="__('ui.approval_'.$quotation->approval_status->value)" /></td>
                             <td class="whitespace-nowrap px-4 py-3">{{ $quotation->createdByUser?->name ?: '—' }}</td>
-                            <td class="whitespace-nowrap px-4 py-3"><div class="flex items-center gap-3"><a class="font-semibold text-teal-700 hover:underline" href="{{ route('quotations.show', $quotation) }}">{{ __('ui.view') }}</a>@can('print', $quotation)<a class="font-semibold text-slate-600 hover:underline" href="{{ route('quotations.print', $quotation) }}">{{ __('ui.print') }}</a>@endcan</div></td>
+                            <td class="whitespace-nowrap px-4 py-3"><div class="flex items-center gap-3"><a  href="{{ route('quotations.show', $quotation) }}" class="ui-icon-action ui-icon-action--blue" title="{{ __('ui.view') }}" aria-label="{{ __('ui.view') }}"><x-action-symbol icon="eye" :label="__('ui.view')" /></a>@can('print', $quotation)<a  href="{{ route('quotations.print', $quotation) }}" class="ui-icon-action ui-icon-action--slate" title="{{ __('ui.print') }}" aria-label="{{ __('ui.print') }}"><x-action-symbol icon="printer" :label="__('ui.print')" /></a>@endcan</div></td>
                         </tr>
                     @empty
                         <tr><td colspan="11" class="px-4 py-10 text-center text-sm text-slate-500">{{ __('ui.no_quotations_found') }}</td></tr>

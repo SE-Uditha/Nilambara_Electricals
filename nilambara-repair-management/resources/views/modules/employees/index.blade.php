@@ -10,7 +10,7 @@
             <p class="mt-1 text-sm text-slate-500">Employee records and linked staff accounts.</p>
         </div>
         @can('employees.create')
-            <a href="{{ route('employees.create') }}" class="rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-teal-800">Register employee</a>
+            <a href="{{ route('employees.create') }}" class="ui-create-action rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-teal-800"><x-icon name="plus" :size="18" />Register employee</a>
         @endcan
     </div>
 
@@ -72,9 +72,9 @@
                             </td>
                             <td class="px-5 py-4">
                                 <div class="flex gap-3">
-                                    <a href="{{ route('employees.show', $employee) }}" class="font-semibold text-teal-700 hover:text-teal-900">View</a>
+                                    <a href="{{ route('employees.show', $employee) }}"  class="ui-icon-action ui-icon-action--blue" title="{{ __('ui.view') }}" aria-label="{{ __('ui.view') }}"><x-action-symbol icon="eye" :label="__('ui.view')" /></a>
                                     @can('employees.update')
-                                        <a href="{{ route('employees.edit', $employee) }}" class="font-semibold text-slate-600 hover:text-slate-900">Edit</a>
+                                        <a href="{{ route('employees.edit', $employee) }}"  class="ui-icon-action ui-icon-action--blue" title="{{ __('ui.edit') }}" aria-label="{{ __('ui.edit') }}"><x-action-symbol icon="edit" :label="__('ui.edit')" /></a>
                                     @endcan
                                 </div>
                             </td>

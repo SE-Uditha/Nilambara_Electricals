@@ -30,7 +30,7 @@ class CustomerManagementTest extends TestCase
 
         $individual = Customer::query()->sole();
         $this->assertSame('CUS-', substr($individual->customer_code, 0, 4));
-        $this->assertSame(30, strlen($individual->customer_code));
+        $this->assertSame('CUS-'.str_pad((string) $individual->id, 5, '0', STR_PAD_LEFT), $individual->customer_code);
         $this->assertSame('Nalaka Perera', $individual->display_name);
         $this->assertSame('0.00', $individual->opening_balance);
         $this->assertDatabaseCount('customer_account_entries', 0);

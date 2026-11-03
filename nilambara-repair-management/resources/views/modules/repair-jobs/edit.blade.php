@@ -19,7 +19,11 @@
                 <div><label class="form-label" for="job_number">{{ __('ui.manual_job_number') }}</label><input id="job_number" value="{{ $job->job_number }}" class="form-input bg-slate-50" readonly></div>
                 <div><label class="form-label" for="job_type">{{ __('ui.job_type') }}</label><select id="job_type" name="job_type" class="form-input" required>@foreach (['normal', 'special', 'urgent'] as $type)<option value="{{ $type }}" @selected(old('job_type', $job->job_type) === $type)>{{ __('ui.job_type_'.$type) }}</option>@endforeach</select>@error('job_type')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror</div>
                 <div><label class="form-label">{{ __('ui.customer') }}</label><p class="form-input bg-slate-50">{{ $job->customer->display_name }}</p></div>
-                <div><label class="form-label" for="item_name">{{ __('ui.item_name') }}</label><input id="item_name" name="item_name" value="{{ old('item_name', $job->item_name) }}" class="form-input" required maxlength="255">@error('item_name')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror</div>
+                <div>
+                    <label class="form-label" for="item_name">{{ __('ui.item_name') }}</label>
+                    @include('modules.repair-jobs.partials.item-name-input', ['value' => old('item_name', $job->item_name)])
+                    @error('item_name')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+                </div>
                 <div><label class="form-label" for="brand">{{ __('ui.brand') }}</label><input id="brand" name="brand" value="{{ old('brand', $job->brand) }}" class="form-input" maxlength="150">@error('brand')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror</div>
                 <div><label class="form-label" for="model">{{ __('ui.model') }}</label><input id="model" name="model" value="{{ old('model', $job->model) }}" class="form-input" maxlength="150">@error('model')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror</div>
                 <p class="sm:col-span-2 text-[10px] text-slate-400">{{ __('ui.brand_or_model_required') }}</p>

@@ -16,6 +16,7 @@ use App\Modules\RepairJobs\Models\RepairJob;
 use App\Modules\RepairReceipts\Models\RepairReceipt;
 use App\Modules\RepairReceipts\Services\RepairReceiptService;
 use App\Modules\RolesPermissions\Models\Permission;
+use App\Modules\Settings\Models\SystemSetting;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -47,6 +48,43 @@ class RepairReceiptAndJobManagementTest extends TestCase
 
         $this->post(route('repair-jobs.store'), $this->receiptData($customer, $receiver, ['job_number' => 'J-INSP-2', 'labor_cost' => '500.00']))->assertSessionHasNoErrors();
         $this->assertSame('500.00', number_format((float) RepairJob::latest('id')->first()->labour_cost, 2, '.', ''));
+    }
+
+    public function test_item_name_presets_are_offered_on_create_and_edit_while_manual_names_remain_valid(): void
+    {
+        $admin = $this->userWithRole('administrator');
+        $customer = $this->customer();
+        $receiver = $this->employee();
+        SystemSetting::query()->create([
+            'group' => 'business', 'key' => 'common_item_names', 'value' => "Table fan\nPump & motor", 'value_type' => 'string',
+        ]);
+
+        $this->actingAs($admin)->get(route('repair-jobs.create'))->assertOk()
+            ->assertSee('id="item_name_preset"', false)
+            ->assertSee('<option value="Table fan">', false)
+            ->assertSee('<option value="Pump &amp; motor">', false)
+            ->assertSee('name="item_name"', false);
+
+        foreach (['Table fan', 'Custom workshop appliance'] as $index => $itemName) {
+            $this->post(route('repair-jobs.store'), $this->receiptData($customer, $receiver, [
+                'job_number' => 'ITEM-NAME-'.($index + 1), 'item_name' => $itemName,
+            ]))->assertSessionHasNoErrors();
+            $job = RepairJob::query()->where('job_number', 'ITEM-NAME-'.($index + 1))->sole();
+            $this->assertSame($itemName, $job->item_name);
+            $this->assertSame($itemName, data_get($job->receipt->document_snapshot, 'item.name'));
+        }
+
+        $this->get(route('repair-jobs.edit', $job))->assertOk()
+            ->assertSee('id="item_name_preset"', false)
+            ->assertSee('<option value="Table fan">', false)
+            ->assertSee('value="Custom workshop appliance"', false);
+
+        foreach (['Pump & motor', 'Another manually entered item'] as $itemName) {
+            $this->put(route('repair-jobs.update', $job), [
+                'job_type' => 'normal', 'item_name' => $itemName, 'brand' => 'Nilambara', 'model' => 'NP-60',
+            ])->assertSessionHasNoErrors();
+            $this->assertSame($itemName, $job->fresh()->item_name);
+        }
     }
 
     public function test_accepting_a_job_generates_one_receipt_and_exposes_print_pdf_and_legacy_redirects(): void

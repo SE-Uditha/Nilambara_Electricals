@@ -11,8 +11,8 @@
             <p class="mt-1 text-sm text-slate-500">{{ __('payments.payment_details') }}</p>
         </div>
         <div class="flex flex-wrap gap-2">
-            @can('print', $payment)<a href="{{ route('payments.print', $payment) }}" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700">{{ __('payments.print_receipt') }}</a>@endcan
-            @can('export', $payment)<a href="{{ route('payments.pdf', $payment) }}" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700">{{ __('payments.download_pdf') }}</a>@endcan
+            @can('print', $payment)<a href="{{ route('payments.print', $payment) }}"  class="ui-icon-action ui-icon-action--slate" title="{{ __('payments.print_receipt') }}" aria-label="{{ __('payments.print_receipt') }}"><x-action-symbol icon="printer" :label="__('payments.print_receipt')" /></a>@endcan
+            @can('export', $payment)<a href="{{ route('payments.pdf', $payment) }}"  class="ui-icon-action ui-icon-action--slate" title="{{ __('payments.download_pdf') }}" aria-label="{{ __('payments.download_pdf') }}"><x-action-symbol icon="download" :label="__('payments.download_pdf')" /></a>@endcan
         </div>
     </div>
 

@@ -51,7 +51,8 @@ class RepairReceiptService
 
             $receivedAt = now();
             $job = RepairJob::query()->create([
-                'job_number' => trim($data['job_number']),
+                // Blank manual numbers use a unique placeholder until the automatic reference is known.
+                'job_number' => trim((string) ($data['job_number'] ?? '')) ?: 'TMP-'.\Illuminate\Support\Str::uuid(),
                 'customer_id' => $customer->getKey(),
                 'item_name' => trim($data['item_name']),
                 'brand' => $this->nullableTrim($data['brand'] ?? null),
@@ -79,6 +80,7 @@ class RepairReceiptService
             $jobReference = 'JOB-'.str_pad((string) $job->getKey(), 5, '0', STR_PAD_LEFT);
             DB::table('repair_jobs')->where('id', $job->getKey())->update([
                 'automatic_number' => $jobReference,
+                'job_number' => str_starts_with((string) $job->job_number, 'TMP-') ? $jobReference : $job->job_number,
                 'updated_at' => $receivedAt,
             ]);
             $job->refresh();

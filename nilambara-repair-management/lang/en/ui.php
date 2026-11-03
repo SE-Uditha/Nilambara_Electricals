@@ -215,6 +215,7 @@ return [
     'all_employees' => 'All employees',
     'job_reference' => 'Job reference',
     'manual_job_number' => 'Manual job number',
+    'optional' => 'optional',
     'received_date' => 'Received date',
     'brand_model' => 'Brand / model',
     'no_repair_receipts' => 'No repair receipts found',

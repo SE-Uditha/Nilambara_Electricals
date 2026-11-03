@@ -10,7 +10,7 @@
             <p class="mt-1 text-sm text-slate-500">{{ __('ui.customer_list_description') }}</p>
         </div>
         @can('customers.create')
-            <a href="{{ route('customers.create') }}" class="rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-teal-800">{{ __('ui.register_customer') }}</a>
+            <a href="{{ route('customers.create') }}" class="ui-create-action rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-teal-800"><x-icon name="plus" :size="18" />{{ __('ui.register_customer') }}</a>
         @endcan
     </div>
 
@@ -69,12 +69,12 @@
                             <td class="px-5 py-4"><span @class(['rounded-full px-2.5 py-1 text-[10px] font-semibold', 'bg-emerald-50 text-emerald-700' => $customer->is_active, 'bg-slate-100 text-slate-500' => ! $customer->is_active])>{{ $customer->is_active ? __('ui.active') : __('ui.inactive') }}</span></td>
                             <td class="px-5 py-4">
                                 <div class="flex gap-3">
-                                    <a href="{{ route('customers.show', $customer) }}" class="font-semibold text-teal-700 hover:text-teal-900">{{ __('ui.view') }}</a>
+                                    <a href="{{ route('customers.show', $customer) }}"  class="ui-icon-action ui-icon-action--blue" title="{{ __('ui.view') }}" aria-label="{{ __('ui.view') }}"><x-action-symbol icon="eye" :label="__('ui.view')" /></a>
                                     @can('customers.update')
-                                        <a href="{{ route('customers.edit', $customer) }}" class="font-semibold text-slate-600 hover:text-slate-900">{{ __('ui.edit') }}</a>
+                                        <a href="{{ route('customers.edit', $customer) }}"  class="ui-icon-action ui-icon-action--blue" title="{{ __('ui.edit') }}" aria-label="{{ __('ui.edit') }}"><x-action-symbol icon="edit" :label="__('ui.edit')" /></a>
                                     @endcan
                                     @if (\App\Modules\Approvals\Services\ApprovalAccess::canRequestChange(auth()->user(), 'customer_update'))
-                                        <a href="{{ route('customers.request-edit', $customer) }}" class="font-semibold text-amber-700 hover:text-amber-900">{{ __('ui.request_edit') }}</a>
+                                        <a href="{{ route('customers.request-edit', $customer) }}"  class="ui-icon-action ui-icon-action--amber" title="{{ __('ui.request_edit') }}" aria-label="{{ __('ui.request_edit') }}"><x-action-symbol icon="edit" :label="__('ui.request_edit')" /></a>
                                     @endif
                                 </div>
                             </td>

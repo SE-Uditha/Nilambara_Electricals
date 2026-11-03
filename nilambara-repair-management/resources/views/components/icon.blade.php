@@ -92,6 +92,33 @@
         @case('eye-off')
             <path d="m3 3 18 18M10.6 5.1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-3.1 3.7M6.1 6.1A18.4 18.4 0 0 0 2 12s3.5 7 10 7a11.7 11.7 0 0 0 5.1-1.2M10 10a3 3 0 0 0 4 4" />
             @break
+        @case('plus')
+            <path d="M12 5v14M5 12h14" />
+            @break
+        @case('edit')
+            <path d="m16 3 5 5-12 12-6 1 1-6L16 3ZM13 6l5 5" />
+            @break
+        @case('trash')
+            <path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7" />
+            @break
+        @case('printer')
+            <path d="M6 9V3h12v6M6 17H3V9h18v8h-3M6 14h12v7H6v-7M17 11h.01" />
+            @break
+        @case('download')
+            <path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5" />
+            @break
+        @case('user-plus')
+            <circle cx="9" cy="7" r="4" /><path d="M2 21v-3a7 7 0 0 1 14 0v3M20 8v6M17 11h6" />
+            @break
+        @case('filter')
+            <path d="M3 4h18l-7 8v7l-4 2v-9L3 4Z" />
+            @break
+        @case('search')
+            <circle cx="10.5" cy="10.5" r="7.5" /><path d="m16 16 5 5" />
+            @break
+        @case('refresh')
+            <path d="M20 7v5h-5M4 17v-5h5M6.1 6.1A8 8 0 0 1 20 12M4 12a8 8 0 0 0 13.9 5.9" />
+            @break
         @default
             <circle cx="12" cy="12" r="9" /><path d="M12 8v5M12 16h.01" />
     @endswitch

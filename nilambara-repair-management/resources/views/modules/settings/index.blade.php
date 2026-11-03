@@ -27,7 +27,7 @@
         </div>
         <label class="form-label block">{{ __('settings.logo') }}<input class="form-input mt-1" type="file" name="logo" accept="image/png,image/jpeg,image/webp"><span class="mt-1 block text-xs text-slate-500">{{ __('settings.logo_help') }}</span></label>
         @error('logo')<p class="text-xs text-red-700">{{ $message }}</p>@enderror
-        @foreach (['common_faults', 'common_physical_conditions', 'common_visible_damages'] as $field)
+        @foreach (['common_item_names', 'common_faults', 'common_physical_conditions', 'common_visible_damages'] as $field)
             @include('modules.settings.partials.preset-list', ['field' => $field])
         @endforeach
         @can('settings.update')

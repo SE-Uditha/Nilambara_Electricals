@@ -211,6 +211,7 @@ return [
     'all_employees' => 'සියලු සේවකයන්',
     'job_reference' => 'ස්වයංක්‍රීය කාර්ය යොමුව',
     'manual_job_number' => 'අතින් ඇතුළත් කාර්ය අංකය',
+    'optional' => 'අත්‍යවශ්‍ය නොවේ',
     'received_date' => 'භාරගත් දිනය',
     'brand_model' => 'වෙළඳ නාමය / මාදිලිය',
     'no_repair_receipts' => 'අලුත්වැඩියා රිසිට්පත් හමු නොවීය',

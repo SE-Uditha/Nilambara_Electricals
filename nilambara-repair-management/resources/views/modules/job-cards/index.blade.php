@@ -39,11 +39,11 @@
                             <td class="px-5 py-4">{{ $job->customer->display_name }}</td>
                             <td class="px-5 py-4">{{ $job->item_name }}</td>
                             <td class="px-5 py-4">{{ $job->technician?->name ?: '—' }}</td>
-                            <td class="px-5 py-4">{{ $job->status->value }}</td>
+                            <td class="px-5 py-4"><x-status-badge :status="$job->status" /></td>
                             <td class="px-5 py-4">
                                 <div class="flex gap-3">
-                                    @can('job-cards.print')<a href="{{ route('job-cards.print', $job) }}" class="font-semibold text-teal-700 hover:text-teal-900">{{ __('ui.preview_print') }}</a>@endcan
-                                    @can('jobs.view')<a href="{{ route('repair-jobs.show', $job) }}" class="font-semibold text-slate-600 hover:text-slate-900">{{ __('ui.view_job') }}</a>@endcan
+                                    @can('job-cards.print')<a href="{{ route('job-cards.print', $job) }}"  class="ui-icon-action ui-icon-action--slate" title="{{ __('ui.preview_print') }}" aria-label="{{ __('ui.preview_print') }}"><x-action-symbol icon="printer" :label="__('ui.preview_print')" /></a>@endcan
+                                    @can('jobs.view')<a href="{{ route('repair-jobs.show', $job) }}"  class="ui-icon-action ui-icon-action--blue" title="{{ __('ui.view_job') }}" aria-label="{{ __('ui.view_job') }}"><x-action-symbol icon="eye" :label="__('ui.view_job')" /></a>@endcan
                                 </div>
                             </td>
                         </tr>

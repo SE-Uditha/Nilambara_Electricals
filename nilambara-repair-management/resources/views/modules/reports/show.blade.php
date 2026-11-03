@@ -9,7 +9,7 @@
             <h1 class="mt-2 text-2xl font-bold text-slate-900">{{ $data['title'] }}</h1>
         </div>
         <div class="flex gap-2">
-            <button type="button" class="rounded-lg border px-3 py-2 text-xs" onclick="window.print()">Print</button>
+            <button type="button"  onclick="window.print()" class="ui-icon-action ui-icon-action--slate" title="{{ __('ui.print') }}" aria-label="{{ __('ui.print') }}"><x-action-symbol icon="printer" :label="__('ui.print')" /></button>
             @can('reports.export')
             <a class="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold" href="{{ route('reports.export', ['report' => $report, 'format' => 'xlsx'] + request()->query()) }}">{{ __('reports.export_excel') }}</a>
             <a class="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold" href="{{ route('reports.export', ['report' => $report, 'format' => 'pdf'] + request()->query()) }}">{{ __('reports.export_pdf') }}</a>

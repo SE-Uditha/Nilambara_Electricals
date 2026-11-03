@@ -10,7 +10,7 @@
             <p class="mt-1 text-sm text-slate-500">{{ __('payments.list_description') }}</p>
         </div>
         @can('payments.receive')
-            <a href="{{ route('payments.create') }}" class="rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white hover:bg-teal-800">{{ __('payments.record_payment') }}</a>
+            <a href="{{ route('payments.create') }}" class="ui-create-action rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white hover:bg-teal-800"><x-icon name="plus" :size="18" />{{ __('payments.record_payment') }}</a>
         @endcan
     </div>
 
@@ -50,8 +50,8 @@
                             <td class="px-4 py-3">{{ __('payments.method_'.$payment->method->value) }}</td>
                             <td class="px-4 py-3 text-right font-semibold">{{ config('business.currency') }} {{ $payment->amount }}</td>
                             <td class="px-4 py-3">{{ $payment->receivedByEmployee?->name ?: '—' }}</td>
-                            <td class="px-4 py-3">{{ __('payments.status_'.$payment->balance_summary['status']) }}</td>
-                            <td class="px-4 py-3"><a href="{{ route('payments.show', $payment) }}" class="font-semibold text-teal-800 hover:underline">{{ __('payments.view') }}</a>@can('print', $payment)<a href="{{ route('payments.print', $payment) }}" class="ml-3 text-slate-600 hover:underline">{{ __('payments.print') }}</a>@endcan</td>
+                            <td class="px-4 py-3"><x-status-badge :status="$payment->balance_summary['status']" :label="__('payments.status_'.$payment->balance_summary['status'])" /></td>
+                            <td class="px-4 py-3"><a href="{{ route('payments.show', $payment) }}"  class="ui-icon-action ui-icon-action--blue" title="{{ __('payments.view') }}" aria-label="{{ __('payments.view') }}"><x-action-symbol icon="eye" :label="__('payments.view')" /></a>@can('print', $payment)<a href="{{ route('payments.print', $payment) }}"  class="ui-icon-action ui-icon-action--slate" title="{{ __('payments.print') }}" aria-label="{{ __('payments.print') }}"><x-action-symbol icon="printer" :label="__('payments.print')" /></a>@endcan</td>
                         </tr>
                     @empty
                         <tr><td colspan="10" class="px-4 py-14 text-center text-sm text-slate-500">{{ __('payments.no_payments') }}</td></tr>

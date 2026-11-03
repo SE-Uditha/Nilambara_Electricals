@@ -24,12 +24,12 @@ class CustomerService
             if ($prefix === '') {
                 throw new \LogicException('The customer code prefix must not be empty.');
             }
-            if (strlen($prefix) + 26 > 40) {
+            if (strlen($prefix) + 10 > 40) {
                 throw new \LogicException('The customer code prefix is too long for the customer ID column.');
             }
 
             $customer = Customer::query()->create([
-                'customer_code' => $prefix.Str::upper((string) Str::ulid()),
+                'customer_code' => 'TMP-'.Str::upper((string) Str::ulid()),
                 'customer_type' => $type,
                 'customer_name' => $type === CustomerType::Individual ? trim($data['customer_name']) : null,
                 'company_name' => $type === CustomerType::Company ? trim($data['company_name']) : null,
@@ -43,6 +43,12 @@ class CustomerService
                 'registration_date' => $data['registration_date'],
                 'is_active' => (bool) ($data['is_active'] ?? true),
             ]);
+
+            // The primary key gives a short, concurrency-safe sequential code; the code is immutable on the model, so write it directly.
+            DB::table('customers')->where('id', $customer->id)->update([
+                'customer_code' => $prefix.str_pad((string) $customer->id, 5, '0', STR_PAD_LEFT),
+            ]);
+            $customer->refresh();
 
             $openingBalance = (string) $customer->opening_balance;
 

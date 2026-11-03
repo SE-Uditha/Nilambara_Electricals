@@ -1,9 +1,10 @@
-@php($items = array_values(array_filter(preg_split('/\R/u', (string) old($field, config('business.'.$field))))))
-<div class="space-y-2" x-data="{ items: @js($items), draft: '', add() { const v = this.draft.replace(/\s+/g, ' ').trim(); if (v !== '' && v.length <= 150 && this.items.length < 100 && !this.items.some(i => i.toLowerCase() === v.toLowerCase())) { this.items.push(v); } this.draft = ''; } }">
+@php($items = array_values(array_filter(preg_split('/\R/u', (string) old($field, config('business.'.$field))), fn ($item) => trim($item) !== '')))
+@php($maxLength = $field === 'common_item_names' ? 255 : 150)
+<div class="space-y-2" x-data="{ items: @js($items), draft: '', add() { const v = this.draft.replace(/\s+/g, ' ').trim(); if (v !== '' && Array.from(v).length <= {{ $maxLength }} && this.items.length < 100 && !this.items.some(i => i.toLowerCase() === v.toLowerCase())) { this.items.push(v); } this.draft = ''; } }">
     <label class="form-label" for="{{ $field }}_draft">{{ __('settings.'.$field) }}</label>
     <input type="hidden" name="{{ $field }}" x-bind:value="items.join('\n')" value="{{ implode("\n", $items) }}">
     <div class="flex gap-2">
-        <input id="{{ $field }}_draft" type="text" maxlength="150" x-model="draft" x-on:keydown.enter.prevent="add()" class="form-input" placeholder="{{ __('settings.'.$field.'_placeholder') }}">
+        <input id="{{ $field }}_draft" type="text" maxlength="{{ $maxLength }}" x-model="draft" x-on:keydown.enter.prevent="add()" class="form-input" placeholder="{{ __('settings.'.$field.'_placeholder') }}">
         <button type="button" x-on:click="add()" class="shrink-0 rounded-lg bg-teal-700 px-4 py-2 text-sm font-semibold text-white">{{ __('settings.add_item') }}</button>
     </div>
     <ul class="flex flex-wrap gap-1.5">

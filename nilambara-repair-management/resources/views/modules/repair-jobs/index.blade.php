@@ -13,7 +13,7 @@
             <a href="{{ route('repair-jobs.status-search') }}" class="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600">{{ __('ui.job_status') }}</a>
             @can('job-cards.view')<a href="{{ route('job-cards.index') }}" class="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600">{{ __('ui.job_cards') }}</a>@endcan
             @if (auth()->user()->can('jobs.create') && auth()->user()->can('receipts.create'))
-                <a href="{{ route('repair-jobs.create') }}" class="rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white hover:bg-teal-800">{{ __('ui.new_repair_job') }}</a>
+                <a href="{{ route('repair-jobs.create') }}" class="ui-create-action rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white hover:bg-teal-800"><x-icon name="plus" :size="18" />{{ __('ui.new_repair_job') }}</a>
             @endif
         </div>
     </div>
@@ -73,17 +73,17 @@
                             <td class="px-4 py-4">{{ __('ui.job_type_'.$job->job_type) }}</td>
                             <td class="px-4 py-4">{{ $job->technician?->name ?: '—' }}</td>
                             <td class="px-4 py-4">{{ $job->received_at->timezone(config('business.timezone'))->format(config('business.date_format')) }}</td>
-                            <td class="px-4 py-4"><span class="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold text-slate-700">{{ $job->status->value }}</span></td>
+                            <td class="px-4 py-4"><x-status-badge :status="$job->status" /></td>
                             <td class="px-4 py-4">
                                 <div class="flex flex-wrap gap-3">
-                                    <a href="{{ route('repair-jobs.show', $job) }}" class="font-semibold text-teal-700 hover:text-teal-900">{{ __('ui.view') }}</a>
+                                    <a href="{{ route('repair-jobs.show', $job) }}"  class="ui-icon-action ui-icon-action--blue" title="{{ __('ui.view') }}" aria-label="{{ __('ui.view') }}"><x-action-symbol icon="eye" :label="__('ui.view')" /></a>
                                     @if ($job->receipt)
-                                        @can('receipts.print')<a href="{{ route('repair-jobs.receipt.print', $job) }}" class="font-semibold text-teal-700 hover:text-teal-900">{{ __('ui.print_receipt') }}</a>@endcan
+                                        @can('receipts.print')<a href="{{ route('repair-jobs.receipt.print', $job) }}"  class="ui-icon-action ui-icon-action--slate" title="{{ __('ui.print_receipt') }}" aria-label="{{ __('ui.print_receipt') }}"><x-action-symbol icon="printer" :label="__('ui.print_receipt')" /></a>@endcan
                                     @endif
-                                    @can('jobs.assign', $job)<a href="{{ route('repair-jobs.assign-form', $job) }}" class="font-semibold text-slate-600 hover:text-slate-900">{{ __('ui.assign') }}</a>@endcan
-                                    @can('jobs.update', $job)<a href="{{ route('repair-jobs.edit', $job) }}" class="font-semibold text-slate-600 hover:text-slate-900">{{ __('ui.edit') }}</a>@endcan
-                                                                        @if (\App\Modules\Approvals\Services\ApprovalAccess::canRequestChange(auth()->user(), 'job_update'))<a href="{{ route('repair-jobs.request-edit', $job) }}" class="font-semibold text-amber-700 hover:text-amber-900">{{ __('ui.request_edit') }}</a>@endif
-                                                                        @can('job-cards.print')<a href="{{ route('job-cards.print', $job) }}" class="font-semibold text-slate-600 hover:text-slate-900">{{ __('ui.job_card') }}</a>@endcan
+                                    @can('jobs.assign', $job)<a href="{{ route('repair-jobs.assign-form', $job) }}"  class="ui-icon-action ui-icon-action--blue" title="{{ __('ui.assign') }}" aria-label="{{ __('ui.assign') }}"><x-action-symbol icon="user-plus" :label="__('ui.assign')" /></a>@endcan
+                                    @can('jobs.update', $job)<a href="{{ route('repair-jobs.edit', $job) }}"  class="ui-icon-action ui-icon-action--blue" title="{{ __('ui.edit') }}" aria-label="{{ __('ui.edit') }}"><x-action-symbol icon="edit" :label="__('ui.edit')" /></a>@endcan
+                                                                        @if (\App\Modules\Approvals\Services\ApprovalAccess::canRequestChange(auth()->user(), 'job_update'))<a href="{{ route('repair-jobs.request-edit', $job) }}"  class="ui-icon-action ui-icon-action--amber" title="{{ __('ui.request_edit') }}" aria-label="{{ __('ui.request_edit') }}"><x-action-symbol icon="edit" :label="__('ui.request_edit')" /></a>@endif
+                                                                        @can('job-cards.print')<a href="{{ route('job-cards.print', $job) }}"  class="ui-icon-action ui-icon-action--slate" title="{{ __('ui.job_card') }}" aria-label="{{ __('ui.job_card') }}"><x-action-symbol icon="clipboard" :label="__('ui.job_card')" /></a>@endcan
                                 </div>
                             </td>
                         </tr>

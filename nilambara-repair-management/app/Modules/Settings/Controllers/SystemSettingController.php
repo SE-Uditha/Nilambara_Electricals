@@ -13,7 +13,7 @@ use Illuminate\Validation\ValidationException;
 
 class SystemSettingController
 {
-    private const PRESET_FIELDS = ['common_faults', 'common_physical_conditions', 'common_visible_damages'];
+    private const PRESET_FIELDS = ['common_item_names', 'common_faults', 'common_physical_conditions', 'common_visible_damages'];
 
     public function index(): View
     {
@@ -34,13 +34,14 @@ class SystemSettingController
             'document_footer' => ['nullable', 'string', 'max:2000'],
             'print_paper' => ['sometimes', Rule::in(['A4', 'A5'])],
             'logo' => ['nullable', File::image()->types(['jpg', 'jpeg', 'png'])->max(2048)],
+            'common_item_names' => ['nullable', 'string', 'max:25600'],
             'common_faults' => ['nullable', 'string', 'max:10000'],
             'common_physical_conditions' => ['nullable', 'string', 'max:10000'],
             'common_visible_damages' => ['nullable', 'string', 'max:10000'],
         ]);
         foreach (self::PRESET_FIELDS as $field) {
             if (array_key_exists($field, $values)) {
-                $values[$field] = $this->normalizeFaults($values[$field], $field);
+                $values[$field] = $this->normalizePresets($values[$field], $field);
             }
         }
 
@@ -69,24 +70,27 @@ class SystemSettingController
         return back()->with('status', __('settings.saved'));
     }
 
-    /** One fault per line: trimmed, de-duplicated (case-insensitive), at most 100 entries of 150 characters. */
-    private function normalizeFaults(?string $raw, string $field): ?string
+    /** One preset per line: trimmed, de-duplicated (case-insensitive), at most 100 entries. */
+    private function normalizePresets(?string $raw, string $field): ?string
     {
-        $faults = [];
+        $items = [];
+        $isItemName = $field === 'common_item_names';
+        $maxLength = $isItemName ? 255 : 150;
+        $errorPrefix = $isItemName ? 'common_item_names' : 'common_faults';
         foreach (preg_split('/\R/u', (string) $raw) ?: [] as $line) {
             $line = trim(preg_replace('/\s+/u', ' ', $line));
             if ($line === '') {
                 continue;
             }
-            if (mb_strlen($line) > 150) {
-                throw ValidationException::withMessages([$field => __('settings.common_faults_too_long')]);
+            if (mb_strlen($line) > $maxLength) {
+                throw ValidationException::withMessages([$field => __('settings.'.$errorPrefix.'_too_long')]);
             }
-            $faults[mb_strtolower($line)] ??= $line;
+            $items[mb_strtolower($line)] ??= $line;
         }
-        if (count($faults) > 100) {
-            throw ValidationException::withMessages([$field => __('settings.common_faults_too_many')]);
+        if (count($items) > 100) {
+            throw ValidationException::withMessages([$field => __('settings.'.$errorPrefix.'_too_many')]);
         }
 
-        return $faults === [] ? null : implode("\n", $faults);
+        return $items === [] ? null : implode("\n", $items);
     }
 }

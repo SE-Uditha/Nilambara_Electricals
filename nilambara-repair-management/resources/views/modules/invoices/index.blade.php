@@ -10,7 +10,7 @@
             <p class="mt-1 text-sm text-slate-500">{{ __('invoices.description') }}</p>
         </div>
         @can('create', App\Modules\Invoices\Models\Invoice::class)
-            <a href="{{ route('invoices.create') }}" class="rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white hover:bg-teal-800">{{ __('invoices.new_invoice') }}</a>
+            <a href="{{ route('invoices.create') }}" class="ui-create-action rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white hover:bg-teal-800"><x-icon name="plus" :size="18" />{{ __('invoices.new_invoice') }}</a>
         @endcan
     </div>
 
@@ -55,9 +55,9 @@
                             <td class="whitespace-nowrap px-4 py-3">{{ config('business.currency') }} {{ $invoice->payment_summary['total_paid'] }}</td>
                             <td class="whitespace-nowrap px-4 py-3">{{ config('business.currency') }} {{ $invoice->payment_summary['outstanding'] }}</td>
                             <td class="px-4 py-3">{{ __('invoices.'.$invoice->payment_terms->value) }}</td>
-                            <td class="px-4 py-3">{{ __('invoices.'.$invoice->payment_summary['payment_status']) }}<span class="block text-[10px] text-slate-400">{{ __('invoices.'.$invoice->status->value) }}</span></td>
+                            <td class="px-4 py-3"><x-status-badge :status="$invoice->payment_summary['payment_status']" :label="__('invoices.'.$invoice->payment_summary['payment_status'])" /><span class="block text-[10px] text-slate-400">{{ __('invoices.'.$invoice->status->value) }}</span></td>
                             <td class="px-4 py-3">{{ $invoice->cashierEmployee->name }}</td>
-                            <td class="whitespace-nowrap px-4 py-3"><div class="flex items-center gap-3"><a class="font-semibold text-teal-700 hover:underline" href="{{ route('invoices.show', $invoice) }}">{{ __('invoices.view') }}</a>@can('print', $invoice)<a class="font-semibold text-slate-600 hover:underline" href="{{ route('invoices.print', $invoice) }}">{{ __('invoices.print') }}</a>@endcan</div></td>
+                            <td class="whitespace-nowrap px-4 py-3"><div class="flex items-center gap-3"><a  href="{{ route('invoices.show', $invoice) }}" class="ui-icon-action ui-icon-action--blue" title="{{ __('invoices.view') }}" aria-label="{{ __('invoices.view') }}"><x-action-symbol icon="eye" :label="__('invoices.view')" /></a>@can('print', $invoice)<a  href="{{ route('invoices.print', $invoice) }}" class="ui-icon-action ui-icon-action--slate" title="{{ __('invoices.print') }}" aria-label="{{ __('invoices.print') }}"><x-action-symbol icon="printer" :label="__('invoices.print')" /></a>@endcan</div></td>
                         </tr>
                     @empty
                         <tr><td colspan="12" class="px-4 py-10 text-center text-sm text-slate-500">{{ __('invoices.no_invoices') }}</td></tr>

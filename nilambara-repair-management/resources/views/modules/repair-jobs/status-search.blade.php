@@ -60,7 +60,7 @@
                                         <button class="rounded-lg bg-teal-700 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-teal-800">{{ __('ui.save_status') }}</button>
                                     </form>
                                 @else
-                                    <span class="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold text-slate-700">{{ $job->status->value }}</span>
+                                    <x-status-badge :status="$job->status" />
                                 @endcan
                             </td>
                             <td class="max-w-40 truncate px-4 py-4" title="{{ $job->special_notes }}">{{ $job->special_notes ?: '—' }}</td>

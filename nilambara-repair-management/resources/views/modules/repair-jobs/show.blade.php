@@ -12,10 +12,10 @@
         <div class="flex flex-wrap gap-2">
             <a href="{{ route('repair-jobs.index') }}" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50">{{ __('ui.back_to_jobs') }}</a>
             @can('update', $job)<a href="{{ route('repair-jobs.edit', $job) }}" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">{{ __('ui.edit_job') }}</a>@endcan
-                        @if (\App\Modules\Approvals\Services\ApprovalAccess::canRequestChange(auth()->user(), 'job_update'))<a href="{{ route('repair-jobs.request-edit', $job) }}" class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-xs font-semibold text-amber-900 hover:bg-amber-100">{{ __('ui.request_edit') }}</a>@endif
+                        @if (\App\Modules\Approvals\Services\ApprovalAccess::canRequestChange(auth()->user(), 'job_update'))<a href="{{ route('repair-jobs.request-edit', $job) }}"  class="ui-icon-action ui-icon-action--amber" title="{{ __('ui.request_edit') }}" aria-label="{{ __('ui.request_edit') }}"><x-action-symbol icon="edit" :label="__('ui.request_edit')" /></a>@endif
                         @can('assign', $job)<a href="{{ route('repair-jobs.assign-form', $job) }}" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">{{ __('ui.assign_technician') }}</a>@endcan
             @can('delete', $job)
-                <form method="POST" action="{{ route('repair-jobs.destroy', $job) }}" onsubmit="return confirm('{{ __('ui.confirm_delete_job') }}')">@csrf @method('DELETE')<button class="rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-xs font-semibold text-red-700 hover:bg-red-100">{{ __('ui.delete_job') }}</button></form>
+                <form method="POST" action="{{ route('repair-jobs.destroy', $job) }}" onsubmit="return confirm('{{ __('ui.confirm_delete_job') }}')">@csrf @method('DELETE')<button  class="ui-icon-action ui-icon-action--danger" title="{{ __('ui.delete_job') }}" aria-label="{{ __('ui.delete_job') }}"><x-action-symbol icon="trash" :label="__('ui.delete_job')" /></button></form>
             @elseif (\App\Modules\Approvals\Services\ApprovalAccess::canRequestChange(auth()->user(), 'job_delete'))
                 <details class="relative">
                     <summary class="cursor-pointer list-none rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-xs font-semibold text-red-700 hover:bg-red-100">{{ __('ui.request_delete') }}</summary>
@@ -33,11 +33,11 @@
             @endif
             @if ($job->receipt)
                 @can('receipts.print')
-                    <a href="{{ route('repair-jobs.receipt.print', $job) }}" class="rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white hover:bg-teal-800">{{ __('ui.print_receipt') }}</a>
+                    <a href="{{ route('repair-jobs.receipt.print', $job) }}"  class="ui-icon-action ui-icon-action--slate" title="{{ __('ui.print_receipt') }}" aria-label="{{ __('ui.print_receipt') }}"><x-action-symbol icon="printer" :label="__('ui.print_receipt')" /></a>
                 @endcan
                 @can('receipts.reprint')<a href="{{ route('repair-jobs.receipt.duplicate', $job) }}" class="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-700">{{ __('ui.reprint_duplicate') }}</a>@endcan
             @endif
-            @can('job-cards.print')<a href="{{ route('job-cards.print', $job) }}" class="rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white hover:bg-teal-800">{{ __('ui.print_job_card') }}</a>@endcan
+            @can('job-cards.print')<a href="{{ route('job-cards.print', $job) }}"  class="ui-icon-action ui-icon-action--slate" title="{{ __('ui.print_job_card') }}" aria-label="{{ __('ui.print_job_card') }}"><x-action-symbol icon="printer" :label="__('ui.print_job_card')" /></a>@endcan
         </div>
     </div>
     @if (session('status'))
@@ -242,7 +242,7 @@
                             @if (auth()->user()->can('view', $quotation))
                                 <article class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-100 p-3">
                                     <div><a href="{{ route('quotations.show', $quotation) }}" class="text-xs font-semibold text-teal-800 hover:underline">{{ $quotation->quotation_number }}</a><p class="mt-1 text-[11px] text-slate-500">{{ __('ui.preparation_'.$quotation->preparation_status->value) }} · {{ __('ui.approval_'.$quotation->approval_status->value) }}</p></div>
-                                    <a href="{{ route('quotations.show', $quotation) }}" class="text-xs font-semibold text-slate-600 hover:text-teal-800">{{ __('ui.view') }}</a>
+                                    <a href="{{ route('quotations.show', $quotation) }}"  class="ui-icon-action ui-icon-action--blue" title="{{ __('ui.view') }}" aria-label="{{ __('ui.view') }}"><x-action-symbol icon="eye" :label="__('ui.view')" /></a>
                                 </article>
                             @endif
                         @empty
