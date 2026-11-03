@@ -52,8 +52,8 @@ class SystemSupportTest extends TestCase
         $this->get(route('repair-jobs.create'))->assertOk()
             ->assertSee('<option value="Screen not turning on">', false)
             ->assertSee('<option value="Overheating">', false)
-            ->assertSee('<option value="Scratched body">', false)
-            ->assertSee('<option value="Cracked screen">', false)
+            ->assertSee('<option value="Scratched body"', false)
+            ->assertSee('<option value="Cracked screen"', false)
             ->assertSee('name="reported_fault"', false);
         $this->get(route('settings.index'))->assertOk()->assertSee('name="common_visible_damages"', false);
 

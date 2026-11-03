@@ -64,7 +64,7 @@ class ApprovalService
 
     public const CHANGE_FIELDS = [
         'customer_update' => ['customer_type', 'customer_name', 'company_name', 'contact_person', 'address', 'mobile_number', 'alternate_phone', 'email', 'special_notes'],
-        'job_update' => ['job_type', 'item_name', 'brand', 'model', 'item_description', 'reported_fault', 'accessories_received', 'physical_condition', 'visible_damage', 'special_notes'],
+        'job_update' => ['job_type', 'item_name', 'brand', 'model', 'item_description', 'reported_fault', 'accessories_received', 'physical_condition', 'visible_damage', 'special_notes', 'private_notes'],
     ];
 
     /**

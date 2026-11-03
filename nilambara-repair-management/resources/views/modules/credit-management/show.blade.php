@@ -5,7 +5,7 @@
 @section('content')
     <div class="mb-7 flex flex-wrap items-end justify-between gap-4">
         <div><a href="{{ route('credit-invoices.index') }}" class="text-xs font-semibold text-teal-700 hover:text-teal-900">← {{ __('payments.credit_invoices') }}</a><h1 class="mt-3 text-2xl font-bold tracking-tight text-slate-900">{{ $invoice->invoice_number }}</h1><p class="mt-1 text-sm text-slate-500">{{ $invoice->customer->display_name }} · {{ __('payments.invoice_history') }}</p></div>
-        <div class="flex flex-wrap gap-2">@can('invoices.view')<a href="{{ route('invoices.show', $invoice) }}" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700">{{ __('payments.view_invoice') }}</a>@endcan
+        <div class="flex flex-wrap gap-2">@can('invoices.view')<a href="{{ route('invoices.show', $invoice) }}" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700" target="_blank" rel="noopener noreferrer">{{ __('payments.view_invoice') }}</a>@endcan
         @can('customers.statement')<a href="{{ route('customers.statement', $invoice->customer) }}" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700">{{ __('payments.customer_statement') }}</a>@endcan
         @if ($balance['outstanding'] !== '0.00' && auth()->user()->can('credit.collect') && auth()->user()->can('payments.receive'))<a href="{{ route('credit-invoices.collect', $invoice) }}" class="rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white">{{ __('payments.collect') }}</a>@endif</div>
     </div>

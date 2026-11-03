@@ -46,6 +46,7 @@ class PaymentController extends Controller
             'paymentAllocations.invoice',
             'paymentAllocations.repairJob',
             'paymentReversals',
+            'paymentAllocations.releases',
         ])
             ->whereIn('payment_type', ['advance', 'invoice', 'credit_collection'])
             ->orderByDesc('paid_at')->orderByDesc('id');

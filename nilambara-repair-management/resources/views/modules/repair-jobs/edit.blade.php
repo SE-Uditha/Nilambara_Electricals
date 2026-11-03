@@ -29,10 +29,17 @@
                 <p class="sm:col-span-2 text-[10px] text-slate-400">{{ __('ui.brand_or_model_required') }}</p>
                 <div class="sm:col-span-2"><label class="form-label" for="item_description">{{ __('ui.item_description') }}</label><textarea id="item_description" name="item_description" rows="3" class="form-input">{{ old('item_description', $job->item_description) }}</textarea></div>
                 <div class="sm:col-span-2"><label class="form-label" for="reported_fault">{{ __('ui.reported_fault') }}</label><textarea id="reported_fault" name="reported_fault" rows="4" class="form-input">{{ old('reported_fault', $job->reported_fault) }}</textarea></div>
-                <div><label class="form-label" for="accessories_received">{{ __('ui.accessories_received') }}</label><textarea id="accessories_received" name="accessories_received" rows="3" class="form-input">{{ old('accessories_received', $job->accessories_received) }}</textarea></div>
-                <div><label class="form-label" for="physical_condition">{{ __('ui.physical_condition') }}</label><textarea id="physical_condition" name="physical_condition" rows="3" class="form-input">{{ old('physical_condition', $job->physical_condition) }}</textarea></div>
-                <div class="sm:col-span-2"><label class="form-label" for="visible_damage">{{ __('ui.visible_damage') }}</label><textarea id="visible_damage" name="visible_damage" rows="3" class="form-input">{{ old('visible_damage', $job->visible_damage) }}</textarea></div>
+                <div class="sm:col-span-2"><label class="form-label" for="accessories_received">{{ __('ui.accessories_received') }}</label><textarea id="accessories_received" name="accessories_received" rows="3" class="form-input">{{ old('accessories_received', $job->accessories_received) }}</textarea></div>
+                <div><label class="form-label" for="physical_condition">{{ __('ui.physical_condition') }}</label>@include('modules.repair-jobs.partials.condition-list', ['config' => 'common_physical_conditions', 'field' => 'physical_condition', 'value' => old('physical_condition', $job->physical_condition)])</div>
+                <div><label class="form-label" for="visible_damage">{{ __('ui.visible_damage') }}</label>@include('modules.repair-jobs.partials.condition-list', ['config' => 'common_visible_damages', 'field' => 'visible_damage', 'value' => old('visible_damage', $job->visible_damage)])</div>
                 <div class="sm:col-span-2"><label class="form-label" for="special_notes">{{ __('ui.special_notes') }}</label><textarea id="special_notes" name="special_notes" rows="3" class="form-input">{{ old('special_notes', $job->special_notes) }}</textarea></div>
+                    <div class="sm:col-span-2 rounded-xl border border-amber-200 bg-amber-50/50 p-4">
+                        <label class="form-label" for="private_notes">{{ __('ui.private_notes') }}</label>
+                        <textarea id="private_notes" name="private_notes" rows="3" maxlength="10000" class="form-input" aria-describedby="private_notes_help">{{ old('private_notes', $job->private_notes) }}</textarea>
+                        <p id="private_notes_help" class="mt-2 text-xs text-slate-500">{{ __('ui.private_notes_help') }}</p>
+                        @error('private_notes')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+                    </div>
+
             </div>
         </section>
         @if ($requestMode ?? false)

@@ -11,8 +11,8 @@
             <p class="mt-1 text-sm text-slate-500">{{ __('payments.payment_details') }}</p>
         </div>
         <div class="flex flex-wrap gap-2">
-            @can('print', $payment)<a href="{{ route('payments.print', $payment) }}"  class="ui-icon-action ui-icon-action--slate" title="{{ __('payments.print_receipt') }}" aria-label="{{ __('payments.print_receipt') }}"><x-action-symbol icon="printer" :label="__('payments.print_receipt')" /></a>@endcan
-            @can('export', $payment)<a href="{{ route('payments.pdf', $payment) }}"  class="ui-icon-action ui-icon-action--slate" title="{{ __('payments.download_pdf') }}" aria-label="{{ __('payments.download_pdf') }}"><x-action-symbol icon="download" :label="__('payments.download_pdf')" /></a>@endcan
+            @can('print', $payment)<a href="{{ route('payments.print', $payment) }}"  class="ui-icon-action ui-icon-action--violet" title="{{ __('payments.print_receipt') }}" aria-label="{{ __('payments.print_receipt') }}" target="_blank" rel="noopener noreferrer"><x-action-symbol icon="printer" :label="__('payments.print_receipt')" /></a>@endcan
+            @can('export', $payment)<a href="{{ route('payments.pdf', $payment) }}"  class="ui-icon-action ui-icon-action--teal" title="{{ __('payments.download_pdf') }}" aria-label="{{ __('payments.download_pdf') }}" target="_blank" rel="noopener noreferrer"><x-action-symbol icon="download" :label="__('payments.download_pdf')" /></a>@endcan
         </div>
     </div>
 
@@ -44,7 +44,7 @@
                                     <td class="px-5 py-3">{{ $allocation->allocated_at->format(config('business.date_format')) }}</td>
                                     <td class="px-5 py-3">
                                         @if ($allocation->invoice)
-                                            @can('invoices.view')<a href="{{ route('invoices.show', $allocation->invoice) }}" class="text-teal-800 hover:underline">{{ $allocation->invoice->invoice_number }}</a>@else{{ $allocation->invoice->invoice_number }}@endcan
+                                            @can('invoices.view')<a href="{{ route('invoices.show', $allocation->invoice) }}" class="text-teal-800 hover:underline" target="_blank" rel="noopener noreferrer">{{ $allocation->invoice->invoice_number }}</a>@else{{ $allocation->invoice->invoice_number }}@endcan
                                         @elseif ($allocation->repairJob)
                                             <a href="{{ route('repair-jobs.show', $allocation->repairJob) }}" class="text-teal-800 hover:underline">{{ $allocation->repairJob->automatic_number ?: $allocation->repairJob->job_number }}</a> · {{ __('payments.job_advance') }}
                                         @else{{ __('payments.unallocated') }}@endif

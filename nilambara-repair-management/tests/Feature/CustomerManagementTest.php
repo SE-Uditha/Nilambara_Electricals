@@ -146,6 +146,29 @@ class CustomerManagementTest extends TestCase
         $this->assertNull($customer->contact_person);
     }
 
+    public function test_customer_picker_can_browse_every_active_customer_without_typing(): void
+    {
+        $user = $this->userWithRole('cashier');
+        $ids = [];
+        for ($number = 1; $number <= 28; $number++) {
+            $customer = Customer::query()->create([
+                'customer_code' => 'BROWSE-'.str_pad((string) $number, 3, '0', STR_PAD_LEFT),
+                'customer_type' => 'individual', 'customer_name' => 'Browse Customer '.$number,
+                'address' => 'Test address', 'mobile_number' => '0771234567',
+                'registration_date' => now()->toDateString(), 'is_active' => $number <= 27,
+            ]);
+            if ($number <= 27) $ids[] = $customer->id;
+        }
+        $first = $this->actingAs($user)->getJson(route('customers.search', ['browse' => 1]))
+            ->assertOk()->assertJsonCount(25, 'data')->assertJsonPath('meta.has_more', true)->assertJsonPath('meta.page', 1);
+        $second = $this->getJson(route('customers.search', ['browse' => 1, 'page' => 2]))
+            ->assertOk()->assertJsonCount(2, 'data')->assertJsonPath('meta.has_more', false);
+        $this->assertSame($ids, array_merge(array_column($first->json('data'), 'id'), array_column($second->json('data'), 'id')));
+        $this->getJson(route('customers.search'))->assertOk()->assertJsonCount(0, 'data');
+        $user->syncRoles([]);
+        $this->actingAs($user->fresh())->getJson(route('customers.search', ['browse' => 1]))->assertForbidden();
+    }
+
     public function test_customer_search_matches_customer_code_name_and_mobile_and_excludes_inactive(): void
     {
         $user = $this->userWithRole('cashier');

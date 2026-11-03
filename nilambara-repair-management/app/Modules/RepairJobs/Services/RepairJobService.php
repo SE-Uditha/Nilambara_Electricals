@@ -135,6 +135,7 @@ class RepairJobService
                 'physical_condition',
                 'visible_damage',
                 'special_notes',
+                'private_notes',
             ]);
             $lockedJob->fill($data);
             $changes = $lockedJob->getDirty();

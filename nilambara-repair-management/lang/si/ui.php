@@ -1,6 +1,18 @@
 <?php
 
 return [
+    'select_physical_condition' => 'භෞතික තත්ත්වයක් තෝරන්න',
+    'select_visible_damage' => 'දෘශ්‍ය හානියක් තෝරන්න',
+    'condition_manual_placeholder' => 'නැතහොත් සටහනක් ලියා එකතු කරන්න',
+    'condition_list_empty' => 'සටහන් එකතු කර නැත.',
+    'condition_list_limit' => 'තෝරාගත් සටහන්වල මුළු අක්ෂර ගණන 5,000 නොඉක්මවිය යුතුය.',
+
+    'job_overview' => 'සාරාංශය',
+    'repair_information_and_inspection' => 'අලුත්වැඩියා තොරතුරු සහ පරීක්ෂණ සටහන්',
+    'browse_customers' => 'සියලු පාරිභෝගිකයන් පෙන්වන්න',
+    'customer_load_more' => 'තවත් පාරිභෝගිකයන් පෙන්වන්න',
+    'private_notes' => 'පුද්ගලික සටහන් (කාර්ය මණ්ඩලයට පමණි)',
+    'private_notes_help' => 'කාර්ය මණ්ඩලයට පමණි. පාරිභෝගික රිසිට්පත්, ඉන්වොයිසි, මිල ගණන් හෝ මුද්‍රිත කාර්ය පත්‍රවල මෙම සටහන් ඇතුළත් නොවේ.',
     'record_payment' => 'Record payment',
     'business_reports' => 'Business reports',
     'repair_reports' => 'Repair reports',

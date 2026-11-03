@@ -9,7 +9,7 @@
     </div>
     <ul class="flex flex-wrap gap-1.5">
         <template x-for="(item, index) in items" :key="item">
-            <li class="inline-flex items-center gap-1 rounded-full border border-teal-200 bg-teal-50 px-2.5 py-1 text-xs font-medium text-teal-800">
+            <li class="preset-chip inline-flex items-center gap-1 rounded-full border border-teal-200 bg-teal-50 px-2.5 py-1 text-xs font-medium text-teal-800">
                 <span x-text="item"></span>
                 <button type="button" x-on:click="items.splice(index, 1)" class="text-teal-700 hover:text-red-700" aria-label="{{ __('settings.remove_item') }}">&times;</button>
             </li>

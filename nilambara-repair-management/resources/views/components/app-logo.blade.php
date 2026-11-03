@@ -3,7 +3,12 @@
 <div {{ $attributes->class(['flex items-center gap-3']) }}>
     <span class="brand-mark flex h-16 w-14 shrink-0 items-center justify-center rounded-xl p-1.5" aria-hidden="true">
         @if (config('business.logo'))
-            <img src="{{ asset(config('business.logo')) }}" alt="" width="48" height="56" class="h-full w-full rounded-md bg-white object-contain p-0.5">
+            <picture class="block h-full w-full">
+                @if (config('business.logo') === 'images/nilambara-electrical-logo.png' && is_file(public_path('images/nilambara-electrical-logo.webp')) && filemtime(public_path('images/nilambara-electrical-logo.webp')) >= filemtime(public_path('images/nilambara-electrical-logo.png')))
+                    <source srcset="{{ asset('images/nilambara-electrical-logo.webp') }}" type="image/webp">
+                @endif
+                <img src="{{ asset(config('business.logo')) }}" alt="" width="48" height="56" class="h-full w-full rounded-md bg-white object-contain p-0.5">
+            </picture>
         @else
             <svg viewBox="0 0 32 32" fill="none" class="size-7">
                 <path d="M9 5.5a12 12 0 1 0 14 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" />

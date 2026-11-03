@@ -29,6 +29,7 @@ class UpdateRepairJobRequest extends FormRequest
             'physical_condition' => ['nullable', 'string', 'max:5000'],
             'visible_damage' => ['nullable', 'string', 'max:5000'],
             'special_notes' => ['nullable', 'string', 'max:10000'],
+            'private_notes' => ['nullable', 'string', 'max:10000'],
         ];
     }
 }

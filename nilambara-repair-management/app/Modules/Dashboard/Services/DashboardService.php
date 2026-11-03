@@ -48,24 +48,33 @@ class DashboardService
         $invoices = DB::table('invoices')
             ->where('status', DocumentStatus::Finalized->value)
             ->whereBetween('finalized_at', [$periodStart, $periodEnd]);
-        $invoiceSales = (clone $invoices)->sum('total');
-        $invoiceCashSales = (clone $invoices)->where('payment_terms', 'cash')->sum('total');
-        $creditSales = (clone $invoices)->where('payment_terms', 'credit')->sum('total');
+        $salesTotals = (clone $invoices)->selectRaw('COALESCE(SUM(total), 0) as total')
+            ->selectRaw('COALESCE(SUM(CASE WHEN payment_terms = ? THEN total ELSE 0 END), 0) as cash', ['cash'])
+            ->selectRaw('COALESCE(SUM(CASE WHEN payment_terms = ? THEN total ELSE 0 END), 0) as credit', ['credit'])->first();
+        $invoiceSales = $salesTotals->total;
+        $invoiceCashSales = $salesTotals->cash;
+        $creditSales = $salesTotals->credit;
         $inventory = $this->inventory->defaultLocationBalancesQuery($periodEnd)->where('spare_parts.is_active', true);
         $balance = 'COALESCE(stock_balances.available_quantity, 0)';
         $inventoryCounts = (clone $inventory)
             ->select([])
             ->selectRaw('COUNT(DISTINCT spare_parts.id) as part_count')
+            ->selectRaw("COALESCE(SUM({$balance}), 0) as current_stock")
             ->selectRaw("SUM(CASE WHEN {$balance} <= 0 THEN 1 ELSE 0 END) as out_of_stock")
             ->selectRaw("SUM(CASE WHEN {$balance} > 0 AND {$balance} <= CASE WHEN spare_parts.minimum_stock_level > 0 THEN spare_parts.minimum_stock_level ELSE spare_parts.reorder_level END THEN 1 ELSE 0 END) as low_stock")
             ->first();
         $creditBalance = DB::query()->fromSub(DB::table('customer_account_entries')
             ->where('occurred_at', '<=', $periodEnd)->select('customer_id')->selectRaw('SUM(amount) as balance')
             ->groupBy('customer_id')->havingRaw('SUM(amount) > 0'), 'balances')->sum('balance');
-        $payments = app(ReportDataService::class)->build('collections', $range, $actor)['query'];
-        $cashPayments = (clone $payments)->where('method', 'cash')->sum('net_amount');
-        $advancePayments = (clone $payments)->where('payment_type', 'advance')->sum('net_amount');
-        $creditCollections = (clone $payments)->where('payment_type', 'credit_collection')->sum('net_amount');
+        $payments = app(ReportDataService::class)->collectionsQuery($range, $actor);
+        $collectionTotals = (clone $payments)->reorder()->select([])
+            ->selectRaw('COALESCE(SUM(net_amount), 0) as total')
+            ->selectRaw('COALESCE(SUM(CASE WHEN method = ? THEN net_amount ELSE 0 END), 0) as cash', ['cash'])
+            ->selectRaw('COALESCE(SUM(CASE WHEN payment_type = ? THEN net_amount ELSE 0 END), 0) as advances', ['advance'])
+            ->selectRaw('COALESCE(SUM(CASE WHEN payment_type = ? THEN net_amount ELSE 0 END), 0) as credit', ['credit_collection'])->first();
+        $cashPayments = $collectionTotals->cash;
+        $advancePayments = $collectionTotals->advances;
+        $creditCollections = $collectionTotals->credit;
 
         return [
             'range' => $range,
@@ -77,7 +86,7 @@ class DashboardService
                 'credit_terms' => $this->money($creditSales),
             ],
             'payments' => [
-                'collected' => $this->money((clone $payments)->sum('net_amount')),
+                'collected' => $this->money($collectionTotals->total),
                 'cash' => $this->money($cashPayments),
                 'advances' => $this->money($advancePayments),
                 'credit_collections' => $this->money($creditCollections),
@@ -89,21 +98,21 @@ class DashboardService
                 'parts' => (int) ($inventoryCounts->part_count ?? 0),
                 'low_stock' => (int) ($inventoryCounts->low_stock ?? 0),
                 'out_of_stock' => (int) ($inventoryCounts->out_of_stock ?? 0),
-                'current_stock' => (string) BigDecimal::of((string) (clone $inventory)->sum(DB::raw($balance)))->toScale(3),
+                'current_stock' => (string) BigDecimal::of((string) $inventoryCounts->current_stock)->toScale(3),
                 'valuation' => __('reports.incomplete'),
             ],
             'recent_jobs' => $this->recentJobs($actor, $periodStart, $periodEnd),
-            'ready_jobs' => (clone $jobs)->where('status', JobStatus::ReadyForCollection->value)->orderByDesc('received_at')->limit(8)->get(),
+            'ready_jobs' => (clone $jobs)->where('status', JobStatus::ReadyForCollection->value)->orderByDesc('received_at')->limit(4)->get(),
             'recent_invoices' => DB::table('invoices')->join('customers', 'invoices.customer_id', '=', 'customers.id')
                 ->select('invoices.id', 'invoices.invoice_number', 'invoices.invoice_date', 'invoices.total', 'invoices.status', 'customers.customer_name')
                 ->whereBetween('invoices.finalized_at', [$periodStart, $periodEnd])
-                ->where('invoices.status', DocumentStatus::Finalized->value)->orderByDesc('invoices.finalized_at')->limit(6)->get(),
+                ->where('invoices.status', DocumentStatus::Finalized->value)->orderByDesc('invoices.finalized_at')->limit(4)->get(),
             'low_stock_items' => $this->inventory->defaultLocationBalancesQuery($periodEnd)
                 ->leftJoin('spare_part_categories', 'spare_parts.category_id', '=', 'spare_part_categories.id')
                 ->select('spare_parts.id', 'spare_parts.sku', 'spare_parts.name', 'spare_parts.minimum_stock_level', 'spare_parts.reorder_level', 'available_quantity', 'spare_part_categories.name as category_name')
                 ->where('spare_parts.is_active', true)
                 ->whereRaw("{$balance} <= CASE WHEN spare_parts.minimum_stock_level > 0 THEN spare_parts.minimum_stock_level ELSE spare_parts.reorder_level END")
-                ->orderByRaw($balance)->limit(8)->get(),
+                ->orderByRaw($balance)->limit(4)->get(),
         ];
     }
 
@@ -118,6 +127,6 @@ class DashboardService
             ->whereBetween('repair_jobs.received_at', [$start, $end])
             ->select('repair_jobs.id', 'repair_jobs.job_number', 'repair_jobs.item_name', 'repair_jobs.status', 'repair_jobs.received_at', 'customers.customer_name');
 
-        return $query->orderByDesc('repair_jobs.received_at')->limit(8)->get();
+        return $query->orderByDesc('repair_jobs.received_at')->limit(4)->get();
     }
 }

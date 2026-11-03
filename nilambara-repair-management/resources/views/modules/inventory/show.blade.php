@@ -5,7 +5,7 @@
 @section('content')
 <a class="mb-4 inline-block text-sm text-teal-700 underline" href="{{ route('approval-requests.create',['kind'=>'stock_adjustment','subject_id'=>$part->id]) }}">Request stock correction / write-off approval</a>
 <div class="mb-5 flex justify-between"><h1 class="text-2xl font-bold">{{ $part->name }} · {{ $part->sku }}</h1>
-@can('inventory.update')<a  href="{{ route('inventory.edit',$part) }}" class="ui-icon-action ui-icon-action--blue" title="Edit part" aria-label="Edit part"><x-action-symbol icon="edit" label="Edit part" /></a>
+@can('inventory.update')<a  href="{{ route('inventory.edit',$part) }}" class="ui-icon-action ui-icon-action--green" title="Edit part" aria-label="Edit part"><x-action-symbol icon="edit" label="Edit part" /></a>
 @endcan</div>
 @include('modules.inventory.feedback')
 <p class="mb-5">{{ $part->description }} · {{ $part->unit->name }} · Selling price LKR {{ $part->selling_price }}</p>

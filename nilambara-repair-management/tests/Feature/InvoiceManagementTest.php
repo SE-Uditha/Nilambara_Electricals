@@ -260,6 +260,15 @@ class InvoiceManagementTest extends TestCase
         $this->assertSame('0.00', $balance['current_payment']);
         $this->assertSame('375.00', $balance['outstanding']);
         $this->assertSame('partially_paid', $balance['payment_status']);
+        $otherCustomer = $this->customer();
+        $otherJob = $this->billableJob($otherCustomer, '25.00', '0.00');
+        $otherInvoice = $this->createIssuedInvoice($user, $otherCustomer, [$otherJob]);
+        $batch = app(InvoiceBalanceService::class)->summaries(Invoice::query()->with('invoiceJobs')->whereKey([$invoice->id, $otherInvoice->id])->get());
+        $this->assertSame($balance, $batch[$invoice->id]);
+        $this->assertSame('0.00', $batch[$otherInvoice->id]['total_paid']);
+        $this->assertSame('25.00', $batch[$otherInvoice->id]['outstanding']);
+        $this->get(route('invoices.index'))->assertOk()->assertSee('125.00')->assertSee('375.00');
+
     }
 
     public function test_issued_snapshot_is_immutable_and_payment_prevents_cancellation(): void

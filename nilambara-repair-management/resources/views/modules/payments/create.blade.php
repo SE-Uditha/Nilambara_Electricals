@@ -41,7 +41,7 @@
             </section>
         @else
             <section class="rounded-2xl border border-slate-200 bg-white p-5">
-                <div class="mb-4 flex gap-3">
+                <div class="mb-4 flex flex-wrap gap-3">
                     <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 px-4 py-3 text-sm"><input type="radio" name="payment_type" value="invoice" @checked(old('payment_type', 'invoice') === 'invoice')>{{ __('payments.invoice_payment') }}</label>
                     <label class="flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 px-4 py-3 text-sm"><input type="radio" name="payment_type" value="advance" @checked(old('payment_type') === 'advance')>{{ __('payments.type_advance') }}</label>
                 </div>

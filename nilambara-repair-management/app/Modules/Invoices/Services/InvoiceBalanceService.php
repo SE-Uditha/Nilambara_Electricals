@@ -8,6 +8,7 @@ use App\Modules\Payments\Models\PaymentAllocation;
 use Brick\Math\BigDecimal;
 use Brick\Math\RoundingMode;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 
 class InvoiceBalanceService
@@ -17,7 +18,9 @@ class InvoiceBalanceService
      */
     public function summary(Invoice $invoice): array
     {
-        $jobIds = $invoice->invoiceJobs()->pluck('repair_job_id');
+        $jobIds = $invoice->relationLoaded('invoiceJobs')
+            ? $invoice->invoiceJobs->pluck('repair_job_id')
+            : $invoice->invoiceJobs()->pluck('repair_job_id');
         $advance = $jobIds->isEmpty()
             ? BigDecimal::zero()->toScale(2)
             : $this->netAllocated(
@@ -30,6 +33,53 @@ class InvoiceBalanceService
                 ->where('target_type', 'invoice')
                 ->where('invoice_id', $invoice->getKey()),
         );
+
+        return $this->summarizeAmounts($invoice, $advance, $invoicePayments);
+    }
+
+    /** Populate an entire list with one allocations query rather than queries per invoice. */
+    public function summaries(Collection $invoices): array
+    {
+        if ($invoices->isEmpty()) {
+            return [];
+        }
+        $invoices->loadMissing('invoiceJobs');
+        $invoiceIds = $invoices->modelKeys();
+        $jobIds = $invoices->flatMap(fn (Invoice $invoice) => $invoice->invoiceJobs->pluck('repair_job_id'))->unique()->values();
+        $allocations = PaymentAllocation::query()->withSum('releases as released_amount', 'amount')
+            ->where(function ($query) use ($invoiceIds, $jobIds): void {
+                $query->where(function ($query) use ($invoiceIds): void {
+                    $query->where('target_type', 'invoice')->whereIn('invoice_id', $invoiceIds);
+                })->orWhere(function ($query) use ($jobIds): void {
+                    $query->where('target_type', 'job_advance')->whereIn('repair_job_id', $jobIds);
+                });
+            })->get();
+        $payments = [];
+        $advances = [];
+        foreach ($allocations as $allocation) {
+            $net = $this->netAmount($allocation);
+            if ($allocation->target_type === 'invoice') {
+                $key = $allocation->invoice_id;
+                $payments[$key] = ($payments[$key] ?? BigDecimal::zero())->plus($net);
+            } else {
+                $key = $allocation->repair_job_id;
+                $advances[$key] = ($advances[$key] ?? BigDecimal::zero())->plus($net);
+            }
+        }
+        $summaries = [];
+        foreach ($invoices as $invoice) {
+            $advance = $invoice->invoiceJobs->reduce(
+                fn (BigDecimal $sum, $link) => $sum->plus($advances[$link->repair_job_id] ?? BigDecimal::zero()),
+                BigDecimal::zero()->toScale(2),
+            );
+            $summaries[$invoice->getKey()] = $this->summarizeAmounts($invoice, $advance, ($payments[$invoice->getKey()] ?? BigDecimal::zero())->toScale(2));
+        }
+
+        return $summaries;
+    }
+
+    private function summarizeAmounts(Invoice $invoice, BigDecimal $advance, BigDecimal $invoicePayments): array
+    {
         $totalPaid = $advance->plus($invoicePayments)->toScale(2);
         $total = BigDecimal::of((string) $invoice->total)->toScale(2);
         $outstanding = $total->minus($totalPaid)->toScale(2);
@@ -90,10 +140,15 @@ class InvoiceBalanceService
         return $query->withSum('releases as released_amount', 'amount')
             ->get()
             ->reduce(function (BigDecimal $sum, PaymentAllocation $allocation): BigDecimal {
-                $released = BigDecimal::of((string) ($allocation->released_amount ?? '0.00'))->toScale(2);
-                $net = BigDecimal::of((string) $allocation->amount)->minus($released)->toScale(2, RoundingMode::HalfUp);
-
-                return $sum->plus($net->isLessThan(0) ? BigDecimal::zero() : $net);
+                return $sum->plus($this->netAmount($allocation));
             }, BigDecimal::zero()->toScale(2));
+    }
+
+    private function netAmount(PaymentAllocation $allocation): BigDecimal
+    {
+        $released = BigDecimal::of((string) ($allocation->released_amount ?? '0.00'))->toScale(2);
+        $net = BigDecimal::of((string) $allocation->amount)->minus($released)->toScale(2, RoundingMode::HalfUp);
+
+        return $net->isLessThan(0) ? BigDecimal::zero()->toScale(2) : $net;
     }
 }

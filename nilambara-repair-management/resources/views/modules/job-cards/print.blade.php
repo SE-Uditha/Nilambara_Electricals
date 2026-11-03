@@ -43,9 +43,9 @@
 <body>
     <nav class="screen-actions" aria-label="{{ __('ui.print_actions') }}">
         <a href="{{ auth()->user()?->can('job-cards.view') ? route('job-cards.index') : route('repair-jobs.show', $job) }}">{{ __('ui.back') }}</a>
-        @can('job-cards.print')<a href="{{ route('job-cards.duplicate', $job) }}">{{ __('ui.reprint_job_card') }}</a>@endcan
+        @can('job-cards.print')<a href="{{ route('job-cards.duplicate', $job) }}" target="_blank" rel="noopener noreferrer">{{ __('ui.reprint_job_card') }}</a>@endcan
         <button type="button" onclick="window.print()">{{ __('ui.print') }}</button>
-        <a href="{{ route('job-cards.pdf',['job'=>$job,'duplicate'=>$duplicate ? 1 : 0]) }}">PDF</a>
+        <a href="{{ route('job-cards.pdf',['job'=>$job,'duplicate'=>$duplicate ? 1 : 0]) }}" target="_blank" rel="noopener noreferrer">PDF</a>
     </nav>
     <main class="preview">
         <article class="page">
@@ -90,7 +90,7 @@
             </section>
             <section class="section">
                 <h2>{{ __('ui.special_notes') }}</h2>
-                <table class="writing notes"><tbody><tr><td>&nbsp;</td></tr><tr><td>&nbsp;</td></tr></tbody></table>
+                <table class="writing notes"><tbody><tr><td style="white-space:pre-wrap;overflow-wrap:anywhere;padding:1mm">{{ $job->special_notes ?: ' ' }}</td></tr><tr><td>&nbsp;</td></tr></tbody></table>
             </section>
             @if ($footerText)<footer class="footer">{{ $footerText }}</footer>@endif
         </article>

@@ -46,7 +46,7 @@
                 <tbody class="divide-y divide-slate-100 text-slate-700">
                     @forelse ($invoices as $invoice)
                         <tr class="hover:bg-slate-50/70">
-                            <td class="whitespace-nowrap px-4 py-3 font-mono font-semibold text-teal-800"><a href="{{ route('invoices.show', $invoice) }}" class="hover:underline">{{ $invoice->invoice_number }}</a></td>
+                            <td class="whitespace-nowrap px-4 py-3 font-mono font-semibold text-teal-800"><a href="{{ route('invoices.show', $invoice) }}" class="hover:underline" target="_blank" rel="noopener noreferrer">{{ $invoice->invoice_number }}</a></td>
                             <td class="whitespace-nowrap px-4 py-3">{{ $invoice->invoice_date->format(config('business.date_format')) }}</td>
                             <td class="px-4 py-3">{{ $invoice->customer->display_name }}<span class="block text-[10px] text-slate-400">{{ $invoice->customer->mobile_number }}</span></td>
                             <td class="px-4 py-3">{{ $invoice->invoiceJobs->count() }}</td>
@@ -57,7 +57,7 @@
                             <td class="px-4 py-3">{{ __('invoices.'.$invoice->payment_terms->value) }}</td>
                             <td class="px-4 py-3"><x-status-badge :status="$invoice->payment_summary['payment_status']" :label="__('invoices.'.$invoice->payment_summary['payment_status'])" /><span class="block text-[10px] text-slate-400">{{ __('invoices.'.$invoice->status->value) }}</span></td>
                             <td class="px-4 py-3">{{ $invoice->cashierEmployee->name }}</td>
-                            <td class="whitespace-nowrap px-4 py-3"><div class="flex items-center gap-3"><a  href="{{ route('invoices.show', $invoice) }}" class="ui-icon-action ui-icon-action--blue" title="{{ __('invoices.view') }}" aria-label="{{ __('invoices.view') }}"><x-action-symbol icon="eye" :label="__('invoices.view')" /></a>@can('print', $invoice)<a  href="{{ route('invoices.print', $invoice) }}" class="ui-icon-action ui-icon-action--slate" title="{{ __('invoices.print') }}" aria-label="{{ __('invoices.print') }}"><x-action-symbol icon="printer" :label="__('invoices.print')" /></a>@endcan</div></td>
+                            <td class="whitespace-nowrap px-4 py-3"><div class="flex items-center gap-3"><a  href="{{ route('invoices.show', $invoice) }}" class="ui-icon-action ui-icon-action--blue" title="{{ __('invoices.view') }}" aria-label="{{ __('invoices.view') }}" target="_blank" rel="noopener noreferrer"><x-action-symbol icon="eye" :label="__('invoices.view')" /></a>@can('print', $invoice)<a  href="{{ route('invoices.print', $invoice) }}" class="ui-icon-action ui-icon-action--violet" title="{{ __('invoices.print') }}" aria-label="{{ __('invoices.print') }}" target="_blank" rel="noopener noreferrer"><x-action-symbol icon="printer" :label="__('invoices.print')" /></a>@endcan</div></td>
                         </tr>
                     @empty
                         <tr><td colspan="12" class="px-4 py-10 text-center text-sm text-slate-500">{{ __('invoices.no_invoices') }}</td></tr>

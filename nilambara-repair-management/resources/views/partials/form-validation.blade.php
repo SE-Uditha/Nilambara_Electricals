@@ -7,6 +7,7 @@
             const name = segments.shift() + segments.map(segment => `[${segment}]`).join('');
             const field = Array.from(document.querySelectorAll('input, select, textarea')).find(item => item.name === name && item.type !== 'hidden' && !item.disabled);
             if (!field) continue;
+            for (let parent = field.parentElement; parent; parent = parent.parentElement) { if (parent.tagName === 'DETAILS') parent.open = true; }
             field.setAttribute('aria-invalid', 'true');
             field.classList.add('has-error');
             const error = document.createElement('p');

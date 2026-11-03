@@ -3,7 +3,7 @@
 @section('title','Suppliers')
 
 @section('content')
-<div class="mb-5 flex justify-between"><h1 class="text-2xl font-bold">Suppliers</h1>
+<div class="mb-5 flex flex-wrap items-center justify-between gap-3"><h1 class="text-2xl font-bold">Suppliers</h1>
 @can('suppliers.create')<a class="ui-create-action rounded-xl bg-teal-700 px-4 py-2 text-white" href="{{ route('suppliers.create') }}"><x-icon name="plus" :size="18" />Register supplier</a>
 @endcan</div>
 @include('modules.inventory.feedback')

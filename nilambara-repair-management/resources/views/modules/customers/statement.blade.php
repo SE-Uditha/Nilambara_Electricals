@@ -11,7 +11,7 @@
         </div>
         <div class="flex gap-2">
             <a href="{{ route('customers.statement.print', ['customer' => $customer] + $filters) }}" target="_blank" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700">{{ __('payments.print_statement') }}</a>
-            <a href="{{ route('customers.statement.pdf', ['customer' => $customer] + $filters) }}"  class="ui-icon-action ui-icon-action--slate" title="{{ __('payments.download_pdf') }}" aria-label="{{ __('payments.download_pdf') }}"><x-action-symbol icon="download" :label="__('payments.download_pdf')" /></a>
+            <a href="{{ route('customers.statement.pdf', ['customer' => $customer] + $filters) }}"  class="ui-icon-action ui-icon-action--teal" title="{{ __('payments.download_pdf') }}" aria-label="{{ __('payments.download_pdf') }}"><x-action-symbol icon="download" :label="__('payments.download_pdf')" /></a>
         </div>
     </div>
 

@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Tests\Feature\Database\CreatesDatabaseRecords;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class EmployeeManagementTest extends TestCase
@@ -102,6 +103,21 @@ class EmployeeManagementTest extends TestCase
 
         $this->assertNotSame($first->employee_code, $second->employee_code);
         $this->assertSame(2, Employee::query()->count());
+    }
+
+    public function test_permission_denials_are_refreshed_between_requests_for_the_same_user(): void
+    {
+        $user = User::factory()->create();
+        $user->assignRole('cashier');
+        $permission = Permission::query()->where('name', 'customers.view')->firstOrFail();
+        $this->actingAs($user)->get(route('customers.index'))->assertOk();
+        DB::table('permission_user')->insert([
+            'user_id' => $user->id, 'permission_id' => $permission->id,
+            'model_type' => User::class, 'effect' => 'deny',
+        ]);
+        $this->get(route('customers.index'))->assertForbidden();
+        DB::table('permission_user')->where('user_id', $user->id)->where('permission_id', $permission->id)->delete();
+        $this->get(route('customers.index'))->assertOk();
     }
 
     public function test_individual_denial_overrides_role_permission(): void

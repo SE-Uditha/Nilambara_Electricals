@@ -70,6 +70,7 @@ class RepairReceiptService
                 'total_job_amount' => $data['labor_cost'] ?? '0.00',
                 'status' => ($data['intent'] ?? null) === 'cancel_payments' ? JobStatus::Cancelled->value : JobStatus::Received->value,
                 'special_notes' => $this->nullableTrim($data['special_notes'] ?? null),
+                'private_notes' => $this->nullableTrim($data['private_notes'] ?? null),
             ]);
 
             if (($data['intent'] ?? null) === 'cancel_payments') {

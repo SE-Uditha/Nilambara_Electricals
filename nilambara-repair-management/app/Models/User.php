@@ -28,6 +28,13 @@ class User extends Authenticatable
 
     public function isExplicitlyDeniedPermission(string $permission): bool
     {
+        $overrides = request()->attributes->get('nilambara.permission_denials');
+        if (is_array($overrides)
+            && $overrides['user_id'] === $this->getKey()
+            && $overrides['model_type'] === $this->getMorphClass()) {
+            return array_key_exists($permission, $overrides['denied']);
+        }
+
         return $this->permissions()
             ->where('permissions.name', $permission)
             ->wherePivot('effect', 'deny')

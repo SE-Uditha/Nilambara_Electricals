@@ -19,14 +19,14 @@
         <div role="alert" class="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{{ __('ui.review_quotation_fields') }}</div>
     @endif
 
-    <form method="POST" action="{{ $quotation ? route('quotations.update', $quotation) : route('quotations.store') }}" class="space-y-5" id="quotation-form">
+    <form method="POST" action="{{ $quotation ? route('quotations.update', $quotation) : route('quotations.store') }}" class="compact-document-grid" id="quotation-form">
         @csrf
         @if ($quotation) @method('PUT') @endif
         <input type="hidden" name="repair_job_id" id="repair_job_id" value="{{ old('repair_job_id', $job?->id) }}">
 
         <section class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">
             <h2 class="mb-5 text-sm font-bold text-slate-900">{{ __('ui.quotation_information') }}</h2>
-            <div class="grid gap-4 sm:grid-cols-3">
+            <div class="grid gap-4 sm:grid-cols-2 2xl:grid-cols-3">
                 <div><label for="quotation-number" class="form-label">{{ __('ui.quotation_number') }}</label><input id="quotation-number" class="form-input" value="{{ $quotation?->quotation_number ?? __('ui.generated_after_save') }}" readonly></div>
                 <div><label for="quotation_date" class="form-label">{{ __('ui.quotation_date') }}</label><input id="quotation_date" name="quotation_date" type="date" class="form-input" value="{{ old('quotation_date', $quotationDate) }}" required>@error('quotation_date')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror</div>
                 <div><label for="valid_until" class="form-label">{{ __('ui.valid_until') }}</label><input id="valid_until" name="valid_until" type="date" class="form-input" value="{{ old('valid_until', $validUntil) }}" required>@error('valid_until')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror</div>
@@ -64,7 +64,7 @@
             </div>
         </section>
 
-        <section class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">
+        <section class="compact-wide rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">
             <h2 class="mb-5 text-sm font-bold text-slate-900">{{ __('ui.proposed_repair') }}</h2>
             <div class="grid gap-4 sm:grid-cols-2">
                 <div class="sm:col-span-2"><label for="proposed_repair_description" class="form-label">{{ __('ui.proposed_repair_details') }}</label><textarea id="proposed_repair_description" name="proposed_repair_description" rows="4" class="form-input" required>{{ old('proposed_repair_description', $quotation?->proposed_repair_description) }}</textarea>@error('proposed_repair_description')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror</div>
@@ -72,7 +72,7 @@
             </div>
         </section>
 
-        <section class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">
+        <section class="compact-wide rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">
             <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
                 <div><h2 class="text-sm font-bold text-slate-900">{{ __('ui.spare_parts_estimate') }}</h2><p class="mt-1 text-xs text-slate-500">{{ __('ui.no_stock_deduction_notice') }}</p></div>
                 <button type="button" id="add-item" class="rounded-xl border border-teal-200 bg-teal-50 px-3 py-2 text-xs font-semibold text-teal-800 hover:bg-teal-100">{{ __('ui.add_quotation_item') }}</button>
@@ -116,13 +116,13 @@
             </div>
         </section>
 
-        <section class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">
+        <section class="compact-wide rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">
             <h2 class="mb-4 text-sm font-bold text-slate-900">{{ __('ui.terms_and_conditions') }}</h2>
             <textarea id="terms_and_conditions" name="terms_and_conditions" rows="4" class="form-input" placeholder="{{ __('ui.terms_optional_hint') }}">{{ old('terms_and_conditions', $quotation?->terms_and_conditions) }}</textarea>
             @error('terms_and_conditions')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
         </section>
 
-        <div class="flex flex-wrap justify-end gap-3">
+        <div class="compact-wide flex flex-wrap justify-end gap-3">
             <button type="submit" name="intent" value="draft" class="rounded-xl border border-slate-200 bg-white px-5 py-3 text-xs font-semibold text-slate-700 hover:bg-slate-50">{{ __('ui.save_draft') }}</button>
             @can('quotations.print')
                 <button type="submit" name="intent" value="preview" class="rounded-xl border border-teal-200 bg-teal-50 px-5 py-3 text-xs font-semibold text-teal-800 hover:bg-teal-100">{{ __('ui.save_and_preview') }}</button>

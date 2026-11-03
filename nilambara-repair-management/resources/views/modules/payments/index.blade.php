@@ -42,7 +42,7 @@
                             <td class="px-4 py-3">{{ $payment->paid_at->timezone(config('business.timezone'))->format(config('business.date_format')) }}</td>
                             <td class="px-4 py-3">{{ $payment->customer?->display_name ?: '-' }}<span class="mt-1 block text-[10px] text-slate-400">{{ $payment->customer?->mobile_number }}</span></td>
                             <td class="px-4 py-3">
-                                @if ($allocation?->invoice)<a class="text-teal-800 hover:underline" href="{{ route('invoices.show', $allocation->invoice) }}">{{ $allocation->invoice->invoice_number }}</a>
+                                @if ($allocation?->invoice)<a class="text-teal-800 hover:underline" href="{{ route('invoices.show', $allocation->invoice) }}" target="_blank" rel="noopener noreferrer">{{ $allocation->invoice->invoice_number }}</a>
                                 @elseif ($allocation?->repairJob)<a class="text-teal-800 hover:underline" href="{{ route('repair-jobs.show', $allocation->repairJob) }}">{{ $allocation->repairJob->automatic_number ?: $allocation->repairJob->job_number }}</a>
                                 @else{{ __('payments.unallocated') }}@endif
                             </td>
@@ -51,7 +51,7 @@
                             <td class="px-4 py-3 text-right font-semibold">{{ config('business.currency') }} {{ $payment->amount }}</td>
                             <td class="px-4 py-3">{{ $payment->receivedByEmployee?->name ?: '—' }}</td>
                             <td class="px-4 py-3"><x-status-badge :status="$payment->balance_summary['status']" :label="__('payments.status_'.$payment->balance_summary['status'])" /></td>
-                            <td class="px-4 py-3"><a href="{{ route('payments.show', $payment) }}"  class="ui-icon-action ui-icon-action--blue" title="{{ __('payments.view') }}" aria-label="{{ __('payments.view') }}"><x-action-symbol icon="eye" :label="__('payments.view')" /></a>@can('print', $payment)<a href="{{ route('payments.print', $payment) }}"  class="ui-icon-action ui-icon-action--slate" title="{{ __('payments.print') }}" aria-label="{{ __('payments.print') }}"><x-action-symbol icon="printer" :label="__('payments.print')" /></a>@endcan</td>
+                            <td class="px-4 py-3"><a href="{{ route('payments.show', $payment) }}"  class="ui-icon-action ui-icon-action--blue" title="{{ __('payments.view') }}" aria-label="{{ __('payments.view') }}"><x-action-symbol icon="eye" :label="__('payments.view')" /></a>@can('print', $payment)<a href="{{ route('payments.print', $payment) }}"  class="ui-icon-action ui-icon-action--violet" title="{{ __('payments.print') }}" aria-label="{{ __('payments.print') }}" target="_blank" rel="noopener noreferrer"><x-action-symbol icon="printer" :label="__('payments.print')" /></a>@endcan</td>
                         </tr>
                     @empty
                         <tr><td colspan="10" class="px-4 py-14 text-center text-sm text-slate-500">{{ __('payments.no_payments') }}</td></tr>

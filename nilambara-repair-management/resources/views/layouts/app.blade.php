@@ -103,7 +103,7 @@
                 <div class="flex min-w-0 items-center gap-2.5 text-xs">
                     <span class="hidden text-slate-400 sm:inline">{{ __('ui.workspace') }}</span>
                     <span class="hidden text-slate-300 sm:inline" aria-hidden="true">/</span>
-                    <span class="font-semibold text-slate-700">@yield('title', __('ui.dashboard'))</span>
+                    <span class="min-w-0 truncate font-semibold text-slate-700">@yield('title', __('ui.dashboard'))</span>
                 </div>
             </div>
             <div class="flex shrink-0 items-center gap-4">

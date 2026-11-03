@@ -71,7 +71,7 @@
                                 <div class="flex gap-3">
                                     <a href="{{ route('customers.show', $customer) }}"  class="ui-icon-action ui-icon-action--blue" title="{{ __('ui.view') }}" aria-label="{{ __('ui.view') }}"><x-action-symbol icon="eye" :label="__('ui.view')" /></a>
                                     @can('customers.update')
-                                        <a href="{{ route('customers.edit', $customer) }}"  class="ui-icon-action ui-icon-action--blue" title="{{ __('ui.edit') }}" aria-label="{{ __('ui.edit') }}"><x-action-symbol icon="edit" :label="__('ui.edit')" /></a>
+                                        <a href="{{ route('customers.edit', $customer) }}"  class="ui-icon-action ui-icon-action--green" title="{{ __('ui.edit') }}" aria-label="{{ __('ui.edit') }}"><x-action-symbol icon="edit" :label="__('ui.edit')" /></a>
                                     @endcan
                                     @if (\App\Modules\Approvals\Services\ApprovalAccess::canRequestChange(auth()->user(), 'customer_update'))
                                         <a href="{{ route('customers.request-edit', $customer) }}"  class="ui-icon-action ui-icon-action--amber" title="{{ __('ui.request_edit') }}" aria-label="{{ __('ui.request_edit') }}"><x-action-symbol icon="edit" :label="__('ui.request_edit')" /></a>

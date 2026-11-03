@@ -25,7 +25,7 @@
 
     <form method="POST"
         action="{{ $editing ? route('invoices.update', $invoice) : route('invoices.store') }}"
-        class="space-y-5"
+        class="compact-document-grid"
         id="invoice-form"
         data-billing-url="{{ route('repair-jobs.billing', ['job' => '__JOB__']) }}"
         data-customer-search="{{ route('customers.search') }}"
@@ -68,7 +68,7 @@
             @error('repair_job_ids')<p class="mt-3 text-xs text-red-700">{{ $message }}</p>@enderror
         </section>
 
-        <div class="grid gap-5 lg:grid-cols-2">
+        <div class="compact-wide grid gap-5 lg:grid-cols-2">
             <section class="space-y-4 rounded-2xl border border-slate-200 bg-white p-5">
                 <h2 class="text-sm font-bold text-slate-900">{{ __('invoices.invoice_details') }}</h2>
                 <div>
@@ -162,7 +162,7 @@
             </section>
         </div>
 
-        <section class="rounded-2xl border border-slate-200 bg-white p-5">
+        <section class="compact-wide rounded-2xl border border-slate-200 bg-white p-5">
             <h2 class="text-sm font-bold text-slate-900">{{ __('invoices.invoice_summary') }}</h2>
             <div class="mt-4 grid gap-3 sm:grid-cols-2">
                 <div class="rounded-xl bg-slate-50 p-3"><span class="text-xs text-slate-500">{{ __('invoices.job_count') }}</span><p id="summary-job-count" class="mt-1 text-lg font-bold text-slate-900">0</p></div>
@@ -171,16 +171,16 @@
             <p class="mt-3 text-xs text-slate-500">{{ __('invoices.server_calculates_totals') }}</p>
         </section>
 
-        <div class="flex flex-wrap justify-end gap-2">
-            <a href="{{ $editing ? route('invoices.show', $invoice) : route('invoices.index') }}" class="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">{{ __('ui.cancel') }}</a>
+        <div class="compact-wide flex flex-wrap justify-end gap-2">
+            <a href="{{ $editing ? route('invoices.show', $invoice) : route('invoices.index') }}" class="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50" target="_blank" rel="noopener noreferrer">{{ __('ui.cancel') }}</a>
             @if ($editing)
                 <button type="submit" name="intent" value="draft" class="rounded-xl border border-teal-700 px-4 py-2.5 text-xs font-semibold text-teal-800 hover:bg-teal-50">{{ __('invoices.save_draft') }}</button>
             @endif
             @can('invoices.print')
-                <button type="submit" name="intent" value="preview" class="rounded-xl border border-slate-300 px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">{{ __('invoices.save_preview') }}</button>
+                <button type="submit" name="intent" value="preview" formtarget="_blank" class="rounded-xl border border-slate-300 px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">{{ __('invoices.save_preview') }}</button>
             @endcan
             @can('invoices.issue')
-                <button type="submit" name="intent" value="issue" data-confirm="{{ __('invoices.issue_confirmation') }}" class="rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white hover:bg-teal-800">{{ $editing ? __('invoices.issue_invoice') : __('invoices.record_payment_create_invoice') }}</button>
+                <button type="submit" name="intent" value="issue" formtarget="_blank" data-confirm="{{ __('invoices.issue_confirmation') }}" class="rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white hover:bg-teal-800">{{ $editing ? __('invoices.issue_invoice') : __('invoices.record_payment_create_invoice') }}</button>
             @endcan
         </div>
     </form>

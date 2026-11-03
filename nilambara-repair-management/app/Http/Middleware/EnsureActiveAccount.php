@@ -22,6 +22,14 @@ class EnsureActiveAccount
                 ->withErrors(['username' => __('Your account is inactive. Contact an administrator.')]);
         }
 
+        if ($user !== null) {
+            $request->attributes->set('nilambara.permission_denials', [
+                'user_id' => $user->getKey(),
+                'model_type' => $user->getMorphClass(),
+                'denied' => $user->permissions()->wherePivot('effect', 'deny')->pluck('permissions.name')->flip()->all(),
+            ]);
+        }
+
         return $next($request);
     }
 }

@@ -52,6 +52,15 @@ class ReportDataService
         };
     }
 
+    public function collectionsQuery(array $filters, User $actor): Builder
+    {
+        if ($actor->hasRole('cashier') && ! $actor->can('reports.financial')) {
+            $filters['employee_id'] = $this->employeeId($actor) ?: -1;
+        }
+
+        return $this->paymentQuery(false, $filters);
+    }
+
     /**
      * @param  array<string, mixed>  $filters
      */

@@ -96,6 +96,7 @@ class JobCardController extends Controller
             'model' => $job->model,
             'item_description' => $job->item_description,
             'reported_fault' => $job->reported_fault,
+            'special_notes' => $job->special_notes,
             'document_kind' => 'technician_worksheet',
             'handwritten_fields' => ['status', 'issues_found', 'inspected_by', 'inspection_date', 'repaired_by', 'completion_date', 'work_performed', 'parts_used', 'parts_cost', 'total_amount', 'notes', 'signature', 'returned_to_cashier_date', 'cashier_received_by'],
             'duplicate' => $duplicate,

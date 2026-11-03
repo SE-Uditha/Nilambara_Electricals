@@ -65,7 +65,7 @@
                         </div>
                         @if ($technician->user_id === null)
                             <div class="flex shrink-0 gap-2">
-                                <button type="button" x-on:click="editing = {{ $technician->id }}"  class="ui-icon-action ui-icon-action--blue" title="{{ __('ui.edit') }}" aria-label="{{ __('ui.edit') }}"><x-action-symbol icon="edit" :label="__('ui.edit')" /></button>
+                                <button type="button" x-on:click="editing = {{ $technician->id }}"  class="ui-icon-action ui-icon-action--green" title="{{ __('ui.edit') }}" aria-label="{{ __('ui.edit') }}"><x-action-symbol icon="edit" :label="__('ui.edit')" /></button>
                                 <form method="POST" action="{{ route('repair-jobs.technicians.destroy', [$job, $technician]) }}" onsubmit="return confirm(@js(__('ui.confirm_remove_technician')))">
                                     @csrf @method('DELETE')
                                     <button type="submit"  class="ui-icon-action ui-icon-action--danger" title="{{ __('ui.delete') }}" aria-label="{{ __('ui.delete') }}"><x-action-symbol icon="trash" :label="__('ui.delete')" /></button>

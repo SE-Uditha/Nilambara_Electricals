@@ -78,8 +78,9 @@ class InvoiceController extends Controller
         }
 
         $invoices = $query->paginate(20)->withQueryString();
+        $summaries = $balances->summaries($invoices->getCollection());
         foreach ($invoices as $invoice) {
-            $invoice->setAttribute('payment_summary', $balances->summary($invoice));
+            $invoice->setAttribute('payment_summary', $summaries[$invoice->getKey()]);
         }
 
         $readyBills = ! $request->user()->can('invoices.create') ? collect() : RepairJob::query()->with('customer')

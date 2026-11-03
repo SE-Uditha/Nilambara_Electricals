@@ -52,11 +52,14 @@ class RepairJob extends BusinessModel
         'delivered_at',
         'approval_status',
         'special_notes',
+        'private_notes',
         'status',
         'cancelled_at',
         'cancelled_by_user_id',
         'cancellation_reason',
     ];
+
+    protected $hidden = ['private_notes'];
 
     protected array $immutableFields = ['id', 'job_number', 'automatic_number', 'customer_id'];
 

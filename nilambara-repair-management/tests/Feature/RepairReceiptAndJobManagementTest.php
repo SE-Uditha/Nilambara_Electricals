@@ -34,6 +34,54 @@ class RepairReceiptAndJobManagementTest extends TestCase
         $this->seed(RoleSeeder::class);
     }
 
+    public function test_private_notes_stay_internal_and_special_notes_are_printed_on_job_cards(): void
+    {
+        $actor = $this->userWithRole('administrator');
+        $customer = $this->customer();
+        $receiver = $this->employee();
+        $this->actingAs($actor)->post(route('repair-jobs.store'), $this->receiptData($customer, $receiver, [
+            'job_number' => 'PRIVATE-NOTE-001',
+            'special_notes' => "Handle carefully\nKeep the original cable.",
+            'private_notes' => '  STAFF-ONLY-NOTE-SECRET  ',
+        ]))->assertSessionHasNoErrors();
+        $job = RepairJob::query()->where('job_number', 'PRIVATE-NOTE-001')->sole();
+        $this->assertSame('STAFF-ONLY-NOTE-SECRET', $job->private_notes);
+        $this->assertArrayNotHasKey('private_notes', $job->toArray());
+        $this->assertArrayNotHasKey('private_notes', $job->receipt->document_snapshot);
+        $this->get(route('repair-jobs.show', $job))->assertOk()->assertSee('STAFF-ONLY-NOTE-SECRET');
+        $this->get(route('repair-jobs.receipt.print', $job))->assertOk()->assertSee('Handle carefully')->assertDontSee('STAFF-ONLY-NOTE-SECRET');
+        foreach (['job-cards.print', 'job-cards.duplicate'] as $route) {
+            $this->get(route($route, $job))->assertOk()->assertSee('Handle carefully')->assertSee('Keep the original cable.')->assertDontSee('STAFF-ONLY-NOTE-SECRET');
+        }
+        $history = \App\Modules\PrintTemplates\Models\DocumentPrintHistory::query()->where('job_card_id', $job->jobCard->id)->latest('id')->firstOrFail();
+        $this->assertSame($job->special_notes, $history->document_snapshot['special_notes']);
+        $this->assertArrayNotHasKey('private_notes', $history->document_snapshot);
+        $this->put(route('repair-jobs.update', $job), [
+            'job_type' => 'normal', 'item_name' => $job->item_name, 'brand' => 'Test',
+            'special_notes' => 'Updated printable notes', 'private_notes' => 'UPDATED-INTERNAL-NOTE',
+        ])->assertSessionHasNoErrors();
+        $this->assertSame('UPDATED-INTERNAL-NOTE', $job->fresh()->private_notes);
+        $this->get(route('job-cards.print', $job))->assertOk()->assertSee('Updated printable notes')->assertDontSee('UPDATED-INTERNAL-NOTE');
+    }
+
+    public function test_private_notes_validation_and_new_tab_document_controls(): void
+    {
+        $actor = $this->userWithRole('administrator');
+        $this->actingAs($actor)->get(route('repair-jobs.create'))->assertOk()
+            ->assertSee('name="private_notes"', false)
+            ->assertSee('value="print" formtarget="_blank"', false);
+        $this->post(route('repair-jobs.store'), $this->receiptData($this->customer(), $this->employee(), [
+            'private_notes' => str_repeat('x', 10001),
+        ]))->assertSessionHasErrors('private_notes');
+        $job = $this->job();
+        $this->get(route('repair-jobs.edit', $job))->assertOk()->assertSee('name="private_notes"', false);
+        $response = $this->get(route('repair-jobs.show', $job))->assertOk();
+        $invoice = $this->invoice($job->customer);
+        $html = $this->get(route('invoices.index'))->assertOk()->getContent();
+        $this->assertMatchesRegularExpression('/<a[^>]*href="'.preg_quote(route('invoices.show', $invoice), '/').'"[^>]*target="_blank"[^>]*rel="noopener noreferrer"/u', $html);
+        $this->get(route('invoices.create'))->assertOk()->assertSee('value="preview" formtarget="_blank"', false);
+    }
+
     public function test_new_job_form_offers_optional_labour_charge_that_defaults_to_zero(): void
     {
         $cashier = $this->userWithRole('cashier');

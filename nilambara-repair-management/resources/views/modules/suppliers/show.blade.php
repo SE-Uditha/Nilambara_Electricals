@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="mb-5 flex justify-between"><h1 class="text-2xl font-bold">{{ $supplier->name }}</h1>
-@can('suppliers.update')<a  href="{{ route('suppliers.edit',$supplier) }}" class="ui-icon-action ui-icon-action--blue" title="Edit supplier" aria-label="Edit supplier"><x-action-symbol icon="edit" label="Edit supplier" /></a>
+@can('suppliers.update')<a  href="{{ route('suppliers.edit',$supplier) }}" class="ui-icon-action ui-icon-action--green" title="Edit supplier" aria-label="Edit supplier"><x-action-symbol icon="edit" label="Edit supplier" /></a>
 @endcan</div>
 @include('modules.inventory.feedback')
 <div class="mb-5 rounded-2xl border bg-white p-5"><p>{{ $supplier->supplier_code }} · {{ $supplier->address }}</p><p>{{ $supplier->contact_person }} · {{ $supplier->mobile_number }} · {{ $supplier->email }}</p><p>Credit: {{ $supplier->credit_terms }} · {{ $supplier->credit_days }} days</p><p class="mt-3 text-lg font-bold">Account balance: LKR {{ $balance }}</p></div>

@@ -1,6 +1,18 @@
 <?php
 
 return [
+    'select_physical_condition' => 'Select a physical condition',
+    'select_visible_damage' => 'Select visible damage',
+    'condition_manual_placeholder' => 'Or type an entry and press Add',
+    'condition_list_empty' => 'No entries added.',
+    'condition_list_limit' => 'The selected entries must total no more than 5,000 characters.',
+
+    'job_overview' => 'Overview',
+    'repair_information_and_inspection' => 'Repair information & Record inspection',
+    'browse_customers' => 'Show all customers',
+    'customer_load_more' => 'Load more customers',
+    'private_notes' => 'Private notes (staff only)',
+    'private_notes_help' => 'For staff only. These notes are not included on customer receipts, invoices, quotations or printed job cards.',
     'register_part' => 'Register part',
     'register_supplier' => 'Register supplier',
     'new_purchase' => 'New purchase',

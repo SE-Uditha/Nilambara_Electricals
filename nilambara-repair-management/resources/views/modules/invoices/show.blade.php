@@ -11,8 +11,8 @@
             <p class="mt-1 text-sm text-slate-500">{{ $invoice->invoice_date->format(config('business.date_format')) }} · {{ __('invoices.'.$invoice->status->value) }} · {{ __('invoices.'.$balance['payment_status']) }}</p>
         </div>
         <div class="flex flex-wrap gap-2">
-            @can('print', $invoice)<a href="{{ route('invoices.print', $invoice) }}"  class="ui-icon-action ui-icon-action--slate" title="{{ __('invoices.print') }}" aria-label="{{ __('invoices.print') }}"><x-action-symbol icon="printer" :label="__('invoices.print')" /></a><a href="{{ route('invoices.duplicate', $invoice) }}" class="rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">{{ __('invoices.duplicate_print') }}</a>@endcan
-            @can('export', $invoice)<a href="{{ route('invoices.pdf', $invoice) }}" class="rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">{{ __('invoices.export_pdf') }}</a>@endcan
+            @can('print', $invoice)<a href="{{ route('invoices.print', $invoice) }}"  class="ui-icon-action ui-icon-action--violet" title="{{ __('invoices.print') }}" aria-label="{{ __('invoices.print') }}" target="_blank" rel="noopener noreferrer"><x-action-symbol icon="printer" :label="__('invoices.print')" /></a><a href="{{ route('invoices.duplicate', $invoice) }}" class="rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50" target="_blank" rel="noopener noreferrer">{{ __('invoices.duplicate_print') }}</a>@endcan
+            @can('export', $invoice)<a href="{{ route('invoices.pdf', $invoice) }}" class="rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50" target="_blank" rel="noopener noreferrer">{{ __('invoices.export_pdf') }}</a>@endcan
             @can('updateDraft', $invoice)<a href="{{ route('invoices.edit', $invoice) }}" class="rounded-xl border border-teal-700 px-3 py-2 text-xs font-semibold text-teal-800 hover:bg-teal-50">{{ __('invoices.edit_draft') }}</a>@endcan
         </div>
     </div>
@@ -84,8 +84,7 @@
                 </dl>
                 <p class="mt-3 text-xs text-slate-500">{{ __('invoices.no_delivery_status_change') }}</p>
             </section>
-            <section class="rounded-2xl border border-slate-200 bg-white p-5">
-                <h2 class="text-sm font-bold text-slate-900">{{ __('invoices.print_history') }}</h2>
+            <details class="compact-disclosure"><summary>{{ __('invoices.print_history') }}</summary><div class="compact-disclosure-body">
                 <ol class="mt-4 space-y-3">
                     @forelse ($invoice->documentPrintHistories as $print)
                         <li class="border-l-2 border-slate-200 pl-3">
@@ -96,7 +95,7 @@
                         <li class="text-xs text-slate-500">{{ __('invoices.no_print_history') }}</li>
                     @endforelse
                 </ol>
-            </section>
+            </div></details>
         </div>
 
         <aside class="space-y-5">

@@ -3,7 +3,7 @@
 @section('title','Purchases')
 
 @section('content')
-<div class="mb-5 flex justify-between"><h1 class="text-2xl font-bold">Purchases</h1>
+<div class="mb-5 flex flex-wrap items-center justify-between gap-3"><h1 class="text-2xl font-bold">Purchases</h1>
 @can('purchases.create')<a class="ui-create-action rounded-xl bg-teal-700 px-4 py-2 text-white" href="{{ route('purchases.create') }}"><x-icon name="plus" :size="18" />New purchase draft</a>
 @endcan</div>
 @include('modules.inventory.feedback')

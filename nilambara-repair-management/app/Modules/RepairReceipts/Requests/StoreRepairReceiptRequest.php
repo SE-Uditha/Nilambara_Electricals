@@ -44,6 +44,7 @@ class StoreRepairReceiptRequest extends FormRequest
                 Rule::exists('employees', 'id')->where(fn ($query) => $query->where('is_active', true)),
             ],
             'special_notes' => ['nullable', 'string', 'max:10000'],
+            'private_notes' => ['nullable', 'string', 'max:10000'],
             'intent' => ['nullable', Rule::in(['save', 'print', 'cancel_payments'])],
         ];
     }

@@ -74,28 +74,26 @@ class CustomerController extends Controller
     public function search(Request $request): JsonResponse
     {
         Gate::authorize('search', Customer::class);
-
         $term = trim((string) $request->query('q'));
-
-        if (mb_strlen($term) < 2) {
+        $browse = $request->boolean('browse');
+        if (! $browse && mb_strlen($term) < 2) {
             return response()->json(['data' => []]);
         }
-
-        $customers = Customer::query()
-            ->where('is_active', true)
-            ->where(function ($builder) use ($term): void {
+        $query = Customer::query()->where('is_active', true);
+        if ($term !== '') {
+            $query->where(function ($builder) use ($term): void {
                 $like = '%'.$term.'%';
                 $builder->where('customer_code', 'like', $like)
                     ->orWhere('customer_name', 'like', $like)
                     ->orWhere('company_name', 'like', $like)
                     ->orWhere('mobile_number', 'like', $like);
-            })
-            ->orderBy('customer_code')
-            ->limit(10)
-            ->get(['id', 'customer_code', 'customer_type', 'customer_name', 'company_name', 'contact_person', 'address', 'mobile_number']);
-
+            });
+        }
+        $customers = $query->orderBy('customer_code')->orderBy('id')->simplePaginate($browse ? 25 : 10, [
+            'id', 'customer_code', 'customer_type', 'customer_name', 'company_name', 'contact_person', 'address', 'mobile_number',
+        ]);
         return response()->json([
-            'data' => $customers->map(fn (Customer $customer): array => [
+            'data' => $customers->getCollection()->map(fn (Customer $customer): array => [
                 'id' => $customer->id,
                 'customer_code' => $customer->customer_code,
                 'name' => $customer->display_name,
@@ -105,6 +103,7 @@ class CustomerController extends Controller
                 'mobile_number' => $customer->mobile_number,
                 'url' => route('customers.show', $customer),
             ])->all(),
+            'meta' => ['page' => $customers->currentPage(), 'has_more' => $customers->hasMorePages()],
         ]);
     }
 

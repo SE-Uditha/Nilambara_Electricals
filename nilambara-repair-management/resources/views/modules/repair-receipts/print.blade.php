@@ -44,7 +44,7 @@
     <nav class="screen-actions" aria-label="{{ __('ui.print_actions') }}">
         <a href="{{ route('repair-jobs.show', $receipt->repair_job_id) }}">{{ __('ui.back_to_jobs') }}</a>
         <button type="button" onclick="window.print()">{{ __('ui.print') }}</button>
-        <a href="{{ route('repair-jobs.receipt.pdf', ['job' => $receipt->repair_job_id, 'duplicate' => $duplicate ? 1 : 0]) }}">PDF</a>
+        <a href="{{ route('repair-jobs.receipt.pdf', ['job' => $receipt->repair_job_id, 'duplicate' => $duplicate ? 1 : 0]) }}" target="_blank" rel="noopener noreferrer">PDF</a>
     </nav>
     <main class="document">
         <header class="business">

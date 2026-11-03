@@ -15,7 +15,7 @@
 
     <form method="POST" action="{{ route('repair-jobs.store') }}" x-data="{ selectedCustomer: @js($selectedCustomer), advancePayment: @js(old('advance_payment', '0.00')), showLabour: @js(old('labor_cost') !== null), labourCost: @js(old('labor_cost', '')), submitting: false }" x-on:customer-selected="selectedCustomer = $event.detail" x-on:submit="if (submitting) { $event.preventDefault(); return; } setTimeout(() => submitting = true, 0)">
         @csrf
-        <div class="space-y-5">
+        <div class="intake-grid">
             <section class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">
                 <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
                     <div>
@@ -28,7 +28,7 @@
                 </div>
                 <x-customer-search name="customer_id" :required="true" :customer="$selectedCustomer" />
                 @error('customer_id')<p class="mt-2 text-xs text-red-600">{{ $message }}</p>@enderror
-                <div class="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                <div class="mt-5 grid gap-4 sm:grid-cols-2">
                     <div><span class="form-label">{{ __('ui.customer_id') }}</span><p class="text-sm font-medium text-slate-700" x-text="selectedCustomer?.customer_code || '—'"></p></div>
                     <div><span class="form-label">{{ __('ui.customer_type') }}</span><p class="text-sm font-medium text-slate-700" x-text="selectedCustomer?.type || '—'"></p></div>
                     <div><span class="form-label">{{ __('ui.customer_name') }}</span><p class="text-sm font-medium text-slate-700" x-text="selectedCustomer?.name || '—'"></p></div>
@@ -40,7 +40,7 @@
 
             <section class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">
                 <h2 class="mb-5 text-sm font-bold text-slate-900">{{ __('ui.job_information') }}</h2>
-                <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                <div class="grid gap-4 sm:grid-cols-2">
                     <div>
                         <label class="form-label" for="automatic-reference">{{ __('ui.automatic_job_reference') }}</label>
                         <input id="automatic-reference" value="{{ __('ui.generated_after_save') }}" class="form-input bg-slate-50" readonly>
@@ -67,7 +67,7 @@
                 </div>
             </section>
 
-            <section class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">
+            <section class="intake-appliance rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">
                 <h2 class="mb-5 text-sm font-bold text-slate-900">{{ __('ui.appliance_information') }}</h2>
                 <div class="grid gap-4 sm:grid-cols-2">
                     <div>
@@ -97,30 +97,35 @@
                         @include('modules.repair-jobs.partials.quick-add', ['config' => 'common_faults', 'target' => 'reported_fault'])
                         <textarea id="reported_fault" name="reported_fault" rows="4" class="form-input">{{ old('reported_fault') }}</textarea>
                     </div>
-                    <div>
+                    <div class="sm:col-span-2">
                         <label class="form-label" for="accessories_received">{{ __('ui.accessories_received') }}</label>
                         <textarea id="accessories_received" name="accessories_received" rows="3" class="form-input">{{ old('accessories_received') }}</textarea>
                     </div>
                     <div>
                         <label class="form-label" for="physical_condition">{{ __('ui.physical_condition') }}</label>
-                        @include('modules.repair-jobs.partials.quick-add', ['config' => 'common_physical_conditions', 'target' => 'physical_condition'])
-                        <textarea id="physical_condition" name="physical_condition" rows="3" class="form-input">{{ old('physical_condition') }}</textarea>
+                        @include('modules.repair-jobs.partials.condition-list', ['config' => 'common_physical_conditions', 'field' => 'physical_condition', 'value' => old('physical_condition')])
                     </div>
-                    <div class="sm:col-span-2">
+                    <div>
                         <label class="form-label" for="visible_damage">{{ __('ui.visible_damage') }}</label>
-                        @include('modules.repair-jobs.partials.quick-add', ['config' => 'common_visible_damages', 'target' => 'visible_damage'])
-                        <textarea id="visible_damage" name="visible_damage" rows="3" class="form-input">{{ old('visible_damage') }}</textarea>
+                        @include('modules.repair-jobs.partials.condition-list', ['config' => 'common_visible_damages', 'field' => 'visible_damage', 'value' => old('visible_damage')])
                     </div>
                     <div class="sm:col-span-2">
                         <label class="form-label" for="special_notes">{{ __('ui.special_notes') }}</label>
                         <textarea id="special_notes" name="special_notes" rows="3" class="form-input">{{ old('special_notes') }}</textarea>
                     </div>
+                    <div class="sm:col-span-2 rounded-xl border border-amber-200 bg-amber-50/50 p-4">
+                        <label class="form-label" for="private_notes">{{ __('ui.private_notes') }}</label>
+                        <textarea id="private_notes" name="private_notes" rows="3" maxlength="10000" class="form-input" aria-describedby="private_notes_help">{{ old('private_notes') }}</textarea>
+                        <p id="private_notes_help" class="mt-2 text-xs text-slate-500">{{ __('ui.private_notes_help') }}</p>
+                        @error('private_notes')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+                    </div>
+
                 </div>
             </section>
 
             <section class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">
                 <h2 class="mb-5 text-sm font-bold text-slate-900">{{ __('ui.payment_information') }}</h2>
-                <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                <div class="grid gap-4 sm:grid-cols-2">
                     @if (auth()->user()->can('payments.create') && auth()->user()->can('payments.receive'))
                         <div>
                             <label class="form-label" for="advance_payment">{{ __('ui.advance_payment') }}</label>
@@ -169,11 +174,11 @@
                 </div>
             </section>
 
-            <div class="flex flex-wrap justify-end gap-3">
+            <div class="intake-actions flex flex-wrap justify-end gap-3">
                 <a href="{{ route('repair-jobs.index') }}" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50">{{ __('ui.cancel') }}</a>
                 <button type="submit" name="intent" value="save" x-bind:disabled="submitting" class="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 disabled:opacity-60">{{ __('ui.accept_repair_job') }}</button>
                 @can('receipts.print')
-                    <button type="submit" name="intent" value="print" x-bind:disabled="submitting" class="rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white hover:bg-teal-800 disabled:opacity-60">{{ __('ui.accept_and_print_receipt') }}</button>
+                    <button type="submit" name="intent" value="print" formtarget="_blank" x-bind:disabled="submitting" class="rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white hover:bg-teal-800 disabled:opacity-60">{{ __('ui.accept_and_print_receipt') }}</button>
                 @endcan
             </div>
         </div>

@@ -74,7 +74,7 @@
                                 <div class="flex gap-3">
                                     <a href="{{ route('employees.show', $employee) }}"  class="ui-icon-action ui-icon-action--blue" title="{{ __('ui.view') }}" aria-label="{{ __('ui.view') }}"><x-action-symbol icon="eye" :label="__('ui.view')" /></a>
                                     @can('employees.update')
-                                        <a href="{{ route('employees.edit', $employee) }}"  class="ui-icon-action ui-icon-action--blue" title="{{ __('ui.edit') }}" aria-label="{{ __('ui.edit') }}"><x-action-symbol icon="edit" :label="__('ui.edit')" /></a>
+                                        <a href="{{ route('employees.edit', $employee) }}"  class="ui-icon-action ui-icon-action--green" title="{{ __('ui.edit') }}" aria-label="{{ __('ui.edit') }}"><x-action-symbol icon="edit" :label="__('ui.edit')" /></a>
                                     @endcan
                                 </div>
                             </td>

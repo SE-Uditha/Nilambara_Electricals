@@ -33,18 +33,25 @@
             @endif
             @if ($job->receipt)
                 @can('receipts.print')
-                    <a href="{{ route('repair-jobs.receipt.print', $job) }}"  class="ui-icon-action ui-icon-action--slate" title="{{ __('ui.print_receipt') }}" aria-label="{{ __('ui.print_receipt') }}"><x-action-symbol icon="printer" :label="__('ui.print_receipt')" /></a>
+                    <a href="{{ route('repair-jobs.receipt.print', $job) }}"  class="ui-icon-action ui-icon-action--violet" title="{{ __('ui.print_receipt') }}" aria-label="{{ __('ui.print_receipt') }}" target="_blank" rel="noopener noreferrer"><x-action-symbol icon="printer" :label="__('ui.print_receipt')" /></a>
                 @endcan
-                @can('receipts.reprint')<a href="{{ route('repair-jobs.receipt.duplicate', $job) }}" class="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-700">{{ __('ui.reprint_duplicate') }}</a>@endcan
+                @can('receipts.reprint')<a href="{{ route('repair-jobs.receipt.duplicate', $job) }}" class="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-700" target="_blank" rel="noopener noreferrer">{{ __('ui.reprint_duplicate') }}</a>@endcan
             @endif
-            @can('job-cards.print')<a href="{{ route('job-cards.print', $job) }}"  class="ui-icon-action ui-icon-action--slate" title="{{ __('ui.print_job_card') }}" aria-label="{{ __('ui.print_job_card') }}"><x-action-symbol icon="printer" :label="__('ui.print_job_card')" /></a>@endcan
+            @can('job-cards.print')<a href="{{ route('job-cards.print', $job) }}"  class="ui-icon-action ui-icon-action--violet" title="{{ __('ui.print_job_card') }}" aria-label="{{ __('ui.print_job_card') }}" target="_blank" rel="noopener noreferrer"><x-action-symbol icon="printer" :label="__('ui.print_job_card')" /></a>@endcan
         </div>
     </div>
     @if (session('status'))
         <div role="status" class="mb-5 rounded-xl border border-teal-200 bg-teal-50 px-4 py-3 text-sm text-teal-800">{{ session('status') }}</div>
     @endif
 
-    <div class="grid gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
+    <div x-data="{ activePanel: @js($errors->hasAny(['inspection_result', 'inspected_at', 'technical_information', 'work_performed', 'parts_used', 'parts_quantity', 'parts_cost', 'labor_cost', 'repair_completed_at', 'testing_details', 'special_notes']) && (auth()->user()->can('inspect', $job) || auth()->user()->can('repair', $job)) ? 'work' : 'overview') }">
+        @if (auth()->user()->can('inspect', $job) || auth()->user()->can('repair', $job))
+        <div class="compact-tabs" role="tablist" aria-label="{{ __('ui.repair_job') }}">
+            <button type="button" id="job-overview-tab" role="tab" x-ref="overviewTab" aria-controls="job-overview-panel" x-bind:aria-selected="activePanel === 'overview'" x-bind:tabindex="activePanel === 'overview' ? 0 : -1" x-on:click="activePanel = 'overview'" x-on:keydown.arrow-right.prevent="activePanel = 'work'; $refs.workTab.focus()" x-on:keydown.arrow-left.prevent="activePanel = 'work'; $refs.workTab.focus()"><x-icon name="clipboard" :size="17" />{{ __('ui.job_overview') }}</button>
+            <button type="button" id="job-work-tab" role="tab" x-ref="workTab" aria-controls="job-work-panel" x-bind:aria-selected="activePanel === 'work'" x-bind:tabindex="activePanel === 'work' ? 0 : -1" x-on:click="activePanel = 'work'" x-on:keydown.arrow-left.prevent="activePanel = 'overview'; $refs.overviewTab.focus()" x-on:keydown.arrow-right.prevent="activePanel = 'overview'; $refs.overviewTab.focus()"><x-icon name="tool" :size="17" />{{ __('ui.repair_information_and_inspection') }}</button>
+        </div>
+        @endif
+    <div id="job-overview-panel" role="tabpanel" aria-label="{{ __('ui.job_overview') }}" x-show="activePanel === 'overview'" class="grid gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
         <div class="space-y-5">
             <section class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">
                 <div class="mb-5 flex items-center justify-between gap-3">
@@ -67,13 +74,14 @@
                     <div><dt class="form-label">{{ __('ui.physical_condition') }}</dt><dd class="whitespace-pre-line text-slate-700">{{ $job->physical_condition ?: '—' }}</dd></div>
                     <div><dt class="form-label">{{ __('ui.visible_damage') }}</dt><dd class="whitespace-pre-line text-slate-700">{{ $job->visible_damage ?: '—' }}</dd></div>
                     <div class="sm:col-span-2 xl:col-span-3"><dt class="form-label">{{ __('ui.special_notes') }}</dt><dd class="whitespace-pre-line text-slate-700">{{ $job->special_notes ?: '—' }}</dd></div>
+                    <div class="sm:col-span-2 xl:col-span-3 rounded-xl border border-amber-200 bg-amber-50/50 p-4"><dt class="form-label">{{ __('ui.private_notes') }}</dt><dd class="whitespace-pre-line text-slate-700">{{ $job->private_notes ?: '—' }}</dd><p class="mt-2 text-xs text-slate-500">{{ __('ui.private_notes_help') }}</p></div>
                     @if ($job->status === \App\Enums\JobStatus::Cancelled)
                         <div><dt class="form-label">{{ __('ui.cancelled_date') }}</dt><dd class="text-slate-700">{{ $job->cancelled_at?->timezone(config('business.timezone'))->format(config('business.date_format').' '.config('business.time_format')) ?: '—' }}</dd></div>
                         <div class="sm:col-span-2"><dt class="form-label">{{ __('ui.cancellation_reason') }}</dt><dd class="whitespace-pre-line text-slate-700">{{ $job->cancellation_reason ?: '—' }}</dd></div>
                     @endif
                 </dl>
                 @if ($job->receipt && auth()->user()->can('receipts.print'))
-                    <div class="mt-5 border-t border-slate-100 pt-4"><a href="{{ route('repair-jobs.receipt.print', $job) }}" class="text-xs font-semibold text-teal-700 hover:text-teal-900">{{ __('ui.view_receipt') }} · {{ $job->receipt->receipt_number }}</a></div>
+                    <div class="mt-5 border-t border-slate-100 pt-4"><a href="{{ route('repair-jobs.receipt.print', $job) }}" class="text-xs font-semibold text-teal-700 hover:text-teal-900" target="_blank" rel="noopener noreferrer">{{ __('ui.view_receipt') }} · {{ $job->receipt->receipt_number }}</a></div>
                 @endif
             </section>
 
@@ -206,8 +214,7 @@
                 </section>
             @endif
 
-            <section class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">
-                <h2 class="mb-5 text-sm font-bold text-slate-900">{{ __('ui.inspection_and_repair_history') }}</h2>
+            <details class="compact-disclosure"><summary>{{ __('ui.inspection_and_repair_history') }}</summary><div class="compact-disclosure-body">
                 <div class="space-y-4">
                     @forelse ($job->jobInspections->sortByDesc('inspected_at') as $inspection)
                         <article class="rounded-xl border border-slate-100 bg-slate-50 p-4">
@@ -227,7 +234,7 @@
                         <p class="rounded-xl bg-slate-50 px-4 py-5 text-sm text-slate-500">{{ __('ui.no_inspection_records') }}</p>
                     @endforelse
                 </div>
-            </section>
+            </div></details>
 
             @if (auth()->user()->can('quotations.view'))
                 <section class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">
@@ -252,85 +259,7 @@
                 </section>
             @endif
 
-            @can('inspect', $job)
-                <section class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">
-                    <h2 class="mb-4 text-sm font-bold text-slate-900">{{ __('ui.record_inspection') }}</h2>
-                    <form method="POST" action="{{ route('repair-jobs.inspect', $job) }}" class="grid gap-4 sm:grid-cols-2">
-                        @csrf
-                        <div>
-                            <label class="form-label" for="inspected_at">{{ __('ui.inspection_date') }}</label>
-                            <input id="inspected_at" type="datetime-local" name="inspected_at" value="{{ old('inspected_at') }}" class="form-input">
-                            @error('inspected_at')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
-                        </div>
-                        <div class="sm:col-span-2">
-                            <label class="form-label" for="existing_fault">{{ __('ui.existing_fault') }}</label>
-                            <textarea id="existing_fault" name="existing_fault" rows="2" class="form-input">{{ old('existing_fault', $job->reported_fault) }}</textarea>
-                        </div>
-                        <div class="sm:col-span-2">
-                            <label class="form-label" for="inspection_result">{{ __('ui.inspection_result') }} <span class="text-red-600">*</span></label>
-                            <textarea id="inspection_result" name="inspection_result" rows="4" required class="form-input">{{ old('inspection_result') }}</textarea>
-                            @error('inspection_result')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
-                        </div>
-                        <div class="sm:col-span-2">
-                            <label class="form-label" for="technical_information">{{ __('ui.technical_information') }}</label>
-                            <textarea id="technical_information" name="technical_information" rows="3" class="form-input">{{ old('technical_information') }}</textarea>
-                        </div>
-                        <div class="sm:col-span-2">
-                            <label class="form-label" for="inspection_notes">{{ __('ui.special_notes') }}</label>
-                            <textarea id="inspection_notes" name="special_notes" rows="2" class="form-input">{{ old('special_notes') }}</textarea>
-                        </div>
-                        <div class="sm:col-span-2"><button class="rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white hover:bg-teal-800">{{ __('ui.save_inspection') }}</button></div>
-                    </form>
-                </section>
-            @endcan
 
-            @can('repair', $job)
-                <section class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">
-                    <h2 class="mb-4 text-sm font-bold text-slate-900">{{ __('ui.repair_information') }}</h2>
-                    <form method="POST" action="{{ route('repair-jobs.save-repair', $job) }}" class="grid gap-4 sm:grid-cols-2">
-                        @csrf
-                        <div class="sm:col-span-2">
-                            <label class="form-label" for="work_performed">{{ __('ui.work_performed') }} <span class="text-red-600">*</span></label>
-                            <textarea id="work_performed" name="work_performed" rows="4" required class="form-input">{{ old('work_performed') }}</textarea>
-                            @error('work_performed')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
-                        </div>
-                        <div>
-                            <label class="form-label" for="parts_used">{{ __('ui.parts_used') }}</label>
-                            <textarea id="parts_used" name="parts_used" rows="3" class="form-input">{{ old('parts_used') }}</textarea>
-                        </div>
-                        <div>
-                            <label class="form-label" for="parts_quantity">{{ __('ui.quantity') }}</label>
-                            <input id="parts_quantity" name="parts_quantity" type="number" min="0" step="0.001" value="{{ old('parts_quantity') }}" class="form-input">
-                            @error('parts_quantity')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
-                        </div>
-                        <div>
-                            <label class="form-label" for="parts_cost">{{ __('ui.total_spare_parts_cost') }}</label>
-                            <input id="parts_cost" name="parts_cost" type="number" min="0" step="0.01" value="{{ old('parts_cost', $job->parts_cost) }}" class="form-input">
-                            @error('parts_cost')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
-                        </div>
-                        <div>
-                            <label class="form-label" for="repair_labor_cost">{{ __('ui.labor_cost') }}</label>
-                            <input id="repair_labor_cost" name="labor_cost" type="number" min="0" step="0.01" value="{{ old('labor_cost', $job->labour_cost) }}" class="form-input">
-                            @error('labor_cost')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
-                        </div>
-                        <div>
-                            <label class="form-label" for="repair_completed_at">{{ __('ui.repair_completed_date') }}</label>
-                            <input id="repair_completed_at" name="repair_completed_at" type="datetime-local" value="{{ old('repair_completed_at') }}" class="form-input">
-                            @error('repair_completed_at')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
-                        </div>
-                        <div>
-                            <label class="form-label" for="testing_details">{{ __('ui.testing_details') }}</label>
-                            <textarea id="testing_details" name="testing_details" rows="3" class="form-input">{{ old('testing_details') }}</textarea>
-                        </div>
-                        <div>
-                            <label class="form-label" for="repair_notes">{{ __('ui.completion_notes') }}</label>
-                            <textarea id="repair_notes" name="special_notes" rows="3" class="form-input">{{ old('special_notes') }}</textarea>
-                        </div>
-                        <p class="sm:col-span-2 text-[11px] text-slate-500">{{ __('ui.no_stock_deduction_notice') }}</p>
-                        <div class="sm:col-span-2"><button class="rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white hover:bg-teal-800">{{ __('ui.save_repair_information') }}</button></div>
-                    </form>
-                </section>
-            @endcan
         </div>
 
         <aside class="space-y-5">
@@ -388,8 +317,7 @@
                     </form>
                 </section>
             @endcan
-            <section class="rounded-2xl border border-slate-200 bg-white p-5">
-                <h2 class="mb-4 text-sm font-bold text-slate-900">{{ __('ui.job_status_history') }}</h2>
+            <details class="compact-disclosure"><summary>{{ __('ui.job_status_history') }}</summary><div class="compact-disclosure-body">
                 <ol class="space-y-4">
                     @forelse ($job->jobStatusHistories as $history)
                         <li class="border-l-2 border-teal-200 pl-3">
@@ -402,7 +330,97 @@
                         <li class="text-xs text-slate-500">{{ __('ui.no_status_history') }}</li>
                     @endforelse
                 </ol>
-            </section>
+            </div></details>
         </aside>
     </div>
+    @if (auth()->user()->can('inspect', $job) || auth()->user()->can('repair', $job))
+        <section id="job-work-panel" role="tabpanel" aria-labelledby="job-work-tab" x-show="activePanel === 'work'" x-cloak class="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+            <div class="border-b border-slate-200 px-5 py-4 sm:px-7">
+                <h2 id="repair-inspection-heading" class="flex items-center gap-2 text-base font-bold text-slate-900"><x-icon name="tool" :size="20" />{{ __('ui.repair_information_and_inspection') }}</h2>
+            </div>
+            <div @class(['grid', 'md:grid-cols-2' => auth()->user()->can('inspect', $job) && auth()->user()->can('repair', $job)])>
+            @can('inspect', $job)
+                <div class="min-w-0 p-5 sm:p-7">
+                    <h3 class="mb-4 text-sm font-bold text-slate-700">{{ __('ui.record_inspection') }}</h3>
+                    <form method="POST" action="{{ route('repair-jobs.inspect', $job) }}" class="grid gap-4 sm:grid-cols-2">
+                        @csrf
+                        <div class="sm:col-span-2">
+                            <label class="form-label" for="inspected_at">{{ __('ui.inspection_date') }}</label>
+                            <input id="inspected_at" type="datetime-local" name="inspected_at" value="{{ old('inspected_at') }}" class="form-input">
+                            @error('inspected_at')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="form-label" for="existing_fault">{{ __('ui.existing_fault') }}</label>
+                            <textarea id="existing_fault" name="existing_fault" rows="2" class="form-input">{{ old('existing_fault', $job->reported_fault) }}</textarea>
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="form-label" for="inspection_result">{{ __('ui.inspection_result') }} <span class="text-red-600">*</span></label>
+                            <textarea id="inspection_result" name="inspection_result" rows="4" required class="form-input">{{ old('inspection_result') }}</textarea>
+                            @error('inspection_result')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="form-label" for="technical_information">{{ __('ui.technical_information') }}</label>
+                            <textarea id="technical_information" name="technical_information" rows="3" class="form-input">{{ old('technical_information') }}</textarea>
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="form-label" for="inspection_notes">{{ __('ui.special_notes') }}</label>
+                            <textarea id="inspection_notes" name="special_notes" rows="2" class="form-input">{{ old('special_notes') }}</textarea>
+                        </div>
+                        <div class="sm:col-span-2"><button class="rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white hover:bg-teal-800">{{ __('ui.save_inspection') }}</button></div>
+                    </form>
+                </div>
+            @endcan
+
+            @can('repair', $job)
+                <div @class(['min-w-0 p-5 sm:p-7', 'border-t border-slate-200 md:border-l md:border-t-0' => auth()->user()->can('inspect', $job)])>
+                    <h3 class="mb-4 text-sm font-bold text-slate-700">{{ __('ui.repair_information') }}</h3>
+                    <form method="POST" action="{{ route('repair-jobs.save-repair', $job) }}" class="grid gap-4 sm:grid-cols-2">
+                        @csrf
+                        <div class="sm:col-span-2">
+                            <label class="form-label" for="work_performed">{{ __('ui.work_performed') }} <span class="text-red-600">*</span></label>
+                            <textarea id="work_performed" name="work_performed" rows="4" required class="form-input">{{ old('work_performed') }}</textarea>
+                            @error('work_performed')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+                        </div>
+                        <div>
+                            <label class="form-label" for="parts_used">{{ __('ui.parts_used') }}</label>
+                            <textarea id="parts_used" name="parts_used" rows="3" class="form-input">{{ old('parts_used') }}</textarea>
+                        </div>
+                        <div>
+                            <label class="form-label" for="parts_quantity">{{ __('ui.quantity') }}</label>
+                            <input id="parts_quantity" name="parts_quantity" type="number" min="0" step="0.001" value="{{ old('parts_quantity') }}" class="form-input">
+                            @error('parts_quantity')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+                        </div>
+                        <div>
+                            <label class="form-label" for="parts_cost">{{ __('ui.total_spare_parts_cost') }}</label>
+                            <input id="parts_cost" name="parts_cost" type="number" min="0" step="0.01" value="{{ old('parts_cost', $job->parts_cost) }}" class="form-input">
+                            @error('parts_cost')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+                        </div>
+                        <div>
+                            <label class="form-label" for="repair_labor_cost">{{ __('ui.labor_cost') }}</label>
+                            <input id="repair_labor_cost" name="labor_cost" type="number" min="0" step="0.01" value="{{ old('labor_cost', $job->labour_cost) }}" class="form-input">
+                            @error('labor_cost')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+                        </div>
+                        <div>
+                            <label class="form-label" for="repair_completed_at">{{ __('ui.repair_completed_date') }}</label>
+                            <input id="repair_completed_at" name="repair_completed_at" type="datetime-local" value="{{ old('repair_completed_at') }}" class="form-input">
+                            @error('repair_completed_at')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+                        </div>
+                        <div>
+                            <label class="form-label" for="testing_details">{{ __('ui.testing_details') }}</label>
+                            <textarea id="testing_details" name="testing_details" rows="3" class="form-input">{{ old('testing_details') }}</textarea>
+                        </div>
+                        <div>
+                            <label class="form-label" for="repair_notes">{{ __('ui.completion_notes') }}</label>
+                            <textarea id="repair_notes" name="special_notes" rows="3" class="form-input">{{ old('special_notes') }}</textarea>
+                        </div>
+                        <p class="sm:col-span-2 text-[11px] text-slate-500">{{ __('ui.no_stock_deduction_notice') }}</p>
+                        <div class="sm:col-span-2"><button class="rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white hover:bg-teal-800">{{ __('ui.save_repair_information') }}</button></div>
+                    </form>
+                </div>
+            @endcan
+            </div>
+        </section>
+    @endif
+    </div>
+
 @endsection
