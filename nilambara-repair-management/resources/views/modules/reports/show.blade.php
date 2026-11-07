@@ -12,8 +12,10 @@
             <button type="button"  onclick="window.print()" class="ui-icon-action ui-icon-action--violet" title="{{ __('ui.print') }}" aria-label="{{ __('ui.print') }}"><x-action-symbol icon="printer" :label="__('ui.print')" /></button>
             @can('reports.export')
             <a class="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold" href="{{ route('reports.export', ['report' => $report, 'format' => 'xlsx'] + request()->query()) }}">{{ __('reports.export_excel') }}</a>
+            @if ($report !== 'job-data')
             <a class="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold" href="{{ route('reports.export', ['report' => $report, 'format' => 'pdf'] + request()->query()) }}">{{ __('reports.export_pdf') }}</a>
             <a class="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold" href="{{ route('reports.export', ['report' => $report, 'format' => 'csv'] + request()->query()) }}">{{ __('reports.export_csv') }}</a>
+            @endif
             @endcan
         </div>
     </div>
@@ -22,7 +24,7 @@
         <label class="text-xs text-slate-600">{{ __('reports.date_from') }}<input class="form-input mt-1" type="date" name="date_from" value="{{ $filters['date_from'] ?? '' }}"></label>
         <label class="text-xs text-slate-600">{{ __('reports.date_to') }}<input class="form-input mt-1" type="date" name="date_to" value="{{ $filters['date_to'] ?? '' }}"></label>
         <label class="text-xs text-slate-600">{{ __('reports.search') }}<input class="form-input mt-1" type="search" name="q" value="{{ $filters['q'] ?? '' }}" maxlength="100"></label>
-        @if (in_array($report, ['repair', 'technicians'], true))
+        @if (in_array($report, ['repair', 'job-data', 'technicians'], true))
             <label class="text-xs text-slate-600">{{ __('reports.status') }}<select class="form-input mt-1" name="status"><option value="">{{ __('reports.all_statuses') }}</option>@foreach (\App\Enums\JobStatus::cases() as $status)<option value="{{ $status->value }}" @selected(($filters['status'] ?? '') === $status->value)>{{ $status->label() }}</option>@endforeach</select></label>
         @endif
         @if (in_array($report, ['stock', 'valuation'], true))
@@ -37,7 +39,7 @@
             <label class="text-xs">{{ $label }}<input class="form-input" type="number" name="{{ $field }}" min="1" value="{{ $filters[$field] ?? '' }}"></label>
             @endif
         @endforeach
-        <label class="text-xs">Sort<select class="form-input" name="sort"><option value="">Default</option>@foreach ($data['columns'] as $column)<option value="{{ $column['field'] }}" @selected(($filters['sort'] ?? '') === $column['field'])>{{ $column['label'] }}</option>@endforeach</select></label>
+        <label class="text-xs">Sort<select class="form-input" name="sort"><option value="">Default</option>@foreach ($data['columns'] as $column)@if ($column['sortable'] ?? true)<option value="{{ $column['field'] }}" @selected(($filters['sort'] ?? '') === $column['field'])>{{ $column['label'] }}</option>@endif @endforeach</select></label>
         <select class="form-input" name="direction" aria-label="Sort direction"><option value="asc" @selected(($filters['direction'] ?? '') === 'asc')>Ascending</option><option value="desc" @selected(($filters['direction'] ?? '') === 'desc')>Descending</option></select>
         <a class="text-xs text-teal-700 underline" href="{{ route('reports.show', $report) }}">Reset</a>
     </form>

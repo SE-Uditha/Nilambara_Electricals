@@ -24,7 +24,7 @@
 <body>
     @if($duplicate)<p style="text-align:center;font-weight:bold">{{ $duplicateLabel }}</p>@endif
     <header class="header">
-        @if (!empty($logoDataUri))<img src="{{ $logoDataUri }}" alt="" style="max-width:48mm;max-height:20mm">@endif
+        @if (!empty($logoDataUri))<img src="{{ $logoDataUri }}" alt="" style="width:auto;height:auto;max-width:48mm;max-height:20mm;object-fit:contain">@endif
         <h1>{{ $template?->business_name ?: config('business.name') }}</h1>
         <p>{{ $template?->business_address ?: config('business.address') }} · {{ $template?->telephone_number ?: config('business.contact_number') }}</p>
         <p><strong>{{ $documentTitle }}</strong> · {{ $customer->customer_code }} · {{ $customer->display_name }} · {{ $customer->mobile_number }} · {{ $customer->address }}</p>

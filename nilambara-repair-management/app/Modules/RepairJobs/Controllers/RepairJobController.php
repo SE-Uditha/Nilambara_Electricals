@@ -21,6 +21,8 @@ use App\Modules\RepairJobs\Requests\UpdateRepairJobRequest;
 use App\Modules\RepairJobs\Services\RepairJobService;
 use App\Modules\RepairReceipts\Controllers\RepairReceiptController;
 use App\Rules\PhoneNumber;
+use Brick\Math\BigDecimal;
+use Brick\Math\RoundingMode;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
@@ -113,6 +115,7 @@ class RepairJobController extends Controller
             'jobInspections.repairedByEmployee',
             'jobPartUsages.sparePart',
             'jobPartUsages.location',
+            'latestRepairInformation',
             'contactAttempts.recordedBy',
             'jobStatusHistories' => fn ($history) => $history->with('changedByUser')
                 ->orderByDesc('changed_at')
@@ -125,6 +128,17 @@ class RepairJobController extends Controller
                 ->orderByDesc('id')]);
         }
         $advancePaid = $this->advancePaid($job);
+        $selectedParts = $job->jobPartUsages->whereIn('status', ['draft', 'approved', 'issued']);
+        $partLineTotals = $selectedParts->mapWithKeys(fn ($usage) => [
+            $usage->id => (string) BigDecimal::of($usage->quantity)->multipliedBy($usage->unit_price)->toScale(2, RoundingMode::HalfUp),
+        ]);
+        $selectedPartsTotal = $partLineTotals->reduce(fn (BigDecimal $sum, $amount) => $sum->plus($amount), BigDecimal::zero()->toScale(2));
+        $pendingPartsTotal = $selectedParts->whereIn('status', ['draft', 'approved'])
+            ->reduce(fn (BigDecimal $sum, $usage) => $sum->plus($partLineTotals[$usage->id]), BigDecimal::zero()->toScale(2));
+        // Issued parts already belong to parts_charge. Approved quotation prices remain authoritative.
+        $usesQuotedPricing = $job->quotations()->where('preparation_status', 'issued')->exists();
+        $estimatedJobTotal = BigDecimal::of($job->total_job_amount)
+            ->plus($usesQuotedPricing || $job->invoiceJobs()->exists() ? '0.00' : $pendingPartsTotal)->toScale(2);
         $advancePayments = auth()->user()->can('payments.view')
             ? PaymentAllocation::query()
                 ->with(['payment.receivedByEmployee', 'releases'])
@@ -138,6 +152,13 @@ class RepairJobController extends Controller
         return view('modules.repair-jobs.show', [
             'job' => $job,
             'advancePaid' => $advancePaid,
+            'selectedPartsTotal' => (string) $selectedPartsTotal,
+            'pendingPartsTotal' => (string) $pendingPartsTotal,
+            'estimatedJobTotal' => (string) $estimatedJobTotal,
+            'partLineTotals' => $partLineTotals,
+            'usesQuotedPricing' => $usesQuotedPricing,
+            'latestInspection' => $job->jobInspections->filter(fn ($inspection) => filled($inspection->inspection_result))->sortByDesc('id')->first(),
+            'latestRepair' => $job->latestRepairInformation,
             'advancePayments' => $advancePayments,
             'statuses' => JobStatus::cases(),
             'parts' => SparePart::query()->where('is_active', true)->orderBy('name')->get(),

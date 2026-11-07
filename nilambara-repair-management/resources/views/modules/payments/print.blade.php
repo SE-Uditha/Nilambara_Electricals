@@ -11,7 +11,7 @@
         body { margin: 0; padding: 20px; color: #172033; font: {{ $fontSize }}pt Receipt, sans-serif; }
         .receipt { max-width: 550px; margin: auto; border: 1px solid #cbd5e1; padding: 22px; }
         .header { display: flex; align-items: center; gap: 14px; border-bottom: 2px solid #0f766e; padding-bottom: 13px; }
-        .logo { max-width: 75px; max-height: 55px; object-fit: contain; }
+        .logo { width: auto; height: auto; max-width: 100px; max-height: 80px; object-fit: contain; }
         .business { flex: 1; text-align: center; }
         .business h1 { margin: 0 0 4px; font-size: 16px; }
         .business p { margin: 2px 0; color: #475569; }
@@ -34,7 +34,7 @@
     <article class="receipt">
         <header class="header">
             @if ($logoDataUri)<img class="logo" src="{{ $logoDataUri }}" alt="{{ $businessName }}">@endif
-            <div class="business"><h1>{{ $businessName }}</h1><p>{{ $businessAddress }}</p><p>{{ $businessTelephone }}</p></div>
+            <div class="business"><h1>{{ $businessName }}</h1><p>{{ $businessAddress }}</p><p>{{ $businessTelephone }}</p><x-print-business-description /></div>
         </header>
         <h2 class="title">{{ $documentTitle }}</h2>
         @if ($duplicate)<p class="duplicate">{{ $duplicateLabel }}</p>@endif

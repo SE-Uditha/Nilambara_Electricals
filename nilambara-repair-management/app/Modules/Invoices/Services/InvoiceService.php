@@ -304,6 +304,7 @@ class InvoiceService
                 'item_name' => $job->item_name,
                 'repair_description' => $job->repair_description ?: $job->item_description,
                 'reported_fault' => $job->reported_fault,
+                'repair_special_notes' => $job->latestRepairInformation?->special_notes,
                 'status' => $job->status?->value,
                 'quotation_id' => $quotation?->getKey(),
                 'quotation_number' => $quotation?->quotation_number,

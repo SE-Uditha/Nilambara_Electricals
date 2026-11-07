@@ -30,7 +30,7 @@ class StockImportService
         'Opening Quantity' => 'opening_quantity',
         'Opening Unit Cost' => 'opening_unit_cost',
         'Selling Price' => 'selling_price',
-        'Minimum Stock' => 'minimum_stock_level',
+        'Legacy reorder threshold' => 'minimum_stock_level',
         'Reorder Level' => 'reorder_level',
         'Barcode' => 'barcode',
         'Brand' => 'brand',
@@ -181,6 +181,9 @@ class StockImportService
         $index = [];
         foreach (self::COLUMNS as $title => $field) {
             $position = array_search(mb_strtolower($title), $header, true);
+            if ($position === false && $field === 'minimum_stock_level') {
+                $position = array_search('minimum stock', $header, true);
+            }
             $index[$field] = $position === false ? null : $position;
         }
         $rows = [];

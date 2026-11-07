@@ -16,8 +16,8 @@
         .business { border-bottom: 1px solid #cbd5e1; padding-bottom: 10px; }
         .business h1 { font-size: 13pt; margin: 0 0 4px; color: #115e59; }
         .business p { margin: 2px 0; color: #475569; font-size: 8.5pt; }
-        .logo { width: 76px; }
-        .logo img { max-width: 50px; max-height: 44px; }
+        .logo { width: 130px; }
+        .logo img { width: auto; height: auto; max-width: 110px; max-height: 90px; object-fit: contain; }
         .heading { margin: 8px 0; }
         .heading h2 { font-size: 13pt; margin: 0 0 4px; text-transform: uppercase; }
         .copy { color: #64748b; font-size: 8pt; }
@@ -49,8 +49,8 @@
     <main class="document">
         <header class="business">
             <table><tr>
-                @if (config('business.printing.show_logo', true) && $logoUrl)<td class="logo" style="width:20%"><img src="{{ $logoUrl }}" alt="{{ $businessName }}"></td>@endif
-                <td style="width:80%"><h1>{{ $businessName }}</h1>@if ($businessAddress)<p>{{ $businessAddress }}</p>@endif @if ($businessTelephone)<p>{{ $businessTelephone }}</p>@endif</td>
+                @if (config('business.printing.show_logo', true) && $logoUrl)<td class="logo"><img src="{{ $logoUrl }}" alt="{{ $businessName }}"></td>@endif
+                <td><h1>{{ $businessName }}</h1>@if ($businessAddress)<p>{{ $businessAddress }}</p>@endif @if ($businessTelephone)<p>{{ $businessTelephone }}</p>@endif<x-print-business-description /></td>
             </tr></table>
         </header>
         <table class="heading"><tr>

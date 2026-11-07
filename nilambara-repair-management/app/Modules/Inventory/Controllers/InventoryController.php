@@ -41,6 +41,60 @@ class InventoryController
         return view('modules.inventory.index', ['parts' => $query->paginate(20)->withQueryString()]);
     }
 
+    public function stockUpdateForm()
+    {
+        Gate::authorize('inventory.update');
+        Gate::authorize('inventory.adjust');
+
+        return view('modules.inventory.stock-update', [
+            'parts' => SparePart::query()->where('is_active', true)->with('unit')->orderBy('name')->get(),
+            'locations' => StockLocation::query()->where('is_active', true)->orderBy('name')->get(),
+        ]);
+    }
+
+    public function stockUpdate(Request $request, StockWorkflowService $service)
+    {
+        Gate::authorize('inventory.update');
+        Gate::authorize('inventory.adjust');
+
+        $data = $request->validate([
+            'spare_part_id' => ['required', 'integer', 'exists:spare_parts,id'],
+            'location_id' => ['required', 'integer', 'exists:stock_locations,id'],
+            'quantity' => ['required', 'numeric', 'decimal:0,3', 'between:-999999999999.999,999999999999.999', 'not_in:0'],
+            'selling_price' => ['required', 'numeric', 'decimal:0,4', 'between:0,999999999999.9999'],
+            'idempotency_key' => ['required', 'uuid'],
+        ]);
+        $service->updateStockAndPrice($data, $request->user());
+
+        return redirect()->route('inventory.index')->with('status', __('inventory.stock_update_saved'));
+    }
+
+    public function stockReturnForm()
+    {
+        Gate::authorize('inventory.adjust');
+
+        return view('modules.inventory.stock-return', [
+            'parts' => SparePart::query()->where('is_active', true)->with('unit')->orderBy('name')->get(),
+            'locations' => StockLocation::query()->where('is_active', true)->orderBy('name')->get(),
+        ]);
+    }
+
+    public function stockReturn(Request $request, StockWorkflowService $service)
+    {
+        Gate::authorize('inventory.adjust');
+
+        $data = $request->validate([
+            'spare_part_id' => ['required', 'integer', 'exists:spare_parts,id'],
+            'location_id' => ['required', 'integer', 'exists:stock_locations,id'],
+            'quantity' => ['required', 'numeric', 'decimal:0,3', 'between:0.001,999999999999.999'],
+            'reason' => ['required', 'string', 'min:5', 'max:2000'],
+            'idempotency_key' => ['required', 'uuid'],
+        ]);
+        $service->returnStock($data, $request->user());
+
+        return redirect()->route('inventory.index')->with('status', __('inventory.stock_return_saved'));
+    }
+
     public function form(?SparePart $part = null)
     {
         Gate::authorize($part?->exists ? 'inventory.update' : 'inventory.create');

@@ -10,6 +10,7 @@ use App\Modules\PrintTemplates\Models\PrintTemplate;
 use App\Modules\PrintTemplates\Services\IntakePdfService;
 use App\Modules\RepairJobs\Models\RepairJob;
 use App\Support\BusinessAudit;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -25,7 +26,7 @@ class JobCardController extends Controller
             'status' => ['nullable', Rule::enum(JobStatus::class)],
         ]);
         $query = RepairJob::query()
-            ->with(['customer', 'technician', 'jobCard'])
+            ->with(['customer', 'technician', 'jobCard.confirmedPrint'])
             ->orderByDesc('received_at')
             ->orderByDesc('id');
 
@@ -68,6 +69,49 @@ class JobCardController extends Controller
         return app(IntakePdfService::class)->download($this->render($job, request()->boolean('duplicate'), true), ($job->automatic_number ?: $job->job_number).'-card.pdf');
     }
 
+    public function confirmPrint(Request $request, RepairJob $job): RedirectResponse
+    {
+        Gate::authorize('view', $job);
+        $data = $request->validate([
+            'history_id' => ['required', 'integer'],
+            'printed_confirmation' => ['accepted'],
+        ]);
+
+        DB::transaction(function () use ($request, $job, $data): void {
+            $card = JobCard::query()->where('repair_job_id', $job->getKey())->lockForUpdate()->firstOrFail();
+            $preview = $card->documentPrintHistories()
+                ->whereKey($data['history_id'])
+                ->where('printed_by_user_id', $request->user()->getKey())
+                ->where('document_snapshot->event', 'preview')
+                ->firstOrFail();
+            $reference = 'confirmed-preview:'.$preview->getKey();
+            if ($card->documentPrintHistories()->where('output_reference', $reference)->exists()) {
+                return;
+            }
+
+            $confirmedAt = now(config('business.timezone', 'Asia/Colombo'));
+            $card->documentPrintHistories()->create([
+                'print_template_id' => $preview->print_template_id,
+                'printed_at' => $confirmedAt,
+                'printed_by_user_id' => $request->user()->getKey(),
+                'is_duplicate' => $preview->is_duplicate,
+                'duplicate_label' => $preview->duplicate_label,
+                'output_reference' => $reference,
+                'document_snapshot' => [
+                    ...$preview->document_snapshot,
+                    'event' => 'user_confirmed_print',
+                    'preview_history_id' => $preview->getKey(),
+                    'confirmed_at' => $confirmedAt->toIso8601String(),
+                    'confirmation_method' => 'user_checked_printed_copy',
+                ],
+            ]);
+            BusinessAudit::record($request->user(), 'job_card.print_confirmed', JobCard::class, (int) $card->getKey(),
+                newValues: ['job_id' => $job->getKey(), 'preview_history_id' => $preview->getKey(), 'confirmation_method' => 'user_checked_printed_copy']);
+        });
+
+        return back()->with('print-confirmation', __('printing.confirmed'));
+    }
+
     private function render(RepairJob $job, bool $duplicate, bool $pdf = false): View
     {
         Gate::authorize('view', $job);
@@ -96,14 +140,15 @@ class JobCardController extends Controller
             'model' => $job->model,
             'item_description' => $job->item_description,
             'reported_fault' => $job->reported_fault,
+            'visible_damage' => $job->visible_damage,
             'special_notes' => $job->special_notes,
             'document_kind' => 'technician_worksheet',
-            'handwritten_fields' => ['status', 'issues_found', 'inspected_by', 'inspection_date', 'repaired_by', 'completion_date', 'work_performed', 'parts_used', 'parts_cost', 'total_amount', 'notes', 'signature', 'returned_to_cashier_date', 'cashier_received_by'],
+            'handwritten_fields' => ['issues_found', 'inspected_by', 'inspection_date', 'repaired_by', 'completion_date', 'work_performed', 'parts_used', 'parts_cost', 'total_amount', 'signature', 'returned_to_cashier_date', 'cashier_received_by'],
             'duplicate' => $duplicate,
         ];
 
-        DB::transaction(function () use ($jobCard, $job, $template, $duplicate, $label, $printedAt, $snapshot, $paperSize, $pdf): void {
-            DocumentPrintHistory::query()->create([
+        $printHistory = DB::transaction(function () use ($jobCard, $job, $template, $duplicate, $label, $printedAt, $snapshot, $paperSize, $pdf): DocumentPrintHistory {
+            $history = DocumentPrintHistory::query()->create([
                 'print_template_id' => $template?->getKey(),
                 'job_card_id' => $jobCard->getKey(),
                 'printed_at' => $printedAt,
@@ -117,6 +162,7 @@ class JobCardController extends Controller
                     'printed_at' => $printedAt->toIso8601String(),
                     'paper_size' => $paperSize,
                     'export_format' => $pdf ? 'pdf' : 'html',
+                    'event' => $pdf ? 'pdf_export' : 'preview',
                 ],
             ]);
 
@@ -132,10 +178,14 @@ class JobCardController extends Controller
                     'paper_size' => $paperSize,
                 ],
             );
+
+            return $history;
         });
 
         return view('modules.job-cards.print', [
             'job' => $job,
+            'printHistory' => $printHistory,
+            'pdfOutput' => $pdf,
             'nativeWorksheetLayout' => true,
             'template' => $template,
             'duplicate' => $duplicate,

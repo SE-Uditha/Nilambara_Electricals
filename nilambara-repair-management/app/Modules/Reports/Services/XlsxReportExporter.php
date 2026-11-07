@@ -12,7 +12,7 @@ class XlsxReportExporter
     /**
      * @param  array<int, array{field: string, label: string, type?: string}>  $columns
      */
-    public function create(Builder $query, array $columns): string
+    public function create(Builder|iterable $query, array $columns): string
     {
         if (! class_exists(ZipArchive::class)) {
             throw new RuntimeException('The PHP zip extension is required for Excel exports.');
@@ -42,7 +42,8 @@ class XlsxReportExporter
 
             $rowNumber = 2;
             $totals = [];
-            foreach ($query->limit(50000)->cursor() as $record) {
+            $records = $query instanceof Builder ? $query->limit(50000)->cursor() : $query;
+            foreach ($records as $record) {
                 $values = [];
                 foreach ($columns as $index => $column) {
                     $value = data_get($record, $column['field'], '');

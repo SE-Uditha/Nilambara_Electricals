@@ -103,7 +103,9 @@
         </section>
     @endif
     @if ($errors->any())
-        <div role="alert" class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{{ __('ui.review_customer_fields') }}</div>
+        <div role="alert" class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {{ $errors->has('customer_code') ? $errors->first('customer_code') : __('ui.review_customer_fields') }}
+        </div>
     @endif
     <div class="flex flex-wrap justify-end gap-3">
         <a href="{{ $customer ? route('customers.show', $customer) : route('customers.index') }}" class="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50">{{ __('ui.cancel') }}</a>

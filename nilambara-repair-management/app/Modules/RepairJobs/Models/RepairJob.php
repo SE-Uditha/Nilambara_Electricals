@@ -70,6 +70,15 @@ class RepairJob extends BusinessModel
         return $this->hasMany(RepairJobCharge::class);
     }
 
+    /** Latest saved repair details, kept separate from receipt notes and inspections. */
+    public function latestRepairInformation(): HasOne
+    {
+        return $this->hasOne(JobInspection::class, 'repair_job_id')->ofMany(
+            ['id' => 'max'],
+            fn ($query) => $query->whereNotNull('repaired_by_employee_id'),
+        );
+    }
+
     public function contactAttempts(): HasMany
     {
         return $this->hasMany(JobContactAttempt::class)->orderBy('attempt_number');

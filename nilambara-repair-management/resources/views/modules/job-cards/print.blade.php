@@ -10,12 +10,15 @@
         body { margin: 0; color: #17252d; font-family: Arial, sans-serif; font-size: {{ $fontSize }}pt; line-height: 1.2; }
         .screen-actions { display: flex; gap: 8px; justify-content: flex-end; margin: 0 auto 14px; max-width: 600px; }
         .screen-actions a, .screen-actions button { padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 7px; background: #fff; color: #17252d; font-size: 11px; text-decoration: none; cursor: pointer; }
+        .print-confirmation { display: block; padding: 12px; border: 1px solid #cbd5e1; border-radius: 7px; background: #f0fdf4; font-size: 11px; }
+        .print-confirmation p { margin: 0 0 8px; }
+        .print-confirmation label { display: block; margin: 8px 0; }
         .preview { width: {{ $pageWidth }}; margin: auto; }
         .page { width: {{ $pageWidth }}; padding: 2mm; border: 1px solid #17252d; page-break-after: auto; }
-        .heading { position: relative; margin: -2mm -2mm 2mm; padding: 2mm; background: #203f85; color: #fff; text-align: center; }
+        .heading { position: relative; min-height: 22mm; margin: -2mm -2mm 2mm; padding: 2mm 30mm 2mm 34mm; background: #203f85; color: #fff; text-align: center; }
         .heading h1 { margin: 0; font-size: 12pt; }
         .heading p { margin: 1mm 0 0; font-size: 6pt; }
-        .heading img { position: absolute; top: 1mm; left: 2mm; max-width: 18mm; max-height: 9mm; object-fit: contain; }
+        .heading img { position: absolute; top: 2mm; left: 2mm; width: auto; height: auto; max-width: 30mm; max-height: 18mm; object-fit: contain; }
         .duplicate { display: inline-block; margin-top: 1mm; border: 1px solid #b91c1c; padding: 1px 4px; color: #b91c1c; font-size: 7pt; font-weight: 700; }
         .instruction { margin: 0 0 1.5mm; font-size: 6.5pt; text-align: center; }
         table { width: 100%; border-collapse: collapse; table-layout: fixed; }
@@ -41,12 +44,23 @@
     </style>
 </head>
 <body>
+    @unless ($pdfOutput ?? false)
     <nav class="screen-actions" aria-label="{{ __('ui.print_actions') }}">
         <a href="{{ auth()->user()?->can('job-cards.view') ? route('job-cards.index') : route('repair-jobs.show', $job) }}">{{ __('ui.back') }}</a>
         @can('job-cards.print')<a href="{{ route('job-cards.duplicate', $job) }}" target="_blank" rel="noopener noreferrer">{{ __('ui.reprint_job_card') }}</a>@endcan
         <button type="button" onclick="window.print()">{{ __('ui.print') }}</button>
         <a href="{{ route('job-cards.pdf',['job'=>$job,'duplicate'=>$duplicate ? 1 : 0]) }}" target="_blank" rel="noopener noreferrer">PDF</a>
     </nav>
+    <form class="screen-actions print-confirmation" method="POST" action="{{ route('job-cards.confirm-print', $job) }}">
+        @csrf
+        <input type="hidden" name="history_id" value="{{ $printHistory->getKey() }}">
+        @if (session('print-confirmation'))<p role="status">{{ session('print-confirmation') }}</p>@endif
+        <p>{{ __('printing.confirm_help') }}</p>
+        <label><input type="checkbox" name="printed_confirmation" value="1" required> {{ __('printing.confirm_check') }}</label>
+        <button type="submit">{{ __('printing.confirm_action') }}</button>
+        @error('printed_confirmation')<p role="alert">{{ $message }}</p>@enderror
+    </form>
+    @endunless
     <main class="preview">
         <article class="page">
             <header class="heading">
@@ -64,7 +78,8 @@
                     <tr><th>{{ __('ui.worksheet_brand_details') }}</th><td colspan="3">{{ trim(($job->brand ?? '').' '.($job->model ?? '').' '.($job->item_description ?? '')) ?: '-' }}</td></tr>
                     <tr><th rowspan="2">{{ __('ui.worksheet_item_fault') }}</th><td colspan="3">{{ $job->reported_fault ?: '-' }}</td></tr>
                     <tr><td colspan="3">&nbsp;</td></tr>
-                    <tr><th>{{ __('ui.job_status') }}</th><td colspan="3">&nbsp;</td></tr>
+                    <tr><th>{{ __('ui.visible_damage') }}</th><td colspan="3" style="white-space:pre-wrap">{{ $job->visible_damage ?: '-' }}</td></tr>
+                    <tr><th>{{ __('ui.special_notes') }}</th><td colspan="3" style="white-space:pre-wrap">{{ $job->special_notes ?: '-' }}</td></tr>
                 </tbody>
             </table>
             <section class="section">
@@ -87,10 +102,6 @@
                         <tr><th>{{ __('ui.total_amount') }} ({{ config('business.currency') }})</th><td></td></tr>
                     </tbody>
                 </table>
-            </section>
-            <section class="section">
-                <h2>{{ __('ui.special_notes') }}</h2>
-                <table class="writing notes"><tbody><tr><td style="white-space:pre-wrap;overflow-wrap:anywhere;padding:1mm">{{ $job->special_notes ?: ' ' }}</td></tr><tr><td>&nbsp;</td></tr></tbody></table>
             </section>
             @if ($footerText)<footer class="footer">{{ $footerText }}</footer>@endif
         </article>

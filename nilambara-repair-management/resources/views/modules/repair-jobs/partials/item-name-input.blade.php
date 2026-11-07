@@ -1,7 +1,7 @@
 @php($itemNames = array_values(array_filter(preg_split('/\R/u', (string) config('business.common_item_names')), fn ($item) => trim($item) !== '')))
 <div x-data="{}">
     @if ($itemNames !== [])
-        <select id="item_name_preset" class="form-input mb-2" aria-label="{{ __('settings.select_item_name') }}" x-on:change="
+        <select id="item_name_preset" class="form-input mb-2" data-searchable data-search-min-length="2" data-search-min-message="{{ __('ui.search_type_minimum', ['count' => 2]) }}" data-search-no-results="{{ __('ui.search_no_results') }}" aria-label="{{ __('settings.select_item_name') }}" x-on:change="
             if ($el.value !== '') {
                 $refs.itemName.value = $el.value;
                 $refs.itemName.dispatchEvent(new Event('input', { bubbles: true }));

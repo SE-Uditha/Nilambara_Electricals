@@ -21,8 +21,8 @@
             <a href="{{ route('quotations.index') }}" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50">{{ __('ui.back_to_quotations') }}</a>
             @can('view', $job)<a href="{{ route('repair-jobs.show', $job) }}" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50">{{ __('ui.view_repair_job') }}</a>@endcan
             @can('print', $quotation)
-                <a href="{{ route('quotations.print', $quotation) }}" class="rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white hover:bg-teal-800">{{ __('ui.preview_quotation') }}</a>
-                <a href="{{ route('quotations.pdf', ['quotation' => $quotation, 'paper' => 'A4']) }}" class="rounded-xl border border-teal-200 bg-teal-50 px-4 py-2.5 text-xs font-semibold text-teal-800 hover:bg-teal-100">{{ __('ui.download_pdf_a4') }}</a>
+                <a href="{{ route('quotations.print', $quotation) }}" target="_blank" rel="noopener noreferrer" class="rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white hover:bg-teal-800">{{ __('ui.preview_quotation') }}</a>
+                <a href="{{ route('quotations.pdf', ['quotation' => $quotation, 'paper' => 'A4']) }}" target="_blank" rel="noopener noreferrer" class="rounded-xl border border-teal-200 bg-teal-50 px-4 py-2.5 text-xs font-semibold text-teal-800 hover:bg-teal-100">{{ __('ui.download_pdf_a4') }}</a>
             @endcan
         </div>
     </div>

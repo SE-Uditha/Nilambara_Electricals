@@ -42,7 +42,7 @@
                             <td class="px-5 py-4"><x-status-badge :status="$job->status" /></td>
                             <td class="px-5 py-4">
                                 <div class="flex gap-3">
-                                    @can('job-cards.print')<a href="{{ route('job-cards.print', $job) }}"  class="ui-icon-action ui-icon-action--violet" title="{{ __('ui.preview_print') }}" aria-label="{{ __('ui.preview_print') }}" target="_blank" rel="noopener noreferrer"><x-action-symbol icon="printer" :label="__('ui.preview_print')" /></a>@endcan
+                                    @can('job-cards.print')<a href="{{ route('job-cards.print', $job) }}"  class="ui-icon-action ui-icon-action--violet" title="{{ __('ui.preview_print') }}" aria-label="{{ __('ui.preview_print') }}" target="_blank" rel="noopener noreferrer"><x-action-symbol icon="printer" :label="__('ui.preview_print')" /><x-job-card-print-status :card="$job->jobCard" /></a>@endcan
                                     @can('jobs.view')<a href="{{ route('repair-jobs.show', $job) }}"  class="ui-icon-action ui-icon-action--blue" title="{{ __('ui.view_job') }}" aria-label="{{ __('ui.view_job') }}"><x-action-symbol icon="eye" :label="__('ui.view_job')" /></a>@endcan
                                 </div>
                             </td>

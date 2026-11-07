@@ -8,6 +8,7 @@ use App\Modules\PrintTemplates\Models\PrintTemplate;
 use App\Modules\RepairJobs\Models\RepairJob;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class JobCard extends BusinessModel
 {
@@ -45,5 +46,11 @@ class JobCard extends BusinessModel
     public function documentPrintHistories(): HasMany
     {
         return $this->hasMany(DocumentPrintHistory::class, 'job_card_id');
+    }
+
+    public function confirmedPrint(): HasOne
+    {
+        return $this->hasOne(DocumentPrintHistory::class, 'job_card_id')
+            ->ofMany(['id' => 'max'], fn ($query) => $query->where('document_snapshot->event', 'user_confirmed_print'));
     }
 }

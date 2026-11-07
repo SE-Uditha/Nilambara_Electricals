@@ -10,7 +10,12 @@ class GoogleDriveBackupService
 {
     public function configured(): bool
     {
-        foreach (['folder_id', 'client_id', 'client_secret', 'refresh_token'] as $key) {
+        return trim((string) config('backup.google_drive.folder_id')) !== '' && $this->oauthConfigured();
+    }
+
+    public function oauthConfigured(): bool
+    {
+        foreach (['client_id', 'client_secret', 'refresh_token'] as $key) {
             if (trim((string) config('backup.google_drive.'.$key)) === '') {
                 return false;
             }
@@ -19,13 +24,13 @@ class GoogleDriveBackupService
         return true;
     }
 
-    public function copy(BackupHistory $backup, string $path): void
+    public function accessToken(): string
     {
-        if (! $this->configured()) {
-            return;
+        if (! $this->oauthConfigured()) {
+            throw new RuntimeException('Google Drive OAuth configuration is incomplete.');
         }
-        $backup->update(['cloud_status' => 'uploading']);
-        $tokenResponse = Http::asForm()->timeout(30)->post('https://oauth2.googleapis.com/token', [
+
+        $tokenResponse = Http::asForm()->timeout(30)->retry(3, 1000, throw: false)->post('https://oauth2.googleapis.com/token', [
             'grant_type' => 'refresh_token',
             'client_id' => config('backup.google_drive.client_id'),
             'client_secret' => config('backup.google_drive.client_secret'),
@@ -35,6 +40,17 @@ class GoogleDriveBackupService
         if (! $tokenResponse->successful() || ! is_string($token) || $token === '') {
             throw new RuntimeException('Google Drive authentication failed.');
         }
+
+        return $token;
+    }
+
+    public function copy(BackupHistory $backup, string $path): void
+    {
+        if (! $this->configured()) {
+            return;
+        }
+        $backup->update(['cloud_status' => 'uploading']);
+        $token = $this->accessToken();
         $session = Http::withToken($token)->timeout(30)->withHeaders([
             'X-Upload-Content-Type' => 'application/sql', 'X-Upload-Content-Length' => (string) filesize($path),
         ])->post('https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&fields=id,md5Checksum,size', [

@@ -42,6 +42,7 @@ class ReportDataService
         }
 
         return match ($report) {
+            'job-data' => app(JobDataReportService::class)->build($filters),
             'repair' => $this->repair($filters, $actor),
             'technicians' => $this->technicians($filters, $actor),
             'sales' => $this->sales($filters),

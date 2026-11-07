@@ -11,7 +11,7 @@
 @method('PUT') 
 @endif
 
-@foreach(['sku'=>'SKU','barcode'=>'Barcode','name'=>'Part name','description'=>'Description','model_compatibility'=>'Model compatibility','rack'=>'Rack / shelf','selling_price'=>'Selling price (LKR)','minimum_stock_level'=>'Minimum stock','reorder_level'=>'Reorder level'] as $field=>$label)
+@foreach(['sku'=>'SKU','barcode'=>'Barcode','name'=>'Part name','description'=>'Description','model_compatibility'=>'Model compatibility','rack'=>'Rack / shelf','selling_price'=>'Selling price (LKR)','minimum_stock_level'=>__('inventory.legacy_reorder_threshold'),'reorder_level'=>__('inventory.reorder_level')] as $field=>$label)
 
 @if($field!=='sku' || !$part->exists)<label>{{ $label }}<input class="form-input mt-1 w-full" name="{{ $field }}" value="{{ old($field,$part->$field ?? (in_array($field,['selling_price','minimum_stock_level','reorder_level']) ? '0' : '')) }}" @required(in_array($field,['sku','name','selling_price','minimum_stock_level','reorder_level']))></label>
 @endif
@@ -34,10 +34,10 @@
 @endunless
 <button class="rounded-xl bg-teal-700 px-4 py-3 text-white">Save part</button></form>
 
-@can('inventory.create')<details class="mt-6 rounded-2xl border bg-white p-5"><summary>Create unit, location, brand or category</summary><form method="POST" action="{{ route('inventory.references') }}" class="mt-4 grid gap-3 md:grid-cols-2">
-@csrf<select class="form-input" name="kind"><option value="unit">Unit</option><option value="location">Location</option><option value="brand">Brand</option><option value="category">Category</option></select><label>Code (units / locations)<input class="form-input w-full" name="code" required></label><label>Name<input class="form-input w-full" name="name" required></label><label>Quantity decimal places (units)<select class="form-input w-full" name="quantity_scale">
+@can('inventory.create')<details class="mt-6 rounded-2xl border bg-white p-5"><summary>Create unit, location, brand or category</summary><form method="POST" action="{{ route('inventory.references') }}" class="mt-4 grid grid-cols-1 items-end gap-3 sm:grid-cols-2 lg:grid-cols-5">
+@csrf<label class="block text-xs font-semibold text-slate-700">{{ __('inventory.reference_type') }}<select class="form-input mt-1 w-full" name="kind"><option value="unit">Unit</option><option value="location">Location</option><option value="brand">Brand</option><option value="category">Category</option></select></label><label class="block text-xs font-semibold text-slate-700">{{ __('inventory.reference_code') }}<input class="form-input mt-1 w-full" name="code" required></label><label class="block text-xs font-semibold text-slate-700">{{ __('inventory.reference_name') }}<input class="form-input mt-1 w-full" name="name" required></label><label class="block text-xs font-semibold text-slate-700">{{ __('inventory.quantity_decimal_places') }}<select class="form-input mt-1 w-full" name="quantity_scale">
 @foreach(range(0,3) as $scale)<option>{{ $scale }}</option>
-@endforeach</select></label><button class="rounded-xl bg-teal-700 p-3 text-white">Save reference</button></form></details>
+@endforeach</select></label><button class="h-10 w-full rounded-xl bg-emerald-700 px-4 font-semibold text-white hover:bg-emerald-800">{{ __('inventory.save_reference') }}</button></form></details>
 @endcan
 
 @endsection

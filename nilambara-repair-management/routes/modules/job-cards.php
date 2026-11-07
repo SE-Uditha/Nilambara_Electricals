@@ -16,3 +16,7 @@ Route::get('/repair-jobs/{job}/job-card/duplicate', [JobCardController::class, '
     ->name('job-cards.duplicate');
 
 Route::get('/repair-jobs/{job}/job-card/pdf', [JobCardController::class, 'pdf'])->middleware('can:job-cards.print')->name('job-cards.pdf');
+
+Route::post('/repair-jobs/{job}/job-card/confirm-print', [JobCardController::class, 'confirmPrint'])
+    ->middleware(['can:job-cards.print', 'throttle:30,1'])
+    ->name('job-cards.confirm-print');

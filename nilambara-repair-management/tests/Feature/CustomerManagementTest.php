@@ -9,10 +9,12 @@ use App\Modules\RolesPermissions\Models\Permission;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Tests\Feature\Database\CreatesDatabaseRecords;
 use Tests\TestCase;
 
 class CustomerManagementTest extends TestCase
 {
+    use CreatesDatabaseRecords;
     use RefreshDatabase;
 
     protected function setUp(): void
@@ -71,6 +73,48 @@ class CustomerManagementTest extends TestCase
             ->assertRedirect();
 
         $this->assertDatabaseCount('customer_account_entries', 0);
+    }
+
+    public function test_customer_codes_use_six_digits_after_the_five_digit_range(): void
+    {
+        DB::table('customers')->insert($this->customerAttributes([
+            'id' => 99999,
+            'customer_code' => 'LEGACY-99999',
+        ]));
+
+        $this->actingAs($this->userWithRole('cashier'))
+            ->post(route('customers.store'), $this->validIndividual())
+            ->assertRedirect();
+
+        $customer = Customer::query()->whereKey(100000)->sole();
+        $this->assertSame('CUS-100000', $customer->customer_code);
+        $this->assertSame(6, strlen(substr($customer->customer_code, 4)));
+    }
+
+    public function test_customer_registration_rejects_an_exhausted_or_colliding_id_without_renumbering_existing_customers(): void
+    {
+        $user = $this->userWithRole('cashier');
+        DB::table('customers')->insert($this->customerAttributes([
+            'id' => 1,
+            'customer_code' => 'CUS-00002',
+        ]));
+
+        $this->actingAs($user)
+            ->post(route('customers.store'), $this->validIndividual())
+            ->assertSessionHasErrors('customer_code');
+
+        $this->assertDatabaseCount('customers', 1);
+        $this->assertDatabaseHas('customers', ['id' => 1, 'customer_code' => 'CUS-00002']);
+
+        DB::table('customers')->insert($this->customerAttributes([
+            'id' => 999999,
+            'customer_code' => 'LEGACY-999999',
+        ]));
+        $this->post(route('customers.store'), $this->validIndividual())
+            ->assertSessionHasErrors('customer_code');
+
+        $this->assertDatabaseCount('customers', 2);
+        $this->assertDatabaseHas('customers', ['id' => 999999, 'customer_code' => 'LEGACY-999999']);
     }
 
     public function test_customer_forms_show_only_fields_allowed_by_the_users_permissions(): void
@@ -157,7 +201,9 @@ class CustomerManagementTest extends TestCase
                 'address' => 'Test address', 'mobile_number' => '0771234567',
                 'registration_date' => now()->toDateString(), 'is_active' => $number <= 27,
             ]);
-            if ($number <= 27) $ids[] = $customer->id;
+            if ($number <= 27) {
+                $ids[] = $customer->id;
+            }
         }
         $first = $this->actingAs($user)->getJson(route('customers.search', ['browse' => 1]))
             ->assertOk()->assertJsonCount(25, 'data')->assertJsonPath('meta.has_more', true)->assertJsonPath('meta.page', 1);

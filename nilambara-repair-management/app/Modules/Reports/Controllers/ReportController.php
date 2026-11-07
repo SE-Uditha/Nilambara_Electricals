@@ -4,6 +4,7 @@ namespace App\Modules\Reports\Controllers;
 
 use App\Enums\JobStatus;
 use App\Models\User;
+use App\Modules\Reports\Services\JobDataReportService;
 use App\Modules\Reports\Services\ReportDataService;
 use App\Modules\Reports\Services\XlsxReportExporter;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -17,7 +18,7 @@ use Symfony\Component\HttpFoundation\Response;
 class ReportController
 {
     private const REPORTS = [
-        'repair', 'technicians', 'sales', 'collections', 'advances', 'customer-credit',
+        'repair', 'job-data', 'technicians', 'sales', 'collections', 'advances', 'customer-credit',
         'overdue-credit', 'supplier-outstanding', 'purchases', 'expenses', 'stock',
         'stock-movements', 'repair-parts', 'adjustments', 'purchase-history',
         'supplier-purchases', 'valuation', 'profit-estimate',
@@ -61,6 +62,9 @@ class ReportController
         $data = $reports->build($report, $filters, $request->user());
         $data = $this->sort($data, $filters);
         $rows = $data['query']->paginate(50)->withQueryString();
+        if ($report === 'job-data') {
+            $rows->setCollection(app(JobDataReportService::class)->enrich($rows->getCollection()));
+        }
 
         return view('modules.reports.show', compact('report', 'filters', 'data', 'rows'));
     }
@@ -70,6 +74,7 @@ class ReportController
         $this->authorizeReport($report, $request->user());
         abort_unless($request->user()->can('reports.export'), 403);
         abort_unless(in_array($format, ['xlsx', 'pdf', 'csv'], true), 404);
+        abort_if($report === 'job-data' && $format !== 'xlsx', 404);
 
         $filters = $request->validate([
             'date_from' => ['nullable', 'date'],
@@ -102,7 +107,9 @@ class ReportController
         $filename = Str::slug($report).'-'.now()->format('Ymd-His');
 
         if ($format === 'xlsx') {
-            return response()->download($excel->create($query, $data['columns']), $filename.'.xlsx', [
+            $records = $report === 'job-data' ? app(JobDataReportService::class)->rows($query) : $query;
+
+            return response()->download($excel->create($records, $data['columns']), $filename.'.xlsx', [
                 'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             ])->deleteFileAfterSend(true);
         }
@@ -140,6 +147,9 @@ class ReportController
 
     private function authorized(string $report, User $actor): bool
     {
+        if ($report === 'job-data') {
+            return $actor->can('reports.view') && $actor->can('jobs.view') && $actor->can('reports.repair');
+        }
         if (in_array($report, ['cashier-sales', 'collections', 'cash-collections', 'cash-summary'], true)
             && $actor->can('reports.sales')) {
             return true;
@@ -166,7 +176,8 @@ class ReportController
     private function sort(array $data, array $filters): array
     {
         if (! empty($filters['sort'])) {
-            abort_unless(in_array($filters['sort'], array_column($data['columns'], 'field'), true), 422);
+            $sortable = array_filter($data['columns'], fn (array $column) => $column['sortable'] ?? true);
+            abort_unless(in_array($filters['sort'], array_column($sortable, 'field'), true), 422);
             $data['query'] = DB::query()->fromSub($data['query']->reorder(), 'sorted_report')
                 ->orderBy($filters['sort'], $filters['direction'] ?? 'asc');
         }

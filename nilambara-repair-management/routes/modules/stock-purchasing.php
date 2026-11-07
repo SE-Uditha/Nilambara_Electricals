@@ -6,6 +6,10 @@ use App\Modules\Suppliers\Controllers\SupplierController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory.index');
+Route::get('/inventory/stock-update', [InventoryController::class, 'stockUpdateForm'])->middleware(['can:inventory.update', 'can:inventory.adjust'])->name('inventory.stock-update');
+Route::post('/inventory/stock-update', [InventoryController::class, 'stockUpdate'])->middleware(['can:inventory.update', 'can:inventory.adjust'])->name('inventory.stock-update.store');
+Route::get('/stock-returns/create', [InventoryController::class, 'stockReturnForm'])->middleware('can:inventory.adjust')->name('stock-returns.create');
+Route::post('/stock-returns', [InventoryController::class, 'stockReturn'])->middleware('can:inventory.adjust')->name('stock-returns.store');
 Route::get('/inventory/create', [InventoryController::class, 'form'])->name('inventory.create');
 Route::get('/inventory/import', [InventoryController::class, 'importForm'])->middleware('can:inventory.create')->name('inventory.import');
 Route::get('/inventory/import/template', [InventoryController::class, 'importTemplate'])->middleware('can:inventory.create')->name('inventory.import.template');

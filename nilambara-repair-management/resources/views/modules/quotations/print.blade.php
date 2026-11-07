@@ -31,7 +31,7 @@
         .watermark{border:2px solid #b45309;background:#fffbeb;color:#92400e;text-align:center;font-size:18pt;font-weight:700;padding:5px;margin-bottom:12px;letter-spacing:.04em}
         .superseded{border-color:#64748b;background:#f8fafc;color:#475569}
         header{display:flex;align-items:center;gap:14px;border-bottom:2px solid #0f766e;padding-bottom:13px;margin-bottom:15px}
-        header img{width:76px;height:76px;object-fit:contain}
+        header img{width:auto;height:auto;max-width:32mm;max-height:24mm;object-fit:contain}
         .business h1{margin:0;font-size:18pt;color:#0f3d3b}
         .business p{margin:2px 0;color:#475569}
         .title{margin:8px 0 12px;text-align:center;font-size:17pt;letter-spacing:.08em}
@@ -80,6 +80,7 @@
                 <h1>{{ $businessName }}</h1>
                 @if ($businessAddress)<p>{{ $businessAddress }}</p>@endif
                 @if ($businessTelephone)<p>{{ $businessTelephone }}</p>@endif
+                <x-print-business-description />
             </div>
         </header>
         <h1 class="title">{{ $documentTitle }}</h1>

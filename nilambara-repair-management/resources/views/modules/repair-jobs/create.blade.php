@@ -46,9 +46,10 @@
                         <input id="automatic-reference" value="{{ __('ui.generated_after_save') }}" class="form-input bg-slate-50" readonly>
                     </div>
                     <div>
-                        <label class="form-label" for="job_number">{{ __('ui.manual_job_number') }}                         <span class="text-xs text-slate-400">({{ __('ui.optional') }})</span></label>
-                                               <input id="job_number" name="job_number" value="{{ old('job_number') }}" class="form-input" maxlength="60">
-                        @error('job_number')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+                        <label class="form-label" for="job_number">{{ __('ui.manual_job_number') }} <span class="font-normal text-slate-400">({{ __('ui.optional') }})</span></label>
+                        <input id="job_number" name="job_number" value="{{ old('job_number') }}" class="form-input" maxlength="60" autocomplete="off">
+                        <p class="mt-1 text-[10px] text-slate-400">{{ __('ui.manual_job_number_optional_help') }}</p>
+                        @error('job_number')<p role="alert" class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
                     </div>
                     <div>
                         <label class="form-label" for="received_at">{{ __('ui.received_date_time') }}</label>

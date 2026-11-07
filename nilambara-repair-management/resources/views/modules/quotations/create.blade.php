@@ -125,7 +125,7 @@
         <div class="compact-wide flex flex-wrap justify-end gap-3">
             <button type="submit" name="intent" value="draft" class="rounded-xl border border-slate-200 bg-white px-5 py-3 text-xs font-semibold text-slate-700 hover:bg-slate-50">{{ __('ui.save_draft') }}</button>
             @can('quotations.print')
-                <button type="submit" name="intent" value="preview" class="rounded-xl border border-teal-200 bg-teal-50 px-5 py-3 text-xs font-semibold text-teal-800 hover:bg-teal-100">{{ __('ui.save_and_preview') }}</button>
+                <button type="submit" name="intent" value="preview" formtarget="_blank" class="rounded-xl border border-teal-200 bg-teal-50 px-5 py-3 text-xs font-semibold text-teal-800 hover:bg-teal-100">{{ __('ui.save_and_preview') }}</button>
             @endcan
             @can('quotations.issue')
                 <button type="submit" name="intent" value="issue" class="rounded-xl bg-teal-700 px-5 py-3 text-xs font-semibold text-white hover:bg-teal-800">{{ __('ui.issue_quotation') }}</button>

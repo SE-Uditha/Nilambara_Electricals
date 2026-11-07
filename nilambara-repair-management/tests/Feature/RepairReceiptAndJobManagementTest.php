@@ -11,6 +11,7 @@ use App\Modules\Employees\Models\Employee;
 use App\Modules\JobCards\Models\JobCard;
 use App\Modules\Payments\Models\Payment;
 use App\Modules\Payments\Models\PaymentAllocation;
+use App\Modules\PrintTemplates\Models\DocumentPrintHistory;
 use App\Modules\RepairJobs\Models\JobInspection;
 use App\Modules\RepairJobs\Models\RepairJob;
 use App\Modules\RepairReceipts\Models\RepairReceipt;
@@ -53,7 +54,7 @@ class RepairReceiptAndJobManagementTest extends TestCase
         foreach (['job-cards.print', 'job-cards.duplicate'] as $route) {
             $this->get(route($route, $job))->assertOk()->assertSee('Handle carefully')->assertSee('Keep the original cable.')->assertDontSee('STAFF-ONLY-NOTE-SECRET');
         }
-        $history = \App\Modules\PrintTemplates\Models\DocumentPrintHistory::query()->where('job_card_id', $job->jobCard->id)->latest('id')->firstOrFail();
+        $history = DocumentPrintHistory::query()->where('job_card_id', $job->jobCard->id)->latest('id')->firstOrFail();
         $this->assertSame($job->special_notes, $history->document_snapshot['special_notes']);
         $this->assertArrayNotHasKey('private_notes', $history->document_snapshot);
         $this->put(route('repair-jobs.update', $job), [
@@ -69,6 +70,8 @@ class RepairReceiptAndJobManagementTest extends TestCase
         $actor = $this->userWithRole('administrator');
         $this->actingAs($actor)->get(route('repair-jobs.create'))->assertOk()
             ->assertSee('name="private_notes"', false)
+            ->assertSee('name="job_number"', false)
+            ->assertSee('id="job_number"', false)
             ->assertSee('value="print" formtarget="_blank"', false);
         $this->post(route('repair-jobs.store'), $this->receiptData($this->customer(), $this->employee(), [
             'private_notes' => str_repeat('x', 10001),
@@ -204,20 +207,26 @@ class RepairReceiptAndJobManagementTest extends TestCase
         ]);
     }
 
-    public function test_automatic_references_use_the_database_sequence_and_manual_numbers_are_unique(): void
+    public function test_manual_job_number_is_optional_and_custom_numbers_are_unique(): void
     {
         $administrator = $this->userWithRole('administrator');
         $customer = $this->customer();
         $receiver = $this->employee();
 
+        $automaticData = $this->receiptData($customer, $receiver);
+        unset($automaticData['job_number']);
         $this->actingAs($administrator)
-            ->post(route('repair-receipts.store'), $this->receiptData($customer, $receiver))
+            ->post(route('repair-receipts.store'), $automaticData)
             ->assertRedirect();
+        $automaticJob = RepairJob::query()->sole();
+        $this->assertSame($automaticJob->automatic_number, $automaticJob->job_number);
+
         $this->actingAs($administrator)
             ->post(route('repair-receipts.store'), $this->receiptData($customer, $receiver, [
                 'job_number' => 'MAN-2026-0002',
             ]))
             ->assertRedirect();
+        $this->assertSame('MAN-2026-0002', RepairJob::query()->latest('id')->value('job_number'));
 
         $numbers = RepairJob::query()->orderBy('id')->pluck('automatic_number')->all();
         $this->assertCount(2, array_unique($numbers));
@@ -227,7 +236,9 @@ class RepairReceiptAndJobManagementTest extends TestCase
 
         $this->actingAs($administrator)
             ->from(route('repair-receipts.create'))
-            ->post(route('repair-receipts.store'), $this->receiptData($customer, $receiver))
+            ->post(route('repair-receipts.store'), $this->receiptData($customer, $receiver, [
+                'job_number' => 'MAN-2026-0002',
+            ]))
             ->assertRedirect(route('repair-receipts.create'))
             ->assertSessionHasErrors('job_number');
 
@@ -475,7 +486,11 @@ class RepairReceiptAndJobManagementTest extends TestCase
     public function test_job_card_print_is_one_page_a5_with_writable_technician_and_handover_fields(): void
     {
         $administrator = $this->userWithRole('administrator');
-        $job = $this->job(null, ['automatic_number' => 'JOB-TEST-10002']);
+        $job = $this->job(null, [
+            'automatic_number' => 'JOB-TEST-10002',
+            'visible_damage' => 'Cracked casing',
+            'special_notes' => 'Keep original screws with appliance',
+        ]);
 
         $response = $this->actingAs($administrator)->get(route('job-cards.print', $job))
             ->assertOk()
@@ -484,7 +499,10 @@ class RepairReceiptAndJobManagementTest extends TestCase
             ->assertSee(__('ui.job_id'))
             ->assertSee(__('ui.worksheet_job_number'))
             ->assertSee(__('ui.worksheet_received_date'))
-            ->assertSee(__('ui.job_status'))
+            ->assertSee(__('ui.visible_damage'))
+            ->assertDontSee(__('ui.job_status'))
+            ->assertSee('Cracked casing')
+            ->assertSee('Keep original screws with appliance')
             ->assertDontSee(__('ui.worksheet_issues_found'))
             ->assertSee(__('ui.repair_details'))
             ->assertSee(__('ui.parts_used'))
@@ -502,6 +520,32 @@ class RepairReceiptAndJobManagementTest extends TestCase
         ]);
     }
 
+    public function test_job_card_preview_needs_user_confirmation_before_showing_printed_status(): void
+    {
+        $administrator = $this->userWithRole('administrator');
+        $job = $this->job(null, ['automatic_number' => 'JOB-PRINT-CONFIRM-01']);
+        $this->actingAs($administrator)->get(route('job-cards.print', $job))->assertOk();
+        $card = JobCard::query()->where('repair_job_id', $job->id)->firstOrFail();
+        $preview = $card->documentPrintHistories()->latest('id')->firstOrFail();
+
+        $this->assertNull($card->confirmedPrint()->first());
+        $this->get(route('job-cards.index'))
+            ->assertOk()
+            ->assertDontSee('data-job-card-print-confirmed="'.$job->id.'"', false);
+
+        $this->post(route('job-cards.confirm-print', $job), [
+            'history_id' => $preview->id,
+            'printed_confirmation' => '1',
+        ])->assertRedirect();
+        $this->assertDatabaseHas('document_print_histories', [
+            'job_card_id' => $card->id,
+            'output_reference' => 'confirmed-preview:'.$preview->id,
+        ]);
+        $this->get(route('job-cards.index'))
+            ->assertOk()
+            ->assertSee('data-job-card-print-confirmed="'.$job->id.'"', false);
+    }
+
     public function test_job_card_is_a_blank_technician_worksheet_even_after_saved_repair_updates(): void
     {
         $actor = $this->userWithRole('cashier');
@@ -514,7 +558,9 @@ class RepairReceiptAndJobManagementTest extends TestCase
         }
         $pdf = $this->get(route('job-cards.pdf', $job))->assertOk();
         $this->assertStringStartsWith('%PDF-', $pdf->getContent());
-        if (! is_dir(base_path('tmp/pdfs'))) { mkdir(base_path('tmp/pdfs'),0700,true); }
+        if (! is_dir(base_path('tmp/pdfs'))) {
+            mkdir(base_path('tmp/pdfs'), 0700, true);
+        }
         file_put_contents(base_path('tmp/pdfs/technician-worksheet-preview.pdf'), $pdf->getContent());
         $this->assertSame('OLD COMPLETION NOTES', $inspection->fresh()->special_notes);
         $this->assertSame('OLD REPAIR TEXT', $job->fresh()->repair_description);

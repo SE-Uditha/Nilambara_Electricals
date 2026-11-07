@@ -104,6 +104,9 @@
         @case('printer')
             <path d="M6 9V3h12v6M6 17H3V9h18v8h-3M6 14h12v7H6v-7M17 11h.01" />
             @break
+        @case('folder-open')
+            <path d="M3 6a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v1M3 6v12a2 2 0 0 0 2 2h13a2 2 0 0 0 2-2l2-7H6l-3 7" />
+            @break
         @case('download')
             <path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5" />
             @break

@@ -150,11 +150,11 @@ class StockWorkflowService
         }
     }
 
-    public function adjust(array $data, User $actor): StockAdjustment
+    public function adjust(array $data, User $actor, string $auditEvent = 'inventory.stock.adjusted'): StockAdjustment
     {
         Gate::forUser($actor)->authorize('inventory.adjust');
 
-        return DB::transaction(function () use ($data, $actor) {
+        return DB::transaction(function () use ($data, $actor, $auditEvent) {
             $part = $this->lockPart($data['spare_part_id'], $data['location_id']);
             $delta = $this->quantity($part, (string) $data['quantity'], true);
             if ($delta->isZero() || ($data['adjustment_type'] === 'damaged' && ! $delta->isNegative())) {
@@ -173,10 +173,63 @@ class StockWorkflowService
             $header = StockAdjustment::create(['adjustment_number' => $number, 'adjusted_at' => now(), 'adjustment_type' => $data['adjustment_type'], 'reason' => $data['reason'], 'created_by_user_id' => $actor->id, 'status' => 'finalized', 'approved_by_user_id' => $actor->id, 'approved_at' => now()]);
             $line = $header->items()->create(['spare_part_id' => $part->id, 'location_id' => $data['location_id'], 'quantity_delta' => (string) $delta]);
             $this->movement($part->id, $data['location_id'], $data['adjustment_type'] === 'damaged' ? 'damaged' : 'adjustment', $delta, $actor, $number, $data['reason'], 'adjust:'.$data['idempotency_key'], ['adjustment_item_id' => $line->id]);
-            BusinessAudit::record($actor, 'inventory.stock.adjusted', StockAdjustment::class, $header->id, newValues: ['quantity_delta' => (string) $delta, 'reason' => $data['reason']]);
+            BusinessAudit::record($actor, $auditEvent, StockAdjustment::class, $header->id, newValues: ['quantity_delta' => (string) $delta, 'reason' => $data['reason']]);
 
             return $header;
         }, 3);
+    }
+
+    public function updateStockAndPrice(array $data, User $actor): StockAdjustment
+    {
+        Gate::forUser($actor)->authorize('inventory.update');
+        Gate::forUser($actor)->authorize('inventory.adjust');
+
+        return DB::transaction(function () use ($data, $actor): StockAdjustment {
+            $part = $this->lockPart((int) $data['spare_part_id'], (int) $data['location_id']);
+            $price = BigDecimal::of((string) $data['selling_price'])->toScale(4);
+            $oldPrice = BigDecimal::of((string) $part->selling_price)->toScale(4);
+            $reason = 'Stock update; selling price '.$price;
+            $adjustment = $this->adjust([
+                'spare_part_id' => (int) $part->getKey(),
+                'location_id' => (int) $data['location_id'],
+                'quantity' => (string) $data['quantity'],
+                'adjustment_type' => 'correction',
+                'reason' => $reason,
+                'idempotency_key' => $data['idempotency_key'],
+            ], $actor);
+
+            if ($oldPrice->compareTo($price) !== 0) {
+                $part->update(['selling_price' => (string) $price]);
+                BusinessAudit::record(
+                    $actor,
+                    'inventory.stock.price_updated',
+                    SparePart::class,
+                    (int) $part->getKey(),
+                    oldValues: ['selling_price' => (string) $oldPrice],
+                    newValues: ['selling_price' => (string) $price, 'stock_adjustment_id' => $adjustment->getKey()],
+                );
+            }
+
+            return $adjustment;
+        }, 3);
+    }
+
+    public function returnStock(array $data, User $actor): StockAdjustment
+    {
+        Gate::forUser($actor)->authorize('inventory.adjust');
+        $reason = trim((string) $data['reason']);
+        if ($reason === '') {
+            throw ValidationException::withMessages(['reason' => 'A return reason is required.']);
+        }
+
+        return $this->adjust([
+            'spare_part_id' => (int) $data['spare_part_id'],
+            'location_id' => (int) $data['location_id'],
+            'quantity' => (string) $data['quantity'],
+            'adjustment_type' => 'correction',
+            'reason' => 'Stock return: '.$reason,
+            'idempotency_key' => $data['idempotency_key'],
+        ], $actor, 'inventory.stock.returned');
     }
 
     public function cancelUsage(JobPartUsage $usage, string $reason, User $actor): JobPartUsage

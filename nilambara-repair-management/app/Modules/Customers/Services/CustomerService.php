@@ -9,6 +9,7 @@ use App\Modules\CreditManagement\Models\CustomerAccountEntry;
 use App\Modules\Customers\Models\Customer;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class CustomerService
 {
@@ -24,7 +25,7 @@ class CustomerService
             if ($prefix === '') {
                 throw new \LogicException('The customer code prefix must not be empty.');
             }
-            if (strlen($prefix) + 10 > 40) {
+            if (strlen($prefix) + 6 > 40) {
                 throw new \LogicException('The customer code prefix is too long for the customer ID column.');
             }
 
@@ -44,9 +45,22 @@ class CustomerService
                 'is_active' => (bool) ($data['is_active'] ?? true),
             ]);
 
+            if ($customer->id < 1 || $customer->id > 999999) {
+                throw ValidationException::withMessages([
+                    'customer_code' => __('ui.customer_code_unavailable'),
+                ]);
+            }
+
+            $customerCode = $prefix.str_pad((string) $customer->id, 5, '0', STR_PAD_LEFT);
+            if (Customer::query()->where('customer_code', $customerCode)->where('id', '<>', $customer->id)->exists()) {
+                throw ValidationException::withMessages([
+                    'customer_code' => __('ui.customer_code_unavailable'),
+                ]);
+            }
+
             // The primary key gives a short, concurrency-safe sequential code; the code is immutable on the model, so write it directly.
             DB::table('customers')->where('id', $customer->id)->update([
-                'customer_code' => $prefix.str_pad((string) $customer->id, 5, '0', STR_PAD_LEFT),
+                'customer_code' => $customerCode,
             ]);
             $customer->refresh();
 
