@@ -13,6 +13,7 @@ use App\Modules\Payments\Services\PaymentService;
 use App\Modules\RepairJobs\Models\RepairJob;
 use App\Modules\RepairReceipts\Models\RepairReceipt;
 use App\Support\BusinessAudit;
+use App\Support\RepairJobTransactionGuard;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -27,6 +28,8 @@ class RepairReceiptService
      */
     public function register(array $data, User $user): RepairReceipt
     {
+        app(RepairJobTransactionGuard::class)->ensureSafe();
+
         return DB::transaction(function () use ($data, $user): RepairReceipt {
             $customer = Customer::query()->whereKey($data['customer_id'])
                 ->where('is_active', true)

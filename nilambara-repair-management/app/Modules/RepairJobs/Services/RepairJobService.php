@@ -12,6 +12,7 @@ use App\Modules\RepairJobs\Models\JobContactAttempt;
 use App\Modules\RepairJobs\Models\JobInspection;
 use App\Modules\RepairJobs\Models\RepairJob;
 use App\Support\BusinessAudit;
+use App\Support\RepairJobTransactionGuard;
 use Brick\Math\BigDecimal;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -319,6 +320,8 @@ class RepairJobService
      */
     public function updateStatus(RepairJob $job, array $data, User $user): RepairJob
     {
+        app(RepairJobTransactionGuard::class)->ensureSafe();
+
         return DB::transaction(function () use ($job, $data, $user): RepairJob {
             $lockedJob = RepairJob::query()->whereKey($job->getKey())->lockForUpdate()->firstOrFail();
             $previous = $lockedJob->status instanceof JobStatus ? $lockedJob->status : JobStatus::from($lockedJob->status);

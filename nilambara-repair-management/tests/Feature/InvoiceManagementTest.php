@@ -120,6 +120,41 @@ class InvoiceManagementTest extends TestCase
         $this->assertDatabaseCount('invoices', 0);
     }
 
+    public function test_missing_job_id_is_rejected_before_any_invoice_is_created(): void
+    {
+        $user = $this->userWithRole('administrator');
+        $customer = $this->customer();
+        $job = $this->billableJob($customer, '100.00', '0.00');
+        $this->actingAs($user)->from(route('invoices.create'))
+            ->post(route('invoices.store'), $this->invoiceData($customer, [$job], [
+                'repair_job_ids' => [$job->id, 99999999],
+            ]))
+            ->assertSessionHasErrors('repair_job_ids.1');
+        $this->assertDatabaseCount('invoices', 0);
+        $this->assertDatabaseCount('invoice_jobs', 0);
+        $this->assertDatabaseCount('payments', 0);
+    }
+
+    public function test_invoice_service_rejects_non_integer_and_missing_job_ids_before_writes(): void
+    {
+        $user = $this->userWithRole('administrator');
+        $customer = $this->customer();
+        $job = $this->billableJob($customer, '100.00', '0.00');
+        foreach (['1.5', 99999999] as $invalidId) {
+            try {
+                app(InvoiceService::class)->create($this->invoiceData($customer, [$job], [
+                    'repair_job_ids' => [$job->id, $invalidId],
+                ]), $user);
+                $this->fail('Invalid job IDs must not create invoices.');
+            } catch (\Illuminate\Validation\ValidationException $exception) {
+                $this->assertNotEmpty($exception->errors());
+            }
+        }
+        $this->assertDatabaseCount('invoices', 0);
+        $this->assertDatabaseCount('invoice_jobs', 0);
+        $this->assertDatabaseCount('payments', 0);
+    }
+
     public function test_actual_issued_part_usages_are_itemized_with_decimal_rounding_without_stock_changes(): void
     {
         $user = $this->userWithRole('administrator');

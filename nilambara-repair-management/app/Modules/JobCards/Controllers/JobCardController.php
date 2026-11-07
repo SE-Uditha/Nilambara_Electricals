@@ -10,6 +10,7 @@ use App\Modules\PrintTemplates\Models\PrintTemplate;
 use App\Modules\PrintTemplates\Services\IntakePdfService;
 use App\Modules\RepairJobs\Models\RepairJob;
 use App\Support\BusinessAudit;
+use App\Support\RepairJobTransactionGuard;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -115,13 +116,13 @@ class JobCardController extends Controller
     private function render(RepairJob $job, bool $duplicate, bool $pdf = false): View
     {
         Gate::authorize('view', $job);
+        app(RepairJobTransactionGuard::class)->ensureSafe();
         $job->load([
             'customer',
             'receivedByEmployee',
             'technician',
             'jobCard',
         ]);
-        $jobCard = $job->jobCard ?? $job->jobCards()->create(['paper_size' => 'A5']);
         $template = PrintTemplate::query()
             ->where('document_type', 'job_card')
             ->where('is_active', true)
@@ -147,7 +148,9 @@ class JobCardController extends Controller
             'duplicate' => $duplicate,
         ];
 
-        $printHistory = DB::transaction(function () use ($jobCard, $job, $template, $duplicate, $label, $printedAt, $snapshot, $paperSize, $pdf): DocumentPrintHistory {
+        $printHistory = DB::transaction(function () use ($job, $template, $duplicate, $label, $printedAt, $snapshot, $paperSize, $pdf): DocumentPrintHistory {
+            $lockedJob = RepairJob::query()->whereKey($job->getKey())->lockForUpdate()->firstOrFail();
+            $jobCard = $lockedJob->jobCard()->first() ?? $lockedJob->jobCard()->create(['paper_size' => 'A5']);
             $history = DocumentPrintHistory::query()->create([
                 'print_template_id' => $template?->getKey(),
                 'job_card_id' => $jobCard->getKey(),
@@ -180,7 +183,7 @@ class JobCardController extends Controller
             );
 
             return $history;
-        });
+        }, 3);
 
         return view('modules.job-cards.print', [
             'job' => $job,

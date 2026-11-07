@@ -16,11 +16,13 @@ use App\Modules\Invoices\Models\InvoiceJob;
 use App\Modules\Payments\Services\PaymentAllocationService;
 use App\Modules\RepairJobs\Models\RepairJob;
 use App\Support\BusinessAudit;
+use App\Support\RepairJobTransactionGuard;
 use Brick\Math\BigDecimal;
 use Brick\Math\Exception\MathException;
 use Brick\Math\RoundingMode;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -37,6 +39,8 @@ class InvoiceService
      */
     public function create(array $data, User $user): Invoice
     {
+        app(RepairJobTransactionGuard::class)->ensureSafe();
+
         return DB::transaction(function () use ($data, $user): Invoice {
             $customer = Customer::query()->whereKey($data['customer_id'])->lockForUpdate()->firstOrFail();
             if (! $customer->is_active) {
@@ -96,6 +100,8 @@ class InvoiceService
      */
     public function updateDraft(Invoice $invoice, array $data, User $user): Invoice
     {
+        app(RepairJobTransactionGuard::class)->ensureSafe();
+
         return DB::transaction(function () use ($invoice, $data, $user): Invoice {
             $locked = Invoice::query()->whereKey($invoice->getKey())->lockForUpdate()->firstOrFail();
             if ($locked->status !== DocumentStatus::Draft) {
@@ -372,6 +378,11 @@ class InvoiceService
      */
     private function jobIds(array $data): array
     {
+        Validator::make($data, [
+            'repair_job_ids' => ['required', 'array', 'min:1', 'max:30'],
+            'repair_job_ids.*' => ['required', 'integer', 'min:1', 'distinct'],
+        ])->validate();
+
         $ids = array_values(array_unique(array_map('intval', $data['repair_job_ids'] ?? [])));
         if ($ids === [] || count($ids) !== count($data['repair_job_ids'] ?? [])) {
             throw ValidationException::withMessages(['repair_job_ids' => __('invoices.select_unique_jobs')]);

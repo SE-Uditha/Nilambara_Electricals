@@ -4,9 +4,18 @@
 
 Job registration, payment, job-card printing and invoicing depend on transactional InnoDB tables and valid job foreign keys. A MyISAM `repair_jobs` table is not compatible: failed transactions can leave partial jobs, and changing the engine alone cannot reconcile existing mismatched records or guarantee that foreign keys are correct.
 
+The application checks the `repair_jobs` engine before job registration, job-card preparation, status changes, and invoice creation or draft editing on MySQL/MariaDB. It returns a safe 503 and logs an error if that table is not InnoDB, before those operations write data. This prevents further partial writes in these workflows; it does not repair the database, verify every related table, or establish that the database's foreign-key metadata is healthy. SQLite tests do not establish MySQL locking or production integrity.
+
 For an affected installation, stop business writes, retain the original database and take a fresh, verified backup before any repair. In phpMyAdmin select the application's database and run these read-only checks:
 
 ```sql
+SELECT DATABASE();
+SELECT id, customer_id FROM repair_jobs WHERE id IN (16, 17);
+SHOW CREATE TABLE repair_jobs;
+SHOW CREATE TABLE job_cards;
+SHOW CREATE TABLE job_status_histories;
+SHOW CREATE TABLE invoice_jobs;
+
 SELECT TABLE_NAME, ENGINE, TABLE_COLLATION
 FROM information_schema.TABLES
 WHERE TABLE_SCHEMA = DATABASE()
