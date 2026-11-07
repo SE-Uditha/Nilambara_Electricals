@@ -21,7 +21,7 @@
             <thead class="bg-slate-50 text-slate-600"><tr><th class="px-4 py-3">{{ __('audit.timestamp') }}</th><th class="px-4 py-3">{{ __('audit.user') }}</th><th class="px-4 py-3">{{ __('audit.action') }}</th><th class="px-4 py-3">{{ __('audit.entity') }}</th><th class="px-4 py-3">{{ __('audit.changes') }}</th><th class="px-4 py-3">{{ __('audit.ip') }}</th></tr></thead>
             <tbody class="divide-y divide-slate-100">
                 @forelse ($logs as $log)
-                    <tr class="align-top"><td class="whitespace-nowrap px-4 py-3">{{ $log->occurred_at->timezone(config('business.timezone'))->format(config('business.date_format').' '.config('business.time_format')) }}</td><td class="px-4 py-3">{{ $log->user?->name ?? __('audit.system') }}</td><td class="px-4 py-3">{{ $log->action }}</td><td class="px-4 py-3">{{ $log->entity_type }}{{ $log->entity_id ? ' #'.$log->entity_id : '' }}</td><td class="max-w-xl px-4 py-3"><details><summary class="cursor-pointer text-teal-700">{{ __('audit.view_changes') }}</summary><pre class="mt-2 whitespace-pre-wrap break-all">{{ json_encode(['old' => $log->old_values, 'new' => $log->new_values], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre></details></td><td class="px-4 py-3">{{ $log->ip_address }}</td></tr>
+                    <tr class="align-top"><td class="whitespace-nowrap px-4 py-3">{{ $log->occurred_at->timezone(config('business.timezone'))->format(config('business.date_format').' '.config('business.time_format')) }}</td><td class="px-4 py-3">{{ $log->user?->name ?? __('audit.system') }}@if($log->user?->username)<div class="mt-1 text-slate-500">{{ $log->user->username }}</div>@endif @if($log->user?->employee?->name && $log->user->employee->name !== $log->user->name)<div class="mt-1 text-slate-500">{{ $log->user->employee->name }}</div>@endif</td><td class="px-4 py-3">{{ $log->action }}</td><td class="px-4 py-3">{{ $log->entity_type }}{{ $log->entity_id ? ' #'.$log->entity_id : '' }}</td><td class="max-w-xl px-4 py-3"><details><summary class="cursor-pointer text-teal-700">{{ __('audit.view_changes') }}</summary><pre class="mt-2 whitespace-pre-wrap break-all">{{ json_encode(['old' => $log->old_values, 'new' => $log->new_values], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre></details></td><td class="px-4 py-3">{{ $log->ip_address }}</td></tr>
                 @empty
                     <tr><td colspan="6" class="px-4 py-10 text-center text-slate-500">{{ __('audit.no_logs') }}</td></tr>
                 @endforelse
@@ -29,5 +29,4 @@
         </table>
     </div>
     <div class="mt-4">{{ $logs->links() }}</div>
-    <div class="mt-5 space-y-1 text-xs text-slate-600">@foreach ($logs as $log)<p>#{{ $log->id }} · {{ $log->user?->username ?? __('audit.system') }} · {{ $log->user?->employee?->name ?? '—' }} · {{ explode('.', $log->action)[0] }}</p>@endforeach</div>
 @endsection

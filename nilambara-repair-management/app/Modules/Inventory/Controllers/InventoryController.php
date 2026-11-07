@@ -182,10 +182,10 @@ class InventoryController
     public function reference(Request $request)
     {
         Gate::authorize('inventory.create');
-        $data = $request->validate(['kind' => 'required|in:unit,location,brand,category', 'code' => 'required|string|max:30|regex:/^[A-Za-z0-9_-]+$/', 'name' => 'required|string|max:100', 'quantity_scale' => 'required|integer|between:0,3']);
+        $data = $request->validateWithBag('inventoryReference', ['kind' => 'required|in:unit,location,brand,category', 'code' => 'required|string|max:30|regex:/^[A-Za-z0-9_-]+$/', 'name' => 'required|string|max:100', 'quantity_scale' => 'required|integer|between:0,3'], ['code.regex' => __('inventory.reference_code_invalid')]);
         $class = ['unit' => UnitOfMeasure::class, 'location' => StockLocation::class, 'brand' => SparePartBrand::class, 'category' => SparePartCategory::class][$data['kind']];
         $column = in_array($data['kind'], ['unit', 'location'], true) ? 'code' : 'name';
-        Validator::make($data, [$column => Rule::unique((new $class)->getTable(), $column)])->validate();
+        Validator::make($data, [$column => Rule::unique((new $class)->getTable(), $column)])->validateWithBag('inventoryReference');
         $values = ['name' => $data['name']];
         if ($column === 'code') {
             $values['code'] = $data['code'];

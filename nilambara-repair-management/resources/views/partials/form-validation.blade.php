@@ -14,8 +14,8 @@
             error.id = `validation-error-${key.replace(/[^a-zA-Z0-9_-]/g, '-')}`;
             error.className = 'mt-1 text-xs text-red-600';
             error.textContent = messages.join(' ');
-            const existing = field.nextElementSibling;
-            const message = existing && existing.textContent.trim() === error.textContent ? existing : error;
+            const existing = Array.from(field.parentElement.children).find(item => item !== field && item.textContent.trim() === error.textContent);
+            const message = existing || error;
             if (message === error) field.insertAdjacentElement('afterend', error);
             message.id ||= error.id;
             field.setAttribute('aria-describedby', [field.getAttribute('aria-describedby'), message.id].filter(Boolean).join(' '));

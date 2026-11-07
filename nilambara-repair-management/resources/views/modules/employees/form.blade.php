@@ -51,7 +51,8 @@
             <div x-cloak x-show="createAccount" class="mt-5 grid gap-5 border-t border-slate-100 pt-5 sm:grid-cols-2">
                 <div>
                     <label for="username" class="mb-2 block text-xs font-semibold text-slate-700">Username <span class="text-red-600">*</span></label>
-                    <input id="username" name="username" value="{{ old('username') }}" maxlength="64" autocomplete="off" class="form-input">
+                    <input id="username" name="username" value="{{ old('username') }}" minlength="3" maxlength="64" pattern="[A-Za-z0-9._\-]+" title="{{ __('ui.username_format_help') }}" aria-describedby="username-help" autocomplete="off" class="form-input">
+                    <p id="username-help" class="mt-1 text-xs text-slate-500">{{ __('ui.username_format_help') }}</p>
                     @error('username')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
                 </div>
                 <div>
@@ -71,7 +72,8 @@
                 </div>
                 <div>
                     <label for="password" class="mb-2 block text-xs font-semibold text-slate-700">Temporary password <span class="text-red-600">*</span></label>
-                    <input id="password" name="password" type="password" minlength="12" autocomplete="new-password" class="form-input">
+                    <input id="password" name="password" type="password" minlength="12" autocomplete="new-password" aria-describedby="password-help" class="form-input">
+                    <p id="password-help" class="mt-1 text-xs text-slate-500">{{ __('ui.password_format_help') }}</p>
                     @error('password')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
                 </div>
                 <div>

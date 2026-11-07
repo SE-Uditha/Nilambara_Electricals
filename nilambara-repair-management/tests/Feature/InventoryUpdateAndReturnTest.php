@@ -14,6 +14,49 @@ class InventoryUpdateAndReturnTest extends TestCase
 {
     use CreatesDatabaseRecords, RefreshDatabase;
 
+    public function test_reference_codes_show_format_errors_and_preserve_reference_input(): void
+    {
+        $this->seed(RoleSeeder::class);
+        $actor = User::factory()->create();
+        $actor->assignRole('administrator');
+        $data = ['kind' => 'location', 'code' => 'LOC 01', 'name' => 'Test location', 'quantity_scale' => '2'];
+
+        $this->actingAs($actor)->from(route('inventory.create'))->followingRedirects()
+            ->post(route('inventory.references'), $data)
+            ->assertOk()
+            ->assertSee(__('inventory.reference_code_help'))
+            ->assertSee(__('inventory.reference_code_invalid'))
+            ->assertSee('value="location" selected', false)
+            ->assertSee('name="code" value="LOC 01"', false)
+            ->assertSee('name="name" value="Test location"', false)
+            ->assertSee('name="name" value=""', false);
+        $this->assertDatabaseMissing('stock_locations', ['name' => 'Test location']);
+
+        $this->followRedirects = false;
+        $this->from(route('inventory.create'))->post(route('inventory.references'), array_replace($data, ['code' => 'LOC-01']))
+            ->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('stock_locations', ['code' => 'LOC-01', 'name' => 'Test location']);
+
+        $this->from(route('inventory.create'))->post(route('inventory.references'), array_replace($data, ['code' => 'LOC-01']))
+            ->assertSessionHasErrorsIn('inventoryReference', ['code']);
+    }
+
+    public function test_reference_codes_enforce_maximum_length_and_valid_characters(): void
+    {
+        $this->seed(RoleSeeder::class);
+        $actor = User::factory()->create();
+        $actor->assignRole('administrator');
+        $data = ['kind' => 'unit', 'name' => 'Test unit', 'quantity_scale' => 0];
+
+        $this->actingAs($actor)->from(route('inventory.create'))
+            ->post(route('inventory.references'), $data + ['code' => str_repeat('A', 31)])
+            ->assertSessionHasErrorsIn('inventoryReference', ['code']);
+        $this->from(route('inventory.create'))
+            ->post(route('inventory.references'), $data + ['code' => 'UNIT_01'])
+            ->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('units_of_measure', ['code' => 'UNIT_01', 'name' => 'Test unit']);
+    }
+
     public function test_inventory_list_shows_action_links_for_existing_parts(): void
     {
         $this->seed(RoleSeeder::class);

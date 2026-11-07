@@ -5,6 +5,8 @@ return [
     'reorder_level' => 'Reorder level',
     'reference_type' => 'Unit / reference type',
     'reference_code' => 'Code',
+    'reference_code_help' => 'Use up to 30 English letters, numbers, hyphens or underscores; no spaces. Example: LOC-01.',
+    'reference_code_invalid' => 'The code may contain only English letters, numbers, hyphens and underscores; no spaces.',
     'reference_name' => 'Name',
     'quantity_decimal_places' => 'Quantity decimal places',
     'save_reference' => 'Save reference',

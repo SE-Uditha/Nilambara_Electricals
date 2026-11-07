@@ -21,7 +21,7 @@
             <form method="POST" action="{{ route('admin.users.update', $managedUser) }}" class="mt-5 space-y-4">
                 @csrf @method('PUT')
                 <div><label for="name" class="mb-2 block text-xs font-semibold text-slate-700">Name</label><input id="name" name="name" required value="{{ old('name', $managedUser->name) }}" class="form-input"></div>
-                <div><label for="username" class="mb-2 block text-xs font-semibold text-slate-700">Username</label><input id="username" name="username" required minlength="3" maxlength="64" value="{{ old('username', $managedUser->username) }}" class="form-input"></div>
+                <div><label for="username" class="mb-2 block text-xs font-semibold text-slate-700">Username</label><input id="username" name="username" required minlength="3" maxlength="64" pattern="[A-Za-z0-9._\-]+" title="{{ __('ui.username_format_help') }}" aria-describedby="username-help" value="{{ old('username', $managedUser->username) }}" class="form-input"><p id="username-help" class="mt-1 text-xs text-slate-500">{{ __('ui.username_format_help') }}</p></div>
                 <div><label for="email" class="mb-2 block text-xs font-semibold text-slate-700">Email (optional)</label><input id="email" name="email" type="email" value="{{ old('email', $managedUser->email) }}" class="form-input"></div>
                 <button class="rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white hover:bg-teal-800">Save account</button>
             </form>
@@ -65,7 +65,7 @@
                 <p class="mt-1 text-xs text-slate-500">The new password is never displayed. All active sessions for this account will be invalidated.</p>
                 <form method="POST" action="{{ route('admin.users.password', $managedUser) }}" class="mt-5 space-y-4">
                     @csrf
-                    <div><label for="password" class="mb-2 block text-xs font-semibold text-slate-700">New password</label><input id="password" name="password" type="password" minlength="12" autocomplete="new-password" required class="form-input"></div>
+                    <div><label for="password" class="mb-2 block text-xs font-semibold text-slate-700">New password</label><input id="password" name="password" type="password" minlength="12" autocomplete="new-password" aria-describedby="password-help" required class="form-input"><p id="password-help" class="mt-1 text-xs text-slate-500">{{ __('ui.password_format_help') }}</p></div>
                     <div><label for="password_confirmation" class="mb-2 block text-xs font-semibold text-slate-700">Confirm new password</label><input id="password_confirmation" name="password_confirmation" type="password" minlength="12" autocomplete="new-password" required class="form-input"></div>
                     <button class="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">Reset password</button>
                 </form>

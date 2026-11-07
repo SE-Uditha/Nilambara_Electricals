@@ -4,9 +4,9 @@ return [
     'root' => env('BACKUP_ROOT'),
     'mysqldump_binary' => env('MYSQLDUMP_BINARY', 'mysqldump'),
     'mysql_binary' => env('MYSQL_BINARY', 'mysql'),
-    'retention_days' => (int) env('BACKUP_RETENTION_DAYS', 30),
-    'maximum_backups' => (int) env('BACKUP_MAXIMUM_DAILY', 30),
-    'schedule_time' => env('BACKUP_SCHEDULE_TIME', '02:00'),
+    'retention_days' => (int) env('BACKUP_RETENTION_DAYS', 365),
+    'maximum_backups' => (int) env('BACKUP_MAXIMUM_DAILY', 1000),
+    'schedule_time' => env('BACKUP_SCHEDULE_TIME', '00:00'),
     'timezone' => 'Asia/Colombo',
     'google_drive' => [
         'folder_id' => env('BACKUP_GOOGLE_DRIVE_FOLDER_ID'),

@@ -93,6 +93,27 @@ class EmployeeManagementTest extends TestCase
         $this->assertDatabaseCount('employees', 0);
     }
 
+    public function test_username_format_guidance_and_server_validation(): void
+    {
+        $administrator = $this->administrator();
+        $this->actingAs($administrator)->get(route('employees.create'))
+            ->assertOk()
+            ->assertSee(__('ui.username_format_help'))
+            ->assertSee(__('ui.password_format_help'));
+
+        $this->from(route('employees.create'))->post(route('employees.store'), [
+            'name' => 'Invalid Username',
+            'is_active' => '1',
+            'create_account' => '1',
+            'username' => 'invalid name',
+            'role_id' => Role::query()->where('name', 'cashier')->value('id'),
+            'password' => 'Strong-Password-123',
+            'password_confirmation' => 'Strong-Password-123',
+        ])->assertSessionHasErrors(['username' => __('validation.custom.username.regex')]);
+
+        $this->assertDatabaseMissing('users', ['username' => 'invalid name']);
+    }
+
     public function test_employee_ids_are_unique_for_multiple_registrations(): void
     {
         $administrator = $this->administrator();

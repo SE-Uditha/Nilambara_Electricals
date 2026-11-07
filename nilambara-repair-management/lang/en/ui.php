@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'username_format_help' => 'Use 3 to 64 English letters, numbers, periods, hyphens or underscores; no spaces.',
+    'password_format_help' => 'Use at least 12 characters, including uppercase and lowercase letters and a number.',
     'select_reported_fault' => 'Select a reported fault',
     'reported_fault_list_limit' => 'The selected faults must total no more than 10,000 characters.',
     'select_physical_condition' => 'Select a physical condition',

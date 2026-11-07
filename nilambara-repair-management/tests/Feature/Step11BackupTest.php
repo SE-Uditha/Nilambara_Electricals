@@ -53,15 +53,20 @@ class Step11BackupTest extends TestCase
 
     public function test_retention_preserves_manual_and_latest_recoverable_copy_and_keeps_history(): void
     {
-        $manual = $this->backup(90, true);
-        $expired = $this->backup(31);
+        config(['backup.retention_days' => 365, 'backup.maximum_backups' => 1000]);
+        $manual = $this->backup(400, true);
+        $withinYear = $this->backup(364);
+        $expired = $this->backup(366);
+        $expired->update(['cloud_file_id' => 'cloud-copy', 'cloud_status' => 'verified']);
         $latest = $this->backup(0);
         app(BackupService::class)->cleanupVerifiedBackups();
         $this->assertTrue(app(BackupService::class)->verify($manual));
         $this->assertTrue(app(BackupService::class)->verify($latest));
+        $this->assertTrue(app(BackupService::class)->verify($withinYear));
         $this->assertFalse(app(BackupService::class)->verify($expired->fresh()));
         $this->assertNotNull($expired->fresh()->deleted_at);
-        $this->assertDatabaseCount('backup_histories', 3);
+        $this->assertSame('cloud-copy', $expired->fresh()->cloud_file_id);
+        $this->assertDatabaseCount('backup_histories', 4);
         $this->assertDatabaseHas('audit_logs', ['action' => 'backup.cleanup.deleted']);
     }
 

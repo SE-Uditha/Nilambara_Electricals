@@ -140,6 +140,8 @@ class SystemSupportTest extends TestCase
         $this->actingAs($user)->get(route('audit-logs.index'))
             ->assertOk()
             ->assertSee('test.redaction')
+            ->assertSee($user->username)
+            ->assertDontSee(' · '.$user->username.' · ')
             ->assertSee('[REDACTED]')
             ->assertDontSee('&quot;password&quot;: &quot;hidden&quot;');
     }
