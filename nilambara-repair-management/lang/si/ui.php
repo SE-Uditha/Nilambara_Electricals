@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'select_reported_fault' => 'වාර්තා කළ දෝෂයක් තෝරන්න',
+    'reported_fault_list_limit' => 'තෝරාගත් දෝෂවල මුළු අක්ෂර ගණන 10,000 නොඉක්මවිය යුතුය.',
     'select_physical_condition' => 'භෞතික තත්ත්වයක් තෝරන්න',
     'select_visible_damage' => 'දෘශ්‍ය හානියක් තෝරන්න',
     'condition_manual_placeholder' => 'නැතහොත් සටහනක් ලියා එකතු කරන්න',

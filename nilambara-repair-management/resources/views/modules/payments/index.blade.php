@@ -42,7 +42,7 @@
                             <td class="px-4 py-3">{{ $payment->paid_at->timezone(config('business.timezone'))->format(config('business.date_format')) }}</td>
                             <td class="px-4 py-3">{{ $payment->customer?->display_name ?: '-' }}<span class="mt-1 block text-[10px] text-slate-400">{{ $payment->customer?->mobile_number }}</span></td>
                             <td class="px-4 py-3">
-                                @if ($allocation?->invoice)<a class="text-teal-800 hover:underline" href="{{ route('invoices.show', $allocation->invoice) }}" target="_blank" rel="noopener noreferrer">{{ $allocation->invoice->invoice_number }}</a>
+                                @if ($allocation?->invoice)<a class="text-teal-800 hover:underline" href="{{ route('invoices.show', $allocation->invoice) }}">{{ $allocation->invoice->invoice_number }}</a>
                                 @elseif ($allocation?->repairJob)<a class="text-teal-800 hover:underline" href="{{ route('repair-jobs.show', $allocation->repairJob) }}">{{ $allocation->repairJob->automatic_number ?: $allocation->repairJob->job_number }}</a>
                                 @else{{ __('payments.unallocated') }}@endif
                             </td>

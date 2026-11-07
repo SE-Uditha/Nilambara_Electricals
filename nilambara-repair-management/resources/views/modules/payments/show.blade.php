@@ -44,7 +44,7 @@
                                     <td class="px-5 py-3">{{ $allocation->allocated_at->format(config('business.date_format')) }}</td>
                                     <td class="px-5 py-3">
                                         @if ($allocation->invoice)
-                                            @can('invoices.view')<a href="{{ route('invoices.show', $allocation->invoice) }}" class="text-teal-800 hover:underline" target="_blank" rel="noopener noreferrer">{{ $allocation->invoice->invoice_number }}</a>@else{{ $allocation->invoice->invoice_number }}@endcan
+                                            @can('invoices.view')<a href="{{ route('invoices.show', $allocation->invoice) }}" class="text-teal-800 hover:underline">{{ $allocation->invoice->invoice_number }}</a>@else{{ $allocation->invoice->invoice_number }}@endcan
                                         @elseif ($allocation->repairJob)
                                             <a href="{{ route('repair-jobs.show', $allocation->repairJob) }}" class="text-teal-800 hover:underline">{{ $allocation->repairJob->automatic_number ?: $allocation->repairJob->job_number }}</a> · {{ __('payments.job_advance') }}
                                         @else{{ __('payments.unallocated') }}@endif

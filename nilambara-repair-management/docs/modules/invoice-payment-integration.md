@@ -1,5 +1,7 @@
 # Invoice payment integration
 
+Invoice creation and payment submission continue in the current tab, as do invoice details and cancellation navigation. Printable invoices, receipts and other document previews may open in a separate tab.
+
 Step 7 does not implement payment receipt or collection. It only displays a derived view of the existing payment/allocation records to keep invoice detail and outstanding filters consistent without adding a second balance store.
 
 ## Read-only summary

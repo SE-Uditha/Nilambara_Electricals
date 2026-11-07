@@ -14,6 +14,21 @@ class InventoryUpdateAndReturnTest extends TestCase
 {
     use CreatesDatabaseRecords, RefreshDatabase;
 
+    public function test_inventory_list_shows_action_links_for_existing_parts(): void
+    {
+        $this->seed(RoleSeeder::class);
+        $actor = User::factory()->create();
+        $actor->assignRole('administrator');
+        $this->employee(['user_id' => $actor->id, 'is_active' => true]);
+        $part = $this->part(['default_location_id' => $this->location()->id]);
+
+        $this->actingAs($actor)->get(route('inventory.index'))
+            ->assertOk()
+            ->assertSee($part->sku)
+            ->assertSee(route('inventory.show', $part->id))
+            ->assertSee(route('inventory.edit', $part->id));
+    }
+
     public function test_stock_update_and_return_are_authorized_idempotent_and_traceable(): void
     {
         $this->seed(RoleSeeder::class);

@@ -50,8 +50,8 @@ class SystemSupportTest extends TestCase
         $this->assertSame("Screen not turning on\nNo power\nOverheating", SystemSetting::query()->where('key', 'common_faults')->firstOrFail()->value);
 
         $this->get(route('repair-jobs.create'))->assertOk()
-            ->assertSee('<option value="Screen not turning on">', false)
-            ->assertSee('<option value="Overheating">', false)
+            ->assertSee('<option value="Screen not turning on"', false)
+            ->assertSee('<option value="Overheating"', false)
             ->assertSee('<option value="Scratched body"', false)
             ->assertSee('<option value="Cracked screen"', false)
             ->assertSee('name="reported_fault"', false);

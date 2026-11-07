@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'select_reported_fault' => 'Select a reported fault',
+    'reported_fault_list_limit' => 'The selected faults must total no more than 10,000 characters.',
     'select_physical_condition' => 'Select a physical condition',
     'select_visible_damage' => 'Select visible damage',
     'condition_manual_placeholder' => 'Or type an entry and press Add',

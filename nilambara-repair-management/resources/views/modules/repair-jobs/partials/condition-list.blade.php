@@ -2,19 +2,22 @@
     $presets = array_values(array_filter(preg_split('/\R/u', (string) config('business.'.$config)), fn ($item) => trim($item) !== ''));
     $entries = array_values(array_filter(array_map('trim', preg_split('/\R/u', (string) ($value ?? ''))), fn ($item) => $item !== ''));
     $label = __('ui.'.$field);
+    $maxLength = $maxLength ?? 5000;
+    $limitMessage = $limitMessage ?? __('ui.condition_list_limit');
+    $originalValue = ($preserveOriginal ?? false) ? (string) ($value ?? '') : implode("\n", $entries);
 @endphp
 <div class="condition-list space-y-2" x-data="{
-    items: @js($entries), draft: '', error: '',
+    items: @js($entries), draft: '', error: '', changed: false,
     add(value) {
         const entry = value.replace(/\s+/g, ' ').trim();
         if (!entry) return;
         if (this.items.some(item => item.toLowerCase() === entry.toLowerCase())) { this.draft = ''; this.error = ''; return; }
-        if (Array.from([...this.items, entry].join('\n')).length > 5000) { this.error = @js(__('ui.condition_list_limit')); return; }
-        this.items.push(entry); this.draft = ''; this.error = '';
+        if (Array.from([...this.items, entry].join('\n')).length > {{ $maxLength }}) { this.error = @js($limitMessage); return; }
+        this.items.push(entry); this.changed = true; this.draft = ''; this.error = '';
     },
-    remove(index) { this.items.splice(index, 1); this.error = ''; }
+    remove(index) { this.items.splice(index, 1); this.changed = true; this.error = ''; }
 }">
-    <input type="hidden" name="{{ $field }}" value="{{ implode("\n", $entries) }}" x-bind:value="items.join('\n')">
+    <input type="hidden" name="{{ $field }}" value="{{ $originalValue }}" x-bind:value="changed ? items.join('\n') : @js($originalValue)">
     <select id="{{ $field }}" class="form-input" aria-label="{{ $label }}" x-on:change="add($el.value); $el.value = ''" @disabled($presets === [])>
         <option value="">{{ __('ui.select_'.$field) }}</option>
         @foreach ($presets as $preset)
@@ -22,7 +25,7 @@
         @endforeach
     </select>
     <div class="flex items-center gap-2">
-        <input id="{{ $field }}_manual" type="text" x-model="draft" maxlength="5000" x-on:keydown.enter.prevent="add(draft)" class="form-input min-w-0" placeholder="{{ __('ui.condition_manual_placeholder') }}" aria-label="{{ __('ui.condition_manual_placeholder') }}: {{ $label }}">
+        <input id="{{ $field }}_manual" type="text" x-model="draft" maxlength="{{ $maxLength }}" x-on:keydown.enter.prevent="add(draft)" class="form-input min-w-0" placeholder="{{ __('ui.condition_manual_placeholder') }}" aria-label="{{ __('ui.condition_manual_placeholder') }}: {{ $label }}">
         <button type="button" x-on:click="add(draft)" class="ui-create-action shrink-0 rounded-lg border border-teal-200 bg-teal-50 px-3 text-xs font-semibold text-teal-800" title="{{ __('settings.add_item') }}"><x-icon name="plus" :size="16" />{{ __('settings.add_item') }}</button>
     </div>
     <div class="overflow-hidden rounded-lg border border-slate-200">

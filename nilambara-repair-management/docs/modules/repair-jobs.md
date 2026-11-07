@@ -1,5 +1,40 @@
 # Repair jobs
 
+## Database integrity incident checks
+
+Job registration, payment, job-card printing and invoicing depend on transactional InnoDB tables and valid job foreign keys. A MyISAM `repair_jobs` table is not compatible: failed transactions can leave partial jobs, and changing the engine alone cannot reconcile existing mismatched records or guarantee that foreign keys are correct.
+
+For an affected installation, stop business writes, retain the original database and take a fresh, verified backup before any repair. In phpMyAdmin select the application's database and run these read-only checks:
+
+```sql
+SELECT TABLE_NAME, ENGINE, TABLE_COLLATION
+FROM information_schema.TABLES
+WHERE TABLE_SCHEMA = DATABASE()
+  AND TABLE_NAME IN ('repair_jobs', 'repair_receipts', 'job_cards',
+                     'job_status_histories', 'payment_allocations',
+                     'repair_job_charges', 'invoice_jobs');
+
+SELECT r.id AS receipt_id, r.repair_job_id, r.customer_id AS receipt_customer_id,
+       j.customer_id AS job_customer_id
+FROM repair_receipts AS r
+LEFT JOIN repair_jobs AS j ON j.id = r.repair_job_id
+WHERE j.id IS NULL OR r.customer_id <> j.customer_id;
+
+SELECT a.id AS allocation_id, a.repair_job_id, a.customer_id AS allocation_customer_id,
+       j.customer_id AS job_customer_id
+FROM payment_allocations AS a
+LEFT JOIN repair_jobs AS j ON j.id = a.repair_job_id
+WHERE a.repair_job_id IS NOT NULL
+  AND (j.id IS NULL OR NOT (a.customer_id <=> j.customer_id));
+
+SELECT j.id AS job_id
+FROM repair_jobs AS j
+LEFT JOIN repair_receipts AS r ON r.repair_job_id = j.id
+WHERE r.id IS NULL;
+```
+
+Missing receipts and mismatches require investigation against original receipts, payments and audit history; do not infer ownership or delete records automatically. Have a database administrator inspect the live engines, foreign keys, constraints and possible InnoDB metadata damage, reconcile records with the business owner, then plan and test the repair on a separate restored copy before changing production. Do not disable foreign-key checks or run `migrate:fresh` as a workaround. Verify a new job, job-card preview, payment and invoice after repair, and confirm the corresponding records and financial balances.
+
 Step 5 adds job browsing and the initial repair-workflow operations to the existing `repair_jobs` and `job_inspections` records. It does not introduce a second repair-job master.
 
 ## Search and job details
@@ -28,6 +63,10 @@ Final invoicing, testing workflows, customer delivery, and warranty features rem
 ## Unified job acceptance and customer receipts (22 October 2026)
 
 The sidebar has one Repair Jobs dropdown containing New Repair Job, All Repair Jobs, Job Cards and Job Status. Repair receiving and printable receipts are combined into this group, with no separate Repair Receipts menu. Open Repair Jobs > New Repair Job to accept an item. Accept Repair Job saves the job and automatically generates its customer receipt in the existing registration transaction. Accept & Print Receipt opens that receipt immediately. Job cards and status search remain available from the job list.
+
+Administrators can add common item names under System settings and save them, just like common faults. On new and edited repair jobs, select a saved name from the item dropdown or enter a different name and press Add. The table shows one selected name; adding another replaces it. When no names are configured, the dropdown is disabled and manual entry remains available.
+
+Reported faults use the same list as visible damage on new and edited jobs: select configured faults or add manual entries, and remove entries from the table. The saved field remains newline-separated text with its existing 10,000-character limit; existing text is retained unchanged until the list is edited.
 
 The job list includes a receipt print action when a saved receipt exists. Job details provide Print Receipt, Receipt PDF and an authorized duplicate-copy action. Existing receipt list/detail links redirect into Repair Jobs; historical receipt print links remain usable. Print/PDF/reprint operations use the saved receipt snapshot and retain print-history/audit entries; they do not create additional jobs or receipts.
 

@@ -172,7 +172,7 @@
         </section>
 
         <div class="compact-wide flex flex-wrap justify-end gap-2">
-            <a href="{{ $editing ? route('invoices.show', $invoice) : route('invoices.index') }}" class="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50" target="_blank" rel="noopener noreferrer">{{ __('ui.cancel') }}</a>
+            <a href="{{ $editing ? route('invoices.show', $invoice) : route('invoices.index') }}" class="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">{{ __('ui.cancel') }}</a>
             @if ($editing)
                 <button type="submit" name="intent" value="draft" class="rounded-xl border border-teal-700 px-4 py-2.5 text-xs font-semibold text-teal-800 hover:bg-teal-50">{{ __('invoices.save_draft') }}</button>
             @endif
@@ -180,7 +180,7 @@
                 <button type="submit" name="intent" value="preview" formtarget="_blank" class="rounded-xl border border-slate-300 px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">{{ __('invoices.save_preview') }}</button>
             @endcan
             @can('invoices.issue')
-                <button type="submit" name="intent" value="issue" formtarget="_blank" data-confirm="{{ __('invoices.issue_confirmation') }}" class="rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white hover:bg-teal-800">{{ $editing ? __('invoices.issue_invoice') : __('invoices.record_payment_create_invoice') }}</button>
+                <button type="submit" name="intent" value="issue" data-confirm="{{ __('invoices.issue_confirmation') }}" class="rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-semibold text-white hover:bg-teal-800">{{ $editing ? __('invoices.issue_invoice') : __('invoices.record_payment_create_invoice') }}</button>
             @endcan
         </div>
     </form>

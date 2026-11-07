@@ -95,8 +95,7 @@
                     </div>
                     <div class="sm:col-span-2">
                         <label class="form-label" for="reported_fault">{{ __('ui.reported_fault') }}</label>
-                        @include('modules.repair-jobs.partials.quick-add', ['config' => 'common_faults', 'target' => 'reported_fault'])
-                        <textarea id="reported_fault" name="reported_fault" rows="4" class="form-input">{{ old('reported_fault') }}</textarea>
+                        @include('modules.repair-jobs.partials.condition-list', ['config' => 'common_faults', 'field' => 'reported_fault', 'value' => old('reported_fault'), 'maxLength' => 10000, 'limitMessage' => __('ui.reported_fault_list_limit'), 'preserveOriginal' => true])
                     </div>
                     <div class="sm:col-span-2">
                         <label class="form-label" for="accessories_received">{{ __('ui.accessories_received') }}</label>

@@ -117,7 +117,7 @@
         @can('invoices.view')
         <section class="dashboard-panel">
             <div class="dashboard-panel-heading"><h2><x-icon name="invoice" :size="19" />{{ __('dashboard.recent_invoices') }}</h2><a href="{{ route('invoices.index') }}">{{ __('dashboard.view_all') }} <x-icon name="arrow-right" :size="15" /></a></div>
-            <div class="dashboard-item-list">@forelse ($recent_invoices->take(4) as $invoice)<a class="dashboard-list-item" href="{{ route('invoices.show', $invoice->id) }}" target="_blank" rel="noopener noreferrer"><span><strong>{{ $invoice->invoice_number }}</strong><small>{{ $invoice->customer_name }} &middot; {{ $invoice->invoice_date }}</small></span><strong class="dashboard-invoice-amount">{{ config('business.currency') }} {{ $invoice->total }}</strong></a>@empty<div class="dashboard-empty"><x-icon name="invoice" :size="30" /><p>{{ __('dashboard.no_invoices') }}</p></div>@endforelse</div>
+            <div class="dashboard-item-list">@forelse ($recent_invoices->take(4) as $invoice)<a class="dashboard-list-item" href="{{ route('invoices.show', $invoice->id) }}"><span><strong>{{ $invoice->invoice_number }}</strong><small>{{ $invoice->customer_name }} &middot; {{ $invoice->invoice_date }}</small></span><strong class="dashboard-invoice-amount">{{ config('business.currency') }} {{ $invoice->total }}</strong></a>@empty<div class="dashboard-empty"><x-icon name="invoice" :size="30" /><p>{{ __('dashboard.no_invoices') }}</p></div>@endforelse</div>
             @can('reports.view')<div class="dashboard-panel-footer"><a href="{{ route('reports.index') }}">{{ __('dashboard.view_report') }} <x-icon name="arrow-right" :size="16" /></a></div>@endcan
         </section>
         @endcan

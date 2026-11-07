@@ -81,8 +81,15 @@ class RepairReceiptAndJobManagementTest extends TestCase
         $response = $this->get(route('repair-jobs.show', $job))->assertOk();
         $invoice = $this->invoice($job->customer);
         $html = $this->get(route('invoices.index'))->assertOk()->getContent();
-        $this->assertMatchesRegularExpression('/<a[^>]*href="'.preg_quote(route('invoices.show', $invoice), '/').'"[^>]*target="_blank"[^>]*rel="noopener noreferrer"/u', $html);
-        $this->get(route('invoices.create'))->assertOk()->assertSee('value="preview" formtarget="_blank"', false);
+        $showUrl = preg_quote(route('invoices.show', $invoice), '/');
+        $printUrl = preg_quote(route('invoices.print', $invoice), '/');
+        $this->assertDoesNotMatchRegularExpression('/<a[^>]*href="'.$showUrl.'"[^>]*target="_blank"/u', $html);
+        $this->assertMatchesRegularExpression('/<a[^>]*href="'.$printUrl.'"[^>]*target="_blank"/u', $html);
+        $form = $this->get(route('invoices.create'))->assertOk()
+            ->assertSee('value="preview" formtarget="_blank"', false)
+            ->getContent();
+        $this->assertDoesNotMatchRegularExpression('/<button[^>]*value="issue"[^>]*formtarget="_blank"/u', $form);
+        $this->assertDoesNotMatchRegularExpression('/<a[^>]*href="'.preg_quote(route('invoices.index'), '/').'"[^>]*target="_blank"/u', $form);
     }
 
     public function test_new_job_form_offers_optional_labour_charge_that_defaults_to_zero(): void
@@ -101,6 +108,61 @@ class RepairReceiptAndJobManagementTest extends TestCase
         $this->assertSame('500.00', number_format((float) RepairJob::latest('id')->first()->labour_cost, 2, '.', ''));
     }
 
+    public function test_reported_fault_list_supports_presets_manual_entries_and_existing_text(): void
+    {
+        $actor = $this->userWithRole('administrator');
+        SystemSetting::query()->create([
+            'group' => 'business', 'key' => 'common_faults', 'value' => "No power\nOverheating", 'value_type' => 'string',
+        ]);
+        $customer = $this->customer();
+        $receiver = $this->employee();
+        $this->actingAs($actor)->get(route('repair-jobs.create'))->assertOk()
+            ->assertSee('id="reported_fault"', false)
+            ->assertSee('id="reported_fault_manual"', false)
+            ->assertSee('<option value="No power"', false)
+            ->assertSee('maxlength="10000"', false)
+            ->assertSee(__('ui.select_reported_fault'))
+            ->assertDontSee('<textarea id="reported_fault"', false);
+
+        $faults = "No power\nCustom fault";
+        $this->post(route('repair-jobs.store'), $this->receiptData($customer, $receiver, [
+            'job_number' => 'FAULT-LIST-01', 'reported_fault' => $faults,
+        ]))->assertSessionHasNoErrors();
+        $job = RepairJob::query()->where('job_number', 'FAULT-LIST-01')->sole();
+        $this->assertSame($faults, $job->reported_fault);
+        $this->assertSame($faults, data_get($job->receipt->document_snapshot, 'item.reported_fault'));
+        $this->get(route('repair-jobs.edit', $job))->assertOk()
+            ->assertSee('id="reported_fault_manual"', false)
+            ->assertSee('<option value="Overheating"', false)
+            ->assertSee('Custom fault');
+        $this->withSession(['_old_input' => ['reported_fault' => "Retained fault\nManual entry"]])
+            ->get(route('repair-jobs.create'))->assertOk()
+            ->assertSee('Retained fault')
+            ->assertSee('Manual entry');
+
+        $longFault = str_repeat('x', 10000);
+        $this->put(route('repair-jobs.update', $job), [
+            'job_type' => 'normal', 'item_name' => $job->item_name, 'brand' => 'Test',
+            'reported_fault' => $longFault,
+        ])->assertSessionHasNoErrors();
+        $this->assertSame($longFault, $job->fresh()->reported_fault);
+        $this->put(route('repair-jobs.update', $job), [
+            'job_type' => 'normal', 'item_name' => $job->item_name, 'brand' => 'Test',
+            'reported_fault' => $longFault.'x',
+        ])->assertSessionHasErrors('reported_fault');
+        $this->assertSame($longFault, $job->fresh()->reported_fault);
+    }
+
+    public function test_reported_fault_manual_entry_is_available_without_presets(): void
+    {
+        $actor = $this->userWithRole('administrator');
+        $html = $this->actingAs($actor)->get(route('repair-jobs.create'))->assertOk()
+            ->assertSee('id="reported_fault_manual"', false)
+            ->getContent();
+
+        $this->assertMatchesRegularExpression('/<select id="reported_fault"[^>]*disabled/u', $html);
+    }
+
     public function test_item_name_presets_are_offered_on_create_and_edit_while_manual_names_remain_valid(): void
     {
         $admin = $this->userWithRole('administrator');
@@ -110,11 +172,16 @@ class RepairReceiptAndJobManagementTest extends TestCase
             'group' => 'business', 'key' => 'common_item_names', 'value' => "Table fan\nPump & motor", 'value_type' => 'string',
         ]);
 
-        $this->actingAs($admin)->get(route('repair-jobs.create'))->assertOk()
+        $html = $this->actingAs($admin)->get(route('repair-jobs.create'))->assertOk()
             ->assertSee('id="item_name_preset"', false)
             ->assertSee('<option value="Table fan">', false)
             ->assertSee('<option value="Pump &amp; motor">', false)
-            ->assertSee('name="item_name"', false);
+            ->assertSee('name="item_name"', false)
+            ->assertSee('x-on:click="add()"', false)
+            ->assertSee('x-on:click="remove()"', false)
+            ->assertSee('x-text="selected"', false)
+            ->getContent();
+        $this->assertDoesNotMatchRegularExpression('/<select id="item_name_preset"[^>]*disabled/u', $html);
 
         foreach (['Table fan', 'Custom workshop appliance'] as $index => $itemName) {
             $this->post(route('repair-jobs.store'), $this->receiptData($customer, $receiver, [
@@ -135,6 +202,21 @@ class RepairReceiptAndJobManagementTest extends TestCase
                 'job_type' => 'normal', 'item_name' => $itemName, 'brand' => 'Nilambara', 'model' => 'NP-60',
             ])->assertSessionHasNoErrors();
             $this->assertSame($itemName, $job->fresh()->item_name);
+        }
+    }
+
+    public function test_item_name_dropdown_explains_when_no_presets_are_configured(): void
+    {
+        $admin = $this->userWithRole('administrator');
+        $job = $this->job();
+
+        foreach ([route('repair-jobs.create'), route('repair-jobs.edit', $job)] as $url) {
+            $html = $this->actingAs($admin)->get($url)->assertOk()
+                ->assertSee('No item names have been saved yet.')
+                ->assertSee('name="item_name"', false)
+                ->getContent();
+
+            $this->assertMatchesRegularExpression('/<select id="item_name_preset"[^>]*disabled/u', $html);
         }
     }
 
